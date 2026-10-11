@@ -78,7 +78,6 @@ Regenerate and commit them in the same change as their source. After changing Sw
 - Layering is controller → service → repository (Ent). New module: add the folders, a `module.go` with `New(Config)` and `InitRoutes`, then wire it in `internal/config/bootstrap.go`.
 - Responses and errors go through `internal/platform/httpx` (`{data, meta}` / `{error, meta}`); never leak internal error text to clients.
 - Protect routes with `httpx.RequirePermission(enforcer, scope, resource, action)`; add new resources in `internal/platform/authz/resource.go`.
-- IDs are UUIDv7 via the shared ID mixin; writes use the transaction helper in `internal/platform/database`.
 - Tests use testify suites; `testutil` boots the app with an in-memory SQLite Ent client (needs CGO) and an ephemeral mock JWKS server.
 
 ### apps/dash (React Router SPA)
