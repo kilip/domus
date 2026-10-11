@@ -104,9 +104,10 @@ In the devcontainer all values below are set through `.devcontainer/compose.yaml
 | `AUTH_JWKS_URL` | api | JWKS endpoint of the auth service. **Not set in compose/CI yet**, set it manually |
 | `API_DB_URL` | api | Postgres connection for the API (`...?sslmode=disable` locally) |
 | `API_PORT` | api | Defaults to `8002` |
+| `S3_*` | api | S3/RustFS storage for finance attachments (`S3_ENDPOINT`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_REGION`, `S3_FORCE_PATH_STYLE`, `S3_BUCKET` default `domus-finance`) |
 | `VITE_AUTH_URL`, `VITE_PUBLIC_URL` | dash | Auth URL and public dashboard URL |
 | `VITE_API_URL` | dash | Defaults to `http://localhost:8002` |
-| `REDIS_URL`, `S3_*`, `KAFKA_BROKERS` | - | Provisioned for infra, not used by code yet |
+| `REDIS_URL`, `KAFKA_BROKERS` | - | Provisioned for infra, not used by code yet |
 
 ## OpenAPI & Types
 

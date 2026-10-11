@@ -173,4 +173,3 @@ func (rc ReportController) GetCollections(c fiber.Ctx) error {
 	}
 	return httpx.OK(c, res)
 }
-

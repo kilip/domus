@@ -49,9 +49,9 @@ Tooling: Bun `1.4.2` (workspaces), Node `>=22`, Turborepo, Biome 2, Husky + Comm
 The devcontainer (`.devcontainer/compose.yaml`) sets everything for local dev; CI sets its own copy in `.github/workflows/ci.yml`. No `.env.example` exists in the repo. `.env*` files are git-ignored. `globalEnv` in `turbo.json` covers `AUTH_*`, `KAFKA_*`, `API_*`, `SUPERADMIN_*`.
 
 - auth / better-auth: `AUTH_URL`, `AUTH_HOST?`, `AUTH_PORT?`, `AUTH_PATH`, `AUTH_DB_URL`, `AUTH_SECRET`, `AUTH_TRUSTED_ORIGINS` (comma separated), optional `AUTH_GOOGLE_*` / `AUTH_GITHUB_*`, optional `SUPERADMIN_EMAIL`, `SUPERADMIN_NAME`
-- api: `API_DB_URL`, `API_PORT` (default 8002), `AUTH_URL`, `AUTH_JWKS_URL`, `AUTH_TRUSTED_ORIGINS`
+- api: `API_DB_URL`, `API_PORT` (default 8002), `AUTH_URL`, `AUTH_JWKS_URL`, `AUTH_TRUSTED_ORIGINS`, `S3_*` (`S3_ENDPOINT`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_REGION`, `S3_FORCE_PATH_STYLE`, `S3_BUCKET` default `domus-finance`)
 - dash: `VITE_AUTH_URL`, `VITE_PUBLIC_URL`, `VITE_API_URL` (default `http://localhost:8002`)
-- provisioned but not used by app code yet: `REDIS_URL`, `S3_*`, `KAFKA_BROKERS`
+- provisioned but not used by app code yet: `REDIS_URL`, `KAFKA_BROKERS`
 
 Never commit real secrets. The `AUTH_SECRET` in compose/CI is a dev-only value.
 
@@ -74,7 +74,7 @@ Never commit real secrets. The `AUTH_SECRET` in compose/CI is a dev-only value.
 Regenerate and commit them in the same change as their source. After changing Swaggo annotations or API response models run `bun run api:gen`. After changing Better Auth plugins/options run `bunx turbo run auth:schema --filter=@domus/better-auth` (task `@domus/better-auth#auth:schema`) and then `bun run db:push` for dev.
 
 ### apps/api (Go)
-- Module path `github.com/paroki/domus/api`. Layout: `cmd/api` (entrypoint), `internal/config` (env, fiber, ent, authz, bootstrap), `internal/core`, `internal/platform/{authz,database,httpx}`, `internal/modules/<name>/{controller,service,repository,model}` (currently `auth`, `unit` for dioceses and parishes), `ent/schema`, `testutil`, `test`.
+- Module path `github.com/paroki/domus/api`. Layout: `cmd/api` (entrypoint), `internal/config` (env, fiber, ent, authz, bootstrap), `internal/core`, `internal/platform/{authz,database,httpx}`, `internal/modules/<name>/{controller,service,repository,model}` (currently `auth`, `unit` for dioceses and parishes, `finance`), `ent/schema`, `testutil`, `test`.
 - Layering is controller → service → repository (Ent). New module: add the folders, a `module.go` with `New(Config)` and `InitRoutes`, then wire it in `internal/config/bootstrap.go`.
 - Responses and errors go through `internal/platform/httpx` (`{data, meta}` / `{error, meta}`); never leak internal error text to clients.
 - Protect routes with `httpx.RequirePermission(enforcer, scope, resource, action)`; add new resources in `internal/platform/authz/resource.go`.
@@ -116,4 +116,4 @@ Regenerate and commit them in the same change as their source. After changing Sw
 - `apps/auth` `test` script is a placeholder that exits 1, and `apps/auth/README.md` / `apps/dash/README.md` are unmodified templates (they mention ports 3000/5173 and SSR that do not apply).
 - `Dockerfile.migrator` header comment references a non-existent `apps/auth/Dockerfile.migrate`; `.devcontainer` comments mention `apps/finance` and `apps/blog`, which do not exist.
 - `apps/dash` pins `typescript ^5.9.3` while the root uses `^6`.
-- Redis, S3 and Kafka are provisioned in devcontainer/CI but unused by application code.
+- Redis and Kafka are provisioned in devcontainer/CI but unused by application code; S3 is used by `apps/api` for finance attachments.

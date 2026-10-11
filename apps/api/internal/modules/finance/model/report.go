@@ -84,4 +84,3 @@ type CollectionsResponse struct {
 	Rows       []CollectionsRow `json:"rows"`
 	GrandTotal int64            `json:"grandTotal"`
 }
-

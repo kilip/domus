@@ -172,4 +172,3 @@ func (s ReportService) GetCollections(ctx context.Context, parishID int, query m
 
 	return s.repo.GetCollections(ctx, parishID, fromDate, toDate, allowedAccountIDs, query.UnitID)
 }
-

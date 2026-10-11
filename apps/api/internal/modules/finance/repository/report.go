@@ -453,4 +453,3 @@ func (r ReportRepository) GetCollections(
 		GrandTotal: grandTotal,
 	}, nil
 }
-
