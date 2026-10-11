@@ -21,12 +21,14 @@ func main() {
 
 	fiber := config.GetFiber(cfg, logger)
 	entcli := config.GetEntClient(cfg)
+	store := config.GetStorage(cfg, logger)
 	state := config.State{
 		Ent:      entcli,
 		Authz:    config.GetAuthz(entcli),
 		Config:   cfg,
 		FiberApp: fiber,
 		Log:      logger,
+		Storage:  store,
 	}
 	config.Bootstrap(state)
 

@@ -8,6 +8,7 @@ import (
 	"github.com/paroki/domus/api/internal/modules/auth"
 	"github.com/paroki/domus/api/internal/modules/unit"
 	"github.com/paroki/domus/api/internal/platform/authz"
+	"github.com/paroki/domus/api/internal/platform/storage"
 )
 
 type State struct {
@@ -16,6 +17,7 @@ type State struct {
 	Config   Config
 	FiberApp *fiber.App
 	Log      *slog.Logger
+	Storage  storage.Storage
 }
 
 func initAuth(state State) {

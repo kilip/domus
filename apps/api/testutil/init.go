@@ -11,6 +11,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/paroki/domus/api/ent"
 	"github.com/paroki/domus/api/internal/config"
+	"github.com/paroki/domus/api/internal/platform/storage"
 )
 
 //go:generate go run go.uber.org/mock/mockgen@latest -destination=cmocks/mock_slog_handler.go -package=cmocks log/slog Handler
@@ -61,13 +62,14 @@ func init() {
 	entClient = createTestDB()
 
 	config.ConfigureEntCli(entClient)
-	//mockStorage := service.NewMockStorageService()
+	mockStorage := storage.NewMemoryStorage()
 	state = config.State{
 		FiberApp: api,
 		Config:   cfg,
 		Log:      logger,
 		Ent:      entClient,
 		Authz:    config.GetAuthz(entClient),
+		Storage:  mockStorage,
 	}
 
 	config.Bootstrap(state)

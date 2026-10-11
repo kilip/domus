@@ -14,6 +14,13 @@ type Config struct {
 	JWKSUrl        string   `env:"AUTH_JWKS_URL"`
 	DatabaseUrl    string   `env:"API_DB_URL"`
 	TrustedOrigins []string `env:"AUTH_TRUSTED_ORIGINS"`
+
+	S3Endpoint       string `env:"S3_ENDPOINT"`
+	S3AccessKey      string `env:"S3_ACCESS_KEY"`
+	S3SecretKey      string `env:"S3_SECRET_KEY"`
+	S3Region         string `env:"S3_REGION, default=us-east-1"`
+	S3ForcePathStyle bool   `env:"S3_FORCE_PATH_STYLE, default=true"`
+	S3Bucket         string `env:"S3_BUCKET, default=domus-finance"`
 }
 
 func GetConfig() Config {

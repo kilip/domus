@@ -96,6 +96,7 @@ func checkJWKS(ctx context.Context, url string, log *slog.Logger) error {
 
 func GetFiber(cfg Config, logger *slog.Logger) *fiber.App {
 	app := fiber.New(fiber.Config{
+		BodyLimit:       12 * 1024 * 1024,
 		StructValidator: &structValidator{validator.New(validator.WithRequiredStructEnabled())},
 		ErrorHandler:    ErrorHandler(logger),
 	})
