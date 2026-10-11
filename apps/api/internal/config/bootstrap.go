@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/paroki/domus/api/ent"
 	"github.com/paroki/domus/api/internal/modules/auth"
+	"github.com/paroki/domus/api/internal/modules/finance"
 	"github.com/paroki/domus/api/internal/modules/unit"
 	"github.com/paroki/domus/api/internal/platform/authz"
 	"github.com/paroki/domus/api/internal/platform/storage"
@@ -40,7 +41,18 @@ func initUnit(state State) {
 	unitModule.InitRoutes(state.FiberApp)
 }
 
+func initFinance(state State) {
+	finModule := finance.New(finance.Config{
+		EntCli:  state.Ent,
+		Authz:   state.Authz,
+		Storage: state.Storage,
+		Log:     state.Log,
+	})
+	finModule.InitRoutes(state.FiberApp)
+}
+
 func Bootstrap(state State) {
 	initAuth(state)
 	initUnit(state)
+	initFinance(state)
 }
