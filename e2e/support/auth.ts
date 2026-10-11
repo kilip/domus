@@ -57,6 +57,14 @@ export async function cleanTestTerritories() {
   }
 }
 
+export async function cleanTestUnits() {
+  try {
+    await authDB.execute(sql`DELETE FROM public.units WHERE name LIKE 'E2E%'`);
+  } catch (err) {
+    console.error("[e2e] Failed to clean test units:", err);
+  }
+}
+
 export async function cleanTestParishes() {
   try {
     await authDB.execute(

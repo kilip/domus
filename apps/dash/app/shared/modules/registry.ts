@@ -32,6 +32,7 @@ export const modules: readonly DomusModule[] = [
       { label: "modules.sys.menu.diocese", slug: "diocese" },
       { label: "modules.sys.menu.parish", slug: "parish" },
       { label: "modules.sys.menu.territorial", slug: "territorial" },
+      { label: "modules.sys.menu.unit", slug: "unit" },
     ],
   },
   {

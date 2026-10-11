@@ -23,4 +23,7 @@ export const systemRoutes: RouteConfigEntry[] = prefix("sys", [
     "territorial/update/:id",
     "features/System/Territorial/TerritorialUpdatePage.tsx",
   ),
+  route("unit", "features/System/Unit/UnitListPage.tsx"),
+  route("unit/create", "features/System/Unit/UnitCreatePage.tsx"),
+  route("unit/update/:id", "features/System/Unit/UnitUpdatePage.tsx"),
 ]);

@@ -12,6 +12,7 @@ import {
   cleanTestDioceses,
   cleanTestParishes,
   cleanTestTerritories,
+  cleanTestUnits,
   removeUser,
 } from "./auth";
 import { env } from "./env";
@@ -56,6 +57,7 @@ After(async function (this: DomusWorld, scenario) {
     this.attach(png, "image/png");
   }
   await this.context.close();
+  await cleanTestUnits();
   await cleanTestTerritories();
   await cleanTestParishes();
   await cleanTestDioceses();
