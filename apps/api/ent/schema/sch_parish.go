@@ -39,6 +39,6 @@ func (Parish) Edges() []ent.Edge {
 		// Geographic structure of the parish.
 		edge.To("territories", Territory.Type),
 		// Organizational bodies of the parish.
-		edge.To("units", Unit.Type),
+		edge.To("workspaces", Workspace.Type),
 	}
 }

@@ -16,7 +16,7 @@ import (
 	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/predicate"
 	"github.com/paroki/domus/api/ent/territory"
-	"github.com/paroki/domus/api/ent/unit"
+	"github.com/paroki/domus/api/ent/workspace"
 )
 
 // ParishUpdate is the builder for updating Parish entities.
@@ -194,19 +194,19 @@ func (_u *ParishUpdate) AddTerritories(v ...*Territory) *ParishUpdate {
 	return _u.AddTerritoryIDs(ids...)
 }
 
-// AddUnitIDs adds the "units" edge to the Unit entity by IDs.
-func (_u *ParishUpdate) AddUnitIDs(ids ...int) *ParishUpdate {
-	_u.mutation.AddUnitIDs(ids...)
+// AddWorkspaceIDs adds the "workspaces" edge to the Workspace entity by IDs.
+func (_u *ParishUpdate) AddWorkspaceIDs(ids ...int) *ParishUpdate {
+	_u.mutation.AddWorkspaceIDs(ids...)
 	return _u
 }
 
-// AddUnits adds the "units" edges to the Unit entity.
-func (_u *ParishUpdate) AddUnits(v ...*Unit) *ParishUpdate {
+// AddWorkspaces adds the "workspaces" edges to the Workspace entity.
+func (_u *ParishUpdate) AddWorkspaces(v ...*Workspace) *ParishUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.AddUnitIDs(ids...)
+	return _u.AddWorkspaceIDs(ids...)
 }
 
 // Mutation returns the ParishMutation object of the builder.
@@ -241,25 +241,25 @@ func (_u *ParishUpdate) RemoveTerritories(v ...*Territory) *ParishUpdate {
 	return _u.RemoveTerritoryIDs(ids...)
 }
 
-// ClearUnits clears all "units" edges to the Unit entity.
-func (_u *ParishUpdate) ClearUnits() *ParishUpdate {
-	_u.mutation.ClearUnits()
+// ClearWorkspaces clears all "workspaces" edges to the Workspace entity.
+func (_u *ParishUpdate) ClearWorkspaces() *ParishUpdate {
+	_u.mutation.ClearWorkspaces()
 	return _u
 }
 
-// RemoveUnitIDs removes the "units" edge to Unit entities by IDs.
-func (_u *ParishUpdate) RemoveUnitIDs(ids ...int) *ParishUpdate {
-	_u.mutation.RemoveUnitIDs(ids...)
+// RemoveWorkspaceIDs removes the "workspaces" edge to Workspace entities by IDs.
+func (_u *ParishUpdate) RemoveWorkspaceIDs(ids ...int) *ParishUpdate {
+	_u.mutation.RemoveWorkspaceIDs(ids...)
 	return _u
 }
 
-// RemoveUnits removes "units" edges to Unit entities.
-func (_u *ParishUpdate) RemoveUnits(v ...*Unit) *ParishUpdate {
+// RemoveWorkspaces removes "workspaces" edges to Workspace entities.
+func (_u *ParishUpdate) RemoveWorkspaces(v ...*Workspace) *ParishUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.RemoveUnitIDs(ids...)
+	return _u.RemoveWorkspaceIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -413,49 +413,49 @@ func (_u *ParishUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.UnitsCleared() {
+	if _u.mutation.WorkspacesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   parish.UnitsTable,
-			Columns: []string{parish.UnitsColumn},
+			Table:   parish.WorkspacesTable,
+			Columns: []string{parish.WorkspacesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workspace.FieldID, field.TypeInt),
 			},
 		}
-		edge.Schema = _u.schemaConfig.Unit
+		edge.Schema = _u.schemaConfig.Workspace
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedUnitsIDs(); len(nodes) > 0 && !_u.mutation.UnitsCleared() {
+	if nodes := _u.mutation.RemovedWorkspacesIDs(); len(nodes) > 0 && !_u.mutation.WorkspacesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   parish.UnitsTable,
-			Columns: []string{parish.UnitsColumn},
+			Table:   parish.WorkspacesTable,
+			Columns: []string{parish.WorkspacesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workspace.FieldID, field.TypeInt),
 			},
 		}
-		edge.Schema = _u.schemaConfig.Unit
+		edge.Schema = _u.schemaConfig.Workspace
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.UnitsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.WorkspacesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   parish.UnitsTable,
-			Columns: []string{parish.UnitsColumn},
+			Table:   parish.WorkspacesTable,
+			Columns: []string{parish.WorkspacesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workspace.FieldID, field.TypeInt),
 			},
 		}
-		edge.Schema = _u.schemaConfig.Unit
+		edge.Schema = _u.schemaConfig.Workspace
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
@@ -645,19 +645,19 @@ func (_u *ParishUpdateOne) AddTerritories(v ...*Territory) *ParishUpdateOne {
 	return _u.AddTerritoryIDs(ids...)
 }
 
-// AddUnitIDs adds the "units" edge to the Unit entity by IDs.
-func (_u *ParishUpdateOne) AddUnitIDs(ids ...int) *ParishUpdateOne {
-	_u.mutation.AddUnitIDs(ids...)
+// AddWorkspaceIDs adds the "workspaces" edge to the Workspace entity by IDs.
+func (_u *ParishUpdateOne) AddWorkspaceIDs(ids ...int) *ParishUpdateOne {
+	_u.mutation.AddWorkspaceIDs(ids...)
 	return _u
 }
 
-// AddUnits adds the "units" edges to the Unit entity.
-func (_u *ParishUpdateOne) AddUnits(v ...*Unit) *ParishUpdateOne {
+// AddWorkspaces adds the "workspaces" edges to the Workspace entity.
+func (_u *ParishUpdateOne) AddWorkspaces(v ...*Workspace) *ParishUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.AddUnitIDs(ids...)
+	return _u.AddWorkspaceIDs(ids...)
 }
 
 // Mutation returns the ParishMutation object of the builder.
@@ -692,25 +692,25 @@ func (_u *ParishUpdateOne) RemoveTerritories(v ...*Territory) *ParishUpdateOne {
 	return _u.RemoveTerritoryIDs(ids...)
 }
 
-// ClearUnits clears all "units" edges to the Unit entity.
-func (_u *ParishUpdateOne) ClearUnits() *ParishUpdateOne {
-	_u.mutation.ClearUnits()
+// ClearWorkspaces clears all "workspaces" edges to the Workspace entity.
+func (_u *ParishUpdateOne) ClearWorkspaces() *ParishUpdateOne {
+	_u.mutation.ClearWorkspaces()
 	return _u
 }
 
-// RemoveUnitIDs removes the "units" edge to Unit entities by IDs.
-func (_u *ParishUpdateOne) RemoveUnitIDs(ids ...int) *ParishUpdateOne {
-	_u.mutation.RemoveUnitIDs(ids...)
+// RemoveWorkspaceIDs removes the "workspaces" edge to Workspace entities by IDs.
+func (_u *ParishUpdateOne) RemoveWorkspaceIDs(ids ...int) *ParishUpdateOne {
+	_u.mutation.RemoveWorkspaceIDs(ids...)
 	return _u
 }
 
-// RemoveUnits removes "units" edges to Unit entities.
-func (_u *ParishUpdateOne) RemoveUnits(v ...*Unit) *ParishUpdateOne {
+// RemoveWorkspaces removes "workspaces" edges to Workspace entities.
+func (_u *ParishUpdateOne) RemoveWorkspaces(v ...*Workspace) *ParishUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.RemoveUnitIDs(ids...)
+	return _u.RemoveWorkspaceIDs(ids...)
 }
 
 // Where appends a list predicates to the ParishUpdate builder.
@@ -894,49 +894,49 @@ func (_u *ParishUpdateOne) sqlSave(ctx context.Context) (_node *Parish, err erro
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.UnitsCleared() {
+	if _u.mutation.WorkspacesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   parish.UnitsTable,
-			Columns: []string{parish.UnitsColumn},
+			Table:   parish.WorkspacesTable,
+			Columns: []string{parish.WorkspacesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workspace.FieldID, field.TypeInt),
 			},
 		}
-		edge.Schema = _u.schemaConfig.Unit
+		edge.Schema = _u.schemaConfig.Workspace
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedUnitsIDs(); len(nodes) > 0 && !_u.mutation.UnitsCleared() {
+	if nodes := _u.mutation.RemovedWorkspacesIDs(); len(nodes) > 0 && !_u.mutation.WorkspacesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   parish.UnitsTable,
-			Columns: []string{parish.UnitsColumn},
+			Table:   parish.WorkspacesTable,
+			Columns: []string{parish.WorkspacesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workspace.FieldID, field.TypeInt),
 			},
 		}
-		edge.Schema = _u.schemaConfig.Unit
+		edge.Schema = _u.schemaConfig.Workspace
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.UnitsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.WorkspacesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   parish.UnitsTable,
-			Columns: []string{parish.UnitsColumn},
+			Table:   parish.WorkspacesTable,
+			Columns: []string{parish.WorkspacesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workspace.FieldID, field.TypeInt),
 			},
 		}
-		edge.Schema = _u.schemaConfig.Unit
+		edge.Schema = _u.schemaConfig.Workspace
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}

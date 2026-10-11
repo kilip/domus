@@ -27,4 +27,3 @@ func (SoftDeleteMixin) Fields() []ent.Field {
 func SkipSoftDelete(parent context.Context) context.Context {
 	return core.SkipSoftDelete(parent)
 }
-

@@ -70,7 +70,7 @@ type TransactionResponse struct {
 	Kind        string                `json:"kind"`
 	Status      string                `json:"status"`
 	Description *string               `json:"description,omitempty"`
-	UnitID      *int                  `json:"unitId,omitempty"`
+	WorkspaceID *int                  `json:"workspaceId,omitempty"`
 	Entries     []EntryResponse       `json:"entries"`
 	Attachments []attachment.Response `json:"attachments"`
 	CreatedBy   core.User             `json:"createdBy"`
@@ -84,6 +84,6 @@ type TransactionSummary struct {
 	Kind        string    `json:"kind"`
 	Status      string    `json:"status"`
 	Description *string   `json:"description,omitempty"`
-	UnitID      *int      `json:"unitId,omitempty"`
+	WorkspaceID *int      `json:"workspaceId,omitempty"`
 	TotalAmount int64     `json:"totalAmount"`
 }

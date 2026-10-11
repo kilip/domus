@@ -6,7 +6,7 @@ import (
 
 	"github.com/paroki/domus/api/ent"
 	"github.com/paroki/domus/api/ent/parish"
-	entunit "github.com/paroki/domus/api/ent/unit"
+	entworkspace "github.com/paroki/domus/api/ent/workspace"
 )
 
 type ActivateRepository struct {
@@ -27,12 +27,11 @@ func (r ActivateRepository) ParishExists(ctx context.Context, parishID int) (boo
 		Exist(ctx)
 }
 
-func (r ActivateRepository) UnitExistsInParish(ctx context.Context, unitID int, parishID int) (bool, error) {
-	return r.entcli.Unit.Query().
+func (r ActivateRepository) WorkspaceExistsInParish(ctx context.Context, workspaceID int, parishID int) (bool, error) {
+	return r.entcli.Workspace.Query().
 		Where(
-			entunit.IDEQ(unitID),
-			entunit.HasParishWith(parish.IDEQ(parishID)),
+			entworkspace.IDEQ(workspaceID),
+			entworkspace.HasParishWith(parish.IDEQ(parishID)),
 		).
 		Exist(ctx)
 }
-

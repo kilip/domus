@@ -10,7 +10,7 @@ import (
 // Account is a node of the chart of accounts (COA) of a parish.
 //
 // Rules enforced in the service layer:
-//   - parent and unit must belong to the same parish as the account
+//   - parent and workspace must belong to the same parish as the account
 //   - the tree must not contain cycles
 //   - only postable accounts (postable = true) can receive postings
 //   - an account that has postings or children must not be deleted;
@@ -44,7 +44,7 @@ func (Account) Fields() []ent.Field {
 func (Account) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("parish", Parish.Type).Unique().Required().Immutable(),
-		edge.To("unit", Unit.Type).Unique().Required().Immutable(),
+		edge.To("workspace", Workspace.Type).Unique().Required().Immutable(),
 		edge.To("children", Account.Type).From("parent").Unique(),
 		edge.From("postings", Posting.Type).Ref("account"),
 	}

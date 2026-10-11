@@ -17,7 +17,7 @@ import (
 	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/predicate"
 	"github.com/paroki/domus/api/ent/territory"
-	"github.com/paroki/domus/api/ent/unit"
+	"github.com/paroki/domus/api/ent/workspace"
 )
 
 // ParishQuery is the builder for querying Parish entities.
@@ -29,7 +29,7 @@ type ParishQuery struct {
 	predicates      []predicate.Parish
 	withDiocese     *DioceseQuery
 	withTerritories *TerritoryQuery
-	withUnits       *UnitQuery
+	withWorkspaces  *WorkspaceQuery
 	withFKs         bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -117,9 +117,9 @@ func (_q *ParishQuery) QueryTerritories() *TerritoryQuery {
 	return query
 }
 
-// QueryUnits chains the current query on the "units" edge.
-func (_q *ParishQuery) QueryUnits() *UnitQuery {
-	query := (&UnitClient{config: _q.config}).Query()
+// QueryWorkspaces chains the current query on the "workspaces" edge.
+func (_q *ParishQuery) QueryWorkspaces() *WorkspaceQuery {
+	query := (&WorkspaceClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -130,12 +130,12 @@ func (_q *ParishQuery) QueryUnits() *UnitQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(parish.Table, parish.FieldID, selector),
-			sqlgraph.To(unit.Table, unit.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, parish.UnitsTable, parish.UnitsColumn),
+			sqlgraph.To(workspace.Table, workspace.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, parish.WorkspacesTable, parish.WorkspacesColumn),
 		)
 		schemaConfig := _q.schemaConfig
-		step.To.Schema = schemaConfig.Unit
-		step.Edge.Schema = schemaConfig.Unit
+		step.To.Schema = schemaConfig.Workspace
+		step.Edge.Schema = schemaConfig.Workspace
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
@@ -336,7 +336,7 @@ func (_q *ParishQuery) Clone() *ParishQuery {
 		predicates:      append([]predicate.Parish{}, _q.predicates...),
 		withDiocese:     _q.withDiocese.Clone(),
 		withTerritories: _q.withTerritories.Clone(),
-		withUnits:       _q.withUnits.Clone(),
+		withWorkspaces:  _q.withWorkspaces.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -365,14 +365,14 @@ func (_q *ParishQuery) WithTerritories(opts ...func(*TerritoryQuery)) *ParishQue
 	return _q
 }
 
-// WithUnits tells the query-builder to eager-load the nodes that are connected to
-// the "units" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *ParishQuery) WithUnits(opts ...func(*UnitQuery)) *ParishQuery {
-	query := (&UnitClient{config: _q.config}).Query()
+// WithWorkspaces tells the query-builder to eager-load the nodes that are connected to
+// the "workspaces" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ParishQuery) WithWorkspaces(opts ...func(*WorkspaceQuery)) *ParishQuery {
+	query := (&WorkspaceClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withUnits = query
+	_q.withWorkspaces = query
 	return _q
 }
 
@@ -458,7 +458,7 @@ func (_q *ParishQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Paris
 		loadedTypes = [3]bool{
 			_q.withDiocese != nil,
 			_q.withTerritories != nil,
-			_q.withUnits != nil,
+			_q.withWorkspaces != nil,
 		}
 	)
 	if _q.withDiocese != nil {
@@ -500,10 +500,10 @@ func (_q *ParishQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Paris
 			return nil, err
 		}
 	}
-	if query := _q.withUnits; query != nil {
-		if err := _q.loadUnits(ctx, query, nodes,
-			func(n *Parish) { n.Edges.Units = []*Unit{} },
-			func(n *Parish, e *Unit) { n.Edges.Units = append(n.Edges.Units, e) }); err != nil {
+	if query := _q.withWorkspaces; query != nil {
+		if err := _q.loadWorkspaces(ctx, query, nodes,
+			func(n *Parish) { n.Edges.Workspaces = []*Workspace{} },
+			func(n *Parish, e *Workspace) { n.Edges.Workspaces = append(n.Edges.Workspaces, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -573,7 +573,7 @@ func (_q *ParishQuery) loadTerritories(ctx context.Context, query *TerritoryQuer
 	}
 	return nil
 }
-func (_q *ParishQuery) loadUnits(ctx context.Context, query *UnitQuery, nodes []*Parish, init func(*Parish), assign func(*Parish, *Unit)) error {
+func (_q *ParishQuery) loadWorkspaces(ctx context.Context, query *WorkspaceQuery, nodes []*Parish, init func(*Parish), assign func(*Parish, *Workspace)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Parish)
 	for i := range nodes {
@@ -584,21 +584,21 @@ func (_q *ParishQuery) loadUnits(ctx context.Context, query *UnitQuery, nodes []
 		}
 	}
 	query.withFKs = true
-	query.Where(predicate.Unit(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(parish.UnitsColumn), fks...))
+	query.Where(predicate.Workspace(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(parish.WorkspacesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.parish_units
+		fk := n.parish_workspaces
 		if fk == nil {
-			return fmt.Errorf(`foreign-key "parish_units" is nil for node %v`, n.ID)
+			return fmt.Errorf(`foreign-key "parish_workspaces" is nil for node %v`, n.ID)
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "parish_units" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "parish_workspaces" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

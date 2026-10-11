@@ -746,7 +746,7 @@ export interface paths {
     put?: never;
     /**
      * Activate finance context
-     * @description Set active parish and unit for finance module in user cookie
+     * @description Set active parish and workspace for finance module in user cookie
      */
     post: {
       parameters: {
@@ -1445,7 +1445,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/fin/units": {
+  "/fin/workspaces": {
     parameters: {
       query?: never;
       header?: never;
@@ -1453,8 +1453,8 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * Get accessible finance units
-     * @description Get list of units accessible to the current user for finance module
+     * Get accessible finance workspaces
+     * @description Get list of workspaces accessible to the current user for finance module
      */
     get: {
       parameters: {
@@ -1475,7 +1475,7 @@ export interface paths {
             [name: string]: unknown;
           };
           content: {
-            "application/json": components["schemas"]["httpx.WebResponse-array_model_FinanceUnitResponse"];
+            "application/json": components["schemas"]["httpx.WebResponse-array_model_FinanceWorkspaceResponse"];
           };
         };
         /** @description Unauthorized */
@@ -1911,7 +1911,7 @@ export interface paths {
     put?: never;
     /**
      * Upload attachment
-     * @description Upload a file (PDF, JPEG, PNG, max 10 MiB) attached to an owner record, e.g. a finance transaction. Permission is checked at the owner's unit scope.
+     * @description Upload a file (PDF, JPEG, PNG, max 10 MiB) attached to an owner record, e.g. a finance transaction. Permission is checked at the owner's workspace scope.
      */
     post: {
       parameters: {
@@ -2521,7 +2521,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/units": {
+  "/workspaces": {
     parameters: {
       query?: never;
       header?: never;
@@ -2531,8 +2531,8 @@ export interface paths {
     get?: never;
     put?: never;
     /**
-     * Create unit
-     * @description Create a new unit
+     * Create workspace
+     * @description Create a new workspace
      */
     post: {
       parameters: {
@@ -2541,10 +2541,10 @@ export interface paths {
         path?: never;
         cookie?: never;
       };
-      /** @description Create unit request */
+      /** @description Create workspace request */
       requestBody: {
         content: {
-          "application/json": components["schemas"]["model.CreateUnitRequest"];
+          "application/json": components["schemas"]["model.CreateWorkspaceRequest"];
         };
       };
       responses: {
@@ -2554,7 +2554,7 @@ export interface paths {
             [name: string]: unknown;
           };
           content: {
-            "application/json": components["schemas"]["httpx.WebResponse-model_UnitResponse"];
+            "application/json": components["schemas"]["httpx.WebResponse-model_WorkspaceResponse"];
           };
         };
         /** @description Bad Request */
@@ -2601,7 +2601,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/units/search": {
+  "/workspaces/search": {
     parameters: {
       query?: never;
       header?: never;
@@ -2611,8 +2611,8 @@ export interface paths {
     get?: never;
     put?: never;
     /**
-     * Search units
-     * @description Search units with filters and cursor pagination
+     * Search workspaces
+     * @description Search workspaces with filters and cursor pagination
      */
     post: {
       parameters: {
@@ -2621,10 +2621,10 @@ export interface paths {
         path?: never;
         cookie?: never;
       };
-      /** @description Search unit request */
+      /** @description Search workspace request */
       requestBody: {
         content: {
-          "application/json": components["schemas"]["model.SearchUnitRequest"];
+          "application/json": components["schemas"]["model.SearchWorkspaceRequest"];
         };
       };
       responses: {
@@ -2634,7 +2634,7 @@ export interface paths {
             [name: string]: unknown;
           };
           content: {
-            "application/json": components["schemas"]["httpx.WebResponse-array_model_UnitResponse"];
+            "application/json": components["schemas"]["httpx.WebResponse-array_model_WorkspaceResponse"];
           };
         };
         /** @description Bad Request */
@@ -2681,7 +2681,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/units/{id}": {
+  "/workspaces/{id}": {
     parameters: {
       query?: never;
       header?: never;
@@ -2689,15 +2689,15 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * Get unit by ID
-     * @description Get unit details by ID
+     * Get workspace by ID
+     * @description Get workspace details by ID
      */
     get: {
       parameters: {
         query?: never;
         header?: never;
         path: {
-          /** @description Unit ID */
+          /** @description Workspace ID */
           id: number;
         };
         cookie?: never;
@@ -2710,7 +2710,7 @@ export interface paths {
             [name: string]: unknown;
           };
           content: {
-            "application/json": components["schemas"]["httpx.WebResponse-model_UnitResponse"];
+            "application/json": components["schemas"]["httpx.WebResponse-model_WorkspaceResponse"];
           };
         };
         /** @description Bad Request */
@@ -2752,23 +2752,23 @@ export interface paths {
       };
     };
     /**
-     * Update unit
-     * @description Update unit by ID
+     * Update workspace
+     * @description Update workspace by ID
      */
     put: {
       parameters: {
         query?: never;
         header?: never;
         path: {
-          /** @description Unit ID */
+          /** @description Workspace ID */
           id: number;
         };
         cookie?: never;
       };
-      /** @description Update unit request */
+      /** @description Update workspace request */
       requestBody: {
         content: {
-          "application/json": components["schemas"]["model.UpdateUnitRequest"];
+          "application/json": components["schemas"]["model.UpdateWorkspaceRequest"];
         };
       };
       responses: {
@@ -2778,7 +2778,7 @@ export interface paths {
             [name: string]: unknown;
           };
           content: {
-            "application/json": components["schemas"]["httpx.WebResponse-model_UnitResponse"];
+            "application/json": components["schemas"]["httpx.WebResponse-model_WorkspaceResponse"];
           };
         };
         /** @description Bad Request */
@@ -2830,15 +2830,15 @@ export interface paths {
     };
     post?: never;
     /**
-     * Delete unit
-     * @description Delete unit by ID
+     * Delete workspace
+     * @description Delete workspace by ID
      */
     delete: {
       parameters: {
         query?: never;
         header?: never;
         path: {
-          /** @description Unit ID */
+          /** @description Workspace ID */
           id: number;
         };
         cookie?: never;
@@ -2913,7 +2913,7 @@ export interface components {
       ownerId?: string;
       ownerType?: string;
       size?: number;
-      unitId?: number;
+      workspaceId?: number;
     };
     "core.AuthenticatedUser": {
       avatar?: string;
@@ -2963,8 +2963,8 @@ export interface components {
       data?: components["schemas"]["model.DioceseResponse"][];
       meta?: components["schemas"]["httpx.Meta"];
     };
-    "httpx.WebResponse-array_model_FinanceUnitResponse": {
-      data?: components["schemas"]["model.FinanceUnitResponse"][];
+    "httpx.WebResponse-array_model_FinanceWorkspaceResponse": {
+      data?: components["schemas"]["model.FinanceWorkspaceResponse"][];
       meta?: components["schemas"]["httpx.Meta"];
     };
     "httpx.WebResponse-array_model_ParishResponse": {
@@ -2979,8 +2979,8 @@ export interface components {
       data?: components["schemas"]["model.TransactionSummary"][];
       meta?: components["schemas"]["httpx.Meta"];
     };
-    "httpx.WebResponse-array_model_UnitResponse": {
-      data?: components["schemas"]["model.UnitResponse"][];
+    "httpx.WebResponse-array_model_WorkspaceResponse": {
+      data?: components["schemas"]["model.WorkspaceResponse"][];
       meta?: components["schemas"]["httpx.Meta"];
     };
     "httpx.WebResponse-attachment_DownloadResponse": {
@@ -3031,8 +3031,8 @@ export interface components {
       data?: components["schemas"]["model.TrialBalanceResponse"];
       meta?: components["schemas"]["httpx.Meta"];
     };
-    "httpx.WebResponse-model_UnitResponse": {
-      data?: components["schemas"]["model.UnitResponse"];
+    "httpx.WebResponse-model_WorkspaceResponse": {
+      data?: components["schemas"]["model.WorkspaceResponse"];
       meta?: components["schemas"]["httpx.Meta"];
     };
     "model.AccountResponse": {
@@ -3047,16 +3047,16 @@ export interface components {
       postable?: boolean;
       status?: string;
       type?: string;
-      unitId?: number;
       updatedAt?: string;
+      workspaceId?: number;
     };
     "model.ActivateFinanceRequest": {
       parishId: number;
-      unitId: number;
+      workspaceId: number;
     };
     "model.ActivateFinanceResponse": {
       activeParishId?: number;
-      activeUnitId?: number;
+      activeWorkspaceId?: number;
     };
     "model.CollectionsResponse": {
       from?: string;
@@ -3112,17 +3112,12 @@ export interface components {
       number?: string;
       postings: components["schemas"]["model.PostingInput"][];
     };
-    "model.CreateUnitRequest": {
-      code?: string;
+    "model.CreateWorkspaceRequest": {
       description?: string;
-      /** @enum {string} */
-      kind: "council" | "territorial" | "category" | "section" | "committee";
       name: string;
-      parentId?: number;
       parishId: number;
       /** @enum {string} */
       status?: "active" | "inactive";
-      territoryId?: number;
     };
     "model.DioceseResponse": {
       active?: boolean;
@@ -3140,10 +3135,8 @@ export interface components {
       postings?: components["schemas"]["model.PostingResponse"][];
       reversesId?: string;
     };
-    "model.FinanceUnitResponse": {
-      code?: string;
+    "model.FinanceWorkspaceResponse": {
       id?: number;
-      kind?: string;
       name?: string;
       parishId?: number;
     };
@@ -3217,14 +3210,11 @@ export interface components {
       status?: "draft" | "submitted" | "approved" | "posted" | "void";
       to?: string;
     };
-    "model.SearchUnitRequest": {
+    "model.SearchWorkspaceRequest": {
       cursor?: string;
-      kind?: string;
       limit?: number;
-      parentId?: number;
       parishId?: number;
       status?: string;
-      territoryId?: number;
     };
     "model.TerritoryResponse": {
       code?: string;
@@ -3237,7 +3227,6 @@ export interface components {
       parish?: components["schemas"]["model.ParishResponse"];
       parishId?: number;
       status?: string;
-      unitId?: number;
     };
     "model.TransactionResponse": {
       attachments?: components["schemas"]["attachment.Response"][];
@@ -3250,7 +3239,7 @@ export interface components {
       kind?: string;
       number?: string;
       status?: string;
-      unitId?: number;
+      workspaceId?: number;
     };
     "model.TransactionSummary": {
       date?: string;
@@ -3260,7 +3249,7 @@ export interface components {
       number?: string;
       status?: string;
       totalAmount?: number;
-      unitId?: number;
+      workspaceId?: number;
     };
     "model.TrialBalanceResponse": {
       asOf?: string;
@@ -3279,20 +3268,6 @@ export interface components {
     "model.TrialBalanceTotals": {
       credit?: number;
       debit?: number;
-    };
-    "model.UnitResponse": {
-      code?: string;
-      description?: string;
-      id?: number;
-      kind?: string;
-      name?: string;
-      parent?: components["schemas"]["model.UnitResponse"];
-      parentId?: number;
-      parish?: components["schemas"]["model.ParishResponse"];
-      parishId?: number;
-      status?: string;
-      territory?: components["schemas"]["model.TerritoryResponse"];
-      territoryId?: number;
     };
     "model.UpdateAccountRequest": {
       code: string;
@@ -3328,21 +3303,24 @@ export interface components {
       /** @enum {string} */
       status?: "active" | "inactive";
     };
-    "model.UpdateUnitRequest": {
-      code?: string;
+    "model.UpdateWorkspaceRequest": {
       description?: string;
-      /** @enum {string} */
-      kind: "council" | "territorial" | "category" | "section" | "committee";
       name: string;
-      parentId?: number;
       parishId: number;
       /** @enum {string} */
       status?: "active" | "inactive";
-      territoryId?: number;
     };
     "model.VoidTransactionRequest": {
       date?: string;
       reason?: string;
+    };
+    "model.WorkspaceResponse": {
+      description?: string;
+      id?: number;
+      name?: string;
+      parish?: components["schemas"]["model.ParishResponse"];
+      parishId?: number;
+      status?: string;
     };
   };
   responses: never;

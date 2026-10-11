@@ -32,10 +32,10 @@ type Tx struct {
 	Territory *TerritoryClient
 	// Transaction is the client for interacting with the Transaction builders.
 	Transaction *TransactionClient
-	// Unit is the client for interacting with the Unit builders.
-	Unit *UnitClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// Workspace is the client for interacting with the Workspace builders.
+	Workspace *WorkspaceClient
 
 	// lazily loaded.
 	client     *Client
@@ -177,8 +177,8 @@ func (tx *Tx) init() {
 	tx.Posting = NewPostingClient(tx.config)
 	tx.Territory = NewTerritoryClient(tx.config)
 	tx.Transaction = NewTransactionClient(tx.config)
-	tx.Unit = NewUnitClient(tx.config)
 	tx.User = NewUserClient(tx.config)
+	tx.Workspace = NewWorkspaceClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

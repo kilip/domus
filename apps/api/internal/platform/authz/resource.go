@@ -7,7 +7,7 @@ const (
 	ResourceDiocese   Resource = "dioceses"
 	ResourceParish    Resource = "parishes"
 	ResourceTerritory Resource = "territories"
-	ResourceUnit      Resource = "units"
+	ResourceWorkspace Resource = "workspaces"
 	ResourceFinance   Resource = "finance"
 	ResourceSacrament Resource = "sacrament"
 )

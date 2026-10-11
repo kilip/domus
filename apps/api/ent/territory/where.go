@@ -717,35 +717,6 @@ func HasChildrenWith(preds ...predicate.Territory) predicate.Territory {
 	})
 }
 
-// HasUnit applies the HasEdge predicate on the "unit" edge.
-func HasUnit() predicate.Territory {
-	return predicate.Territory(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, UnitTable, UnitColumn),
-		)
-		schemaConfig := internal.SchemaConfigFromContext(s.Context())
-		step.To.Schema = schemaConfig.Unit
-		step.Edge.Schema = schemaConfig.Territory
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasUnitWith applies the HasEdge predicate on the "unit" edge with a given conditions (other predicates).
-func HasUnitWith(preds ...predicate.Unit) predicate.Territory {
-	return predicate.Territory(func(s *sql.Selector) {
-		step := newUnitStep()
-		schemaConfig := internal.SchemaConfigFromContext(s.Context())
-		step.To.Schema = schemaConfig.Unit
-		step.Edge.Schema = schemaConfig.Territory
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Territory) predicate.Territory {
 	return predicate.Territory(sql.AndPredicates(predicates...))

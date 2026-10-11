@@ -12,7 +12,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/territory"
-	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
 )
 
@@ -46,7 +45,6 @@ type Territory struct {
 	Edges              TerritoryEdges `json:"edges"`
 	parish_territories *int
 	territory_children *int
-	unit_territory     *int
 	selectValues       sql.SelectValues
 }
 
@@ -62,11 +60,9 @@ type TerritoryEdges struct {
 	Parent *Territory `json:"parent,omitempty"`
 	// Children holds the value of the children edge.
 	Children []*Territory `json:"children,omitempty"`
-	// Unit holds the value of the unit edge.
-	Unit *Unit `json:"unit,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [6]bool
+	loadedTypes [5]bool
 }
 
 // CreatorOrErr returns the Creator value or an error if the edge
@@ -122,17 +118,6 @@ func (e TerritoryEdges) ChildrenOrErr() ([]*Territory, error) {
 	return nil, &NotLoadedError{edge: "children"}
 }
 
-// UnitOrErr returns the Unit value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e TerritoryEdges) UnitOrErr() (*Unit, error) {
-	if e.Unit != nil {
-		return e.Unit, nil
-	} else if e.loadedTypes[5] {
-		return nil, &NotFoundError{label: unit.Label}
-	}
-	return nil, &NotLoadedError{edge: "unit"}
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Territory) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -149,8 +134,6 @@ func (*Territory) scanValues(columns []string) ([]any, error) {
 		case territory.ForeignKeys[0]: // parish_territories
 			values[i] = new(sql.NullInt64)
 		case territory.ForeignKeys[1]: // territory_children
-			values[i] = new(sql.NullInt64)
-		case territory.ForeignKeys[2]: // unit_territory
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -250,13 +233,6 @@ func (_m *Territory) assignValues(columns []string, values []any) error {
 				_m.territory_children = new(int)
 				*_m.territory_children = int(value.Int64)
 			}
-		case territory.ForeignKeys[2]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field unit_territory", value)
-			} else if value.Valid {
-				_m.unit_territory = new(int)
-				*_m.unit_territory = int(value.Int64)
-			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -293,11 +269,6 @@ func (_m *Territory) QueryParent() *TerritoryQuery {
 // QueryChildren queries the "children" edge of the Territory entity.
 func (_m *Territory) QueryChildren() *TerritoryQuery {
 	return NewTerritoryClient(_m.config).QueryChildren(_m)
-}
-
-// QueryUnit queries the "unit" edge of the Territory entity.
-func (_m *Territory) QueryUnit() *UnitQuery {
-	return NewTerritoryClient(_m.config).QueryUnit(_m)
 }
 
 // Update returns a builder for updating this Territory.

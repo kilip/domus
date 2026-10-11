@@ -53,7 +53,7 @@ func (s *VoidSuite) createAccountWithUnit(parishID int, unitID int, code string,
 		SetPostable(postable).
 		SetStatus(account.Status(status)).
 		SetParishID(parishID).
-		SetUnitID(unitID).
+		SetWorkspaceID(unitID).
 		Save(ctx)
 	require.NoError(s.T(), err)
 	return acc
@@ -203,7 +203,7 @@ func (s *VoidSuite) TestVoid_ConcurrentRequests() {
 	st := testutil.GetState()
 	repo := repository.NewTransactionRepository(st.Ent, st.Log)
 	ctx := core.ContextWithUser(context.Background(), core.AuthenticatedUser{ID: s.User.ID})
-	ctx = model.WithFinanceContext(ctx, model.FinanceContext{ParishID: parish.ID, UnitID: unit.ID})
+	ctx = model.WithFinanceContext(ctx, model.FinanceContext{ParishID: parish.ID, WorkspaceID: unit.ID})
 
 	var wg sync.WaitGroup
 	results := make([]error, 2)

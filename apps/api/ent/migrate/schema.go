@@ -24,7 +24,7 @@ var (
 		{Name: "created_by", Type: field.TypeUUID},
 		{Name: "updated_by", Type: field.TypeUUID},
 		{Name: "account_parish", Type: field.TypeInt},
-		{Name: "account_unit", Type: field.TypeInt},
+		{Name: "account_workspace", Type: field.TypeInt},
 		{Name: "account_children", Type: field.TypeUUID, Nullable: true},
 	}
 	// AccountsTable holds the schema information for the "accounts" table.
@@ -52,9 +52,9 @@ var (
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "accounts_units_unit",
+				Symbol:     "accounts_workspaces_workspace",
 				Columns:    []*schema.Column{AccountsColumns[14]},
-				RefColumns: []*schema.Column{UnitsColumns[0]},
+				RefColumns: []*schema.Column{WorkspacesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
@@ -88,7 +88,7 @@ var (
 		{Name: "created_by", Type: field.TypeUUID},
 		{Name: "updated_by", Type: field.TypeUUID},
 		{Name: "attachment_parish", Type: field.TypeInt},
-		{Name: "attachment_unit", Type: field.TypeInt},
+		{Name: "attachment_workspace", Type: field.TypeInt},
 	}
 	// AttachmentsTable holds the schema information for the "attachments" table.
 	AttachmentsTable = &schema.Table{
@@ -115,9 +115,9 @@ var (
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "attachments_units_unit",
+				Symbol:     "attachments_workspaces_workspace",
 				Columns:    []*schema.Column{AttachmentsColumns[14]},
-				RefColumns: []*schema.Column{UnitsColumns[0]},
+				RefColumns: []*schema.Column{WorkspacesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -220,7 +220,7 @@ var (
 	MembershipsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "user_id", Type: field.TypeString},
-		{Name: "scope_type", Type: field.TypeEnum, Enums: []string{"system", "diocese", "parish", "unit"}},
+		{Name: "scope_type", Type: field.TypeEnum, Enums: []string{"system", "diocese", "parish", "workspace"}},
 		{Name: "scope_id", Type: field.TypeInt64},
 		{Name: "role", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
@@ -351,7 +351,6 @@ var (
 		{Name: "created_by", Type: field.TypeUUID},
 		{Name: "updated_by", Type: field.TypeUUID},
 		{Name: "territory_children", Type: field.TypeInt, Nullable: true},
-		{Name: "unit_territory", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// TerritoriesTable holds the schema information for the "territories" table.
 	TerritoriesTable = &schema.Table{
@@ -383,12 +382,6 @@ var (
 				RefColumns: []*schema.Column{TerritoriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
-			{
-				Symbol:     "territories_units_territory",
-				Columns:    []*schema.Column{TerritoriesColumns[13]},
-				RefColumns: []*schema.Column{UnitsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
 		},
 		Indexes: []*schema.Index{
 			{
@@ -417,7 +410,7 @@ var (
 		{Name: "created_by", Type: field.TypeUUID},
 		{Name: "updated_by", Type: field.TypeUUID},
 		{Name: "transaction_parish", Type: field.TypeInt},
-		{Name: "transaction_unit", Type: field.TypeInt, Nullable: true},
+		{Name: "transaction_workspace", Type: field.TypeInt, Nullable: true},
 	}
 	// TransactionsTable holds the schema information for the "transactions" table.
 	TransactionsTable = &schema.Table{
@@ -444,9 +437,9 @@ var (
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "transactions_units_unit",
+				Symbol:     "transactions_workspaces_workspace",
 				Columns:    []*schema.Column{TransactionsColumns[12]},
-				RefColumns: []*schema.Column{UnitsColumns[0]},
+				RefColumns: []*schema.Column{WorkspacesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
@@ -468,61 +461,6 @@ var (
 			},
 		},
 	}
-	// UnitsColumns holds the columns for the "units" table.
-	UnitsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "name", Type: field.TypeString},
-		{Name: "code", Type: field.TypeString, Nullable: true},
-		{Name: "kind", Type: field.TypeEnum, Enums: []string{"council", "territorial", "category", "section", "committee"}},
-		{Name: "description", Type: field.TypeString, Nullable: true},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"active", "inactive"}, Default: "active"},
-		{Name: "parish_units", Type: field.TypeInt},
-		{Name: "created_by", Type: field.TypeUUID},
-		{Name: "updated_by", Type: field.TypeUUID},
-		{Name: "unit_children", Type: field.TypeInt, Nullable: true},
-	}
-	// UnitsTable holds the schema information for the "units" table.
-	UnitsTable = &schema.Table{
-		Name:       "units",
-		Columns:    UnitsColumns,
-		PrimaryKey: []*schema.Column{UnitsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "units_parishes_units",
-				Columns:    []*schema.Column{UnitsColumns[9]},
-				RefColumns: []*schema.Column{ParishesColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-			{
-				Symbol:     "units_users_creator",
-				Columns:    []*schema.Column{UnitsColumns[10]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-			{
-				Symbol:     "units_users_updater",
-				Columns:    []*schema.Column{UnitsColumns[11]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-			{
-				Symbol:     "units_units_children",
-				Columns:    []*schema.Column{UnitsColumns[12]},
-				RefColumns: []*schema.Column{UnitsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-		Indexes: []*schema.Index{
-			{
-				Name:    "unit_code_parish_units",
-				Unique:  true,
-				Columns: []*schema.Column{UnitsColumns[5], UnitsColumns[9]},
-			},
-		},
-	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -537,6 +475,45 @@ var (
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
+	// WorkspacesColumns holds the columns for the "workspaces" table.
+	WorkspacesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString, Nullable: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"active", "inactive"}, Default: "active"},
+		{Name: "parish_workspaces", Type: field.TypeInt},
+		{Name: "created_by", Type: field.TypeUUID},
+		{Name: "updated_by", Type: field.TypeUUID},
+	}
+	// WorkspacesTable holds the schema information for the "workspaces" table.
+	WorkspacesTable = &schema.Table{
+		Name:       "workspaces",
+		Columns:    WorkspacesColumns,
+		PrimaryKey: []*schema.Column{WorkspacesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "workspaces_parishes_workspaces",
+				Columns:    []*schema.Column{WorkspacesColumns[7]},
+				RefColumns: []*schema.Column{ParishesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "workspaces_users_creator",
+				Columns:    []*schema.Column{WorkspacesColumns[8]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "workspaces_users_updater",
+				Columns:    []*schema.Column{WorkspacesColumns[9]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AccountsTable,
@@ -549,8 +526,8 @@ var (
 		PostingsTable,
 		TerritoriesTable,
 		TransactionsTable,
-		UnitsTable,
 		UsersTable,
+		WorkspacesTable,
 	}
 )
 
@@ -558,12 +535,12 @@ func init() {
 	AccountsTable.ForeignKeys[0].RefTable = UsersTable
 	AccountsTable.ForeignKeys[1].RefTable = UsersTable
 	AccountsTable.ForeignKeys[2].RefTable = ParishesTable
-	AccountsTable.ForeignKeys[3].RefTable = UnitsTable
+	AccountsTable.ForeignKeys[3].RefTable = WorkspacesTable
 	AccountsTable.ForeignKeys[4].RefTable = AccountsTable
 	AttachmentsTable.ForeignKeys[0].RefTable = UsersTable
 	AttachmentsTable.ForeignKeys[1].RefTable = UsersTable
 	AttachmentsTable.ForeignKeys[2].RefTable = ParishesTable
-	AttachmentsTable.ForeignKeys[3].RefTable = UnitsTable
+	AttachmentsTable.ForeignKeys[3].RefTable = WorkspacesTable
 	DiocesesTable.ForeignKeys[0].RefTable = UsersTable
 	DiocesesTable.ForeignKeys[1].RefTable = UsersTable
 	EntriesTable.ForeignKeys[0].RefTable = UsersTable
@@ -579,13 +556,11 @@ func init() {
 	TerritoriesTable.ForeignKeys[1].RefTable = UsersTable
 	TerritoriesTable.ForeignKeys[2].RefTable = UsersTable
 	TerritoriesTable.ForeignKeys[3].RefTable = TerritoriesTable
-	TerritoriesTable.ForeignKeys[4].RefTable = UnitsTable
 	TransactionsTable.ForeignKeys[0].RefTable = UsersTable
 	TransactionsTable.ForeignKeys[1].RefTable = UsersTable
 	TransactionsTable.ForeignKeys[2].RefTable = ParishesTable
-	TransactionsTable.ForeignKeys[3].RefTable = UnitsTable
-	UnitsTable.ForeignKeys[0].RefTable = ParishesTable
-	UnitsTable.ForeignKeys[1].RefTable = UsersTable
-	UnitsTable.ForeignKeys[2].RefTable = UsersTable
-	UnitsTable.ForeignKeys[3].RefTable = UnitsTable
+	TransactionsTable.ForeignKeys[3].RefTable = WorkspacesTable
+	WorkspacesTable.ForeignKeys[0].RefTable = ParishesTable
+	WorkspacesTable.ForeignKeys[1].RefTable = UsersTable
+	WorkspacesTable.ForeignKeys[2].RefTable = UsersTable
 }

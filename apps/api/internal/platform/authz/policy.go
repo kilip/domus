@@ -13,8 +13,8 @@ func policies() [][]string {
 		{RoleSuperadmin, string(ResourceParish), string(ActionWrite)},
 		{RoleSuperadmin, string(ResourceTerritory), string(ActionRead)},
 		{RoleSuperadmin, string(ResourceTerritory), string(ActionWrite)},
-		{RoleSuperadmin, string(ResourceUnit), string(ActionRead)},
-		{RoleSuperadmin, string(ResourceUnit), string(ActionWrite)},
+		{RoleSuperadmin, string(ResourceWorkspace), string(ActionRead)},
+		{RoleSuperadmin, string(ResourceWorkspace), string(ActionWrite)},
 	}
 
 	for _, res := range moduleResources {

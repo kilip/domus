@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent"
 	"github.com/paroki/domus/api/ent/parish"
-	entunit "github.com/paroki/domus/api/ent/unit"
+	entworkspace "github.com/paroki/domus/api/ent/workspace"
 	"github.com/paroki/domus/api/internal/core"
 	"github.com/paroki/domus/api/internal/platform/authz"
 	"github.com/paroki/domus/api/testutil"
@@ -20,21 +20,21 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-// GrantFinanceRole grants the finance role to all units belonging to the parish, as well as the unit scope.
+// GrantFinanceRole grants the finance role to all workspaces belonging to the parish, as well as the parish scope.
 func GrantFinanceRole[T any](s *testutil.ApiTestSuite[T], parishID int, role string) {
 	s.T().Helper()
 	st := testutil.GetState()
-	units, _ := st.Ent.Unit.Query().Where(entunit.HasParishWith(parish.IDEQ(parishID))).All(context.Background())
-	for _, u := range units {
-		s.GrantRole(role, authz.Scope{Type: authz.ScopeUnit, ID: int64(u.ID)})
+	workspaces, _ := st.Ent.Workspace.Query().Where(entworkspace.HasParishWith(parish.IDEQ(parishID))).All(context.Background())
+	for _, w := range workspaces {
+		s.GrantRole(role, authz.Scope{Type: authz.ScopeWorkspace, ID: int64(w.ID)})
 	}
 	s.GrantRole(role, authz.Scope{Type: authz.ScopeParish, ID: int64(parishID)})
 }
 
-// SetFinanceCookie sets the domus.fin cookie in the test suite for active parish and unit.
-func SetFinanceCookie[T any](s *testutil.ApiTestSuite[T], parishID int, unitID int) {
+// SetFinanceCookie sets the domus.fin cookie in the test suite for active parish and workspace.
+func SetFinanceCookie[T any](s *testutil.ApiTestSuite[T], parishID int, workspaceID int) {
 	s.T().Helper()
-	cookieVal := fmt.Sprintf(`{"activeParishId":%d,"activeUnitId":%d}`, parishID, unitID)
+	cookieVal := fmt.Sprintf(`{"activeParishId":%d,"activeWorkspaceId":%d}`, parishID, workspaceID)
 	s.SetCookie(&http.Cookie{
 		Name:  "domus.fin",
 		Value: url.QueryEscape(cookieVal),
@@ -62,19 +62,23 @@ func CreateTestParish(t *testing.T) *ent.Parish {
 	return parish
 }
 
-// CreateTestUnit creates a fresh unit belonging to the specified parish directly via Ent client.
-func CreateTestUnit(t *testing.T, parishID int, userID uuid.UUID) *ent.Unit {
+// CreateTestWorkspace creates a fresh workspace belonging to the specified parish directly via Ent client.
+func CreateTestWorkspace(t *testing.T, parishID int, userID uuid.UUID) *ent.Workspace {
 	t.Helper()
 	st := testutil.GetState()
 	ctx := core.ContextWithUser(context.Background(), core.AuthenticatedUser{ID: userID})
 	uniqueSuffix := uuid.New().String()[:8]
-	unit, err := st.Ent.Unit.Create().
-		SetName(fmt.Sprintf("Unit-%s", uniqueSuffix)).
-		SetKind("category").
+	workspace, err := st.Ent.Workspace.Create().
+		SetName(fmt.Sprintf("Workspace-%s", uniqueSuffix)).
 		SetParishID(parishID).
 		Save(ctx)
 	require.NoError(t, err)
-	return unit
+	return workspace
+}
+
+// CreateTestUnit alias for backwards compatibility during refactor
+func CreateTestUnit(t *testing.T, parishID int, userID uuid.UUID) *ent.Workspace {
+	return CreateTestWorkspace(t, parishID, userID)
 }
 
 type FinanceSmokeSuite struct {

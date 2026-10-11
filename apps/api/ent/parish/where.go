@@ -574,27 +574,27 @@ func HasTerritoriesWith(preds ...predicate.Territory) predicate.Parish {
 	})
 }
 
-// HasUnits applies the HasEdge predicate on the "units" edge.
-func HasUnits() predicate.Parish {
+// HasWorkspaces applies the HasEdge predicate on the "workspaces" edge.
+func HasWorkspaces() predicate.Parish {
 	return predicate.Parish(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, UnitsTable, UnitsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, WorkspacesTable, WorkspacesColumn),
 		)
 		schemaConfig := internal.SchemaConfigFromContext(s.Context())
-		step.To.Schema = schemaConfig.Unit
-		step.Edge.Schema = schemaConfig.Unit
+		step.To.Schema = schemaConfig.Workspace
+		step.Edge.Schema = schemaConfig.Workspace
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasUnitsWith applies the HasEdge predicate on the "units" edge with a given conditions (other predicates).
-func HasUnitsWith(preds ...predicate.Unit) predicate.Parish {
+// HasWorkspacesWith applies the HasEdge predicate on the "workspaces" edge with a given conditions (other predicates).
+func HasWorkspacesWith(preds ...predicate.Workspace) predicate.Parish {
 	return predicate.Parish(func(s *sql.Selector) {
-		step := newUnitsStep()
+		step := newWorkspacesStep()
 		schemaConfig := internal.SchemaConfigFromContext(s.Context())
-		step.To.Schema = schemaConfig.Unit
-		step.Edge.Schema = schemaConfig.Unit
+		step.To.Schema = schemaConfig.Workspace
+		step.Edge.Schema = schemaConfig.Workspace
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

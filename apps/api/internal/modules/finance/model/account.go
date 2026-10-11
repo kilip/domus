@@ -37,7 +37,7 @@ type AccountResponse struct {
 	Description   *string    `json:"description,omitempty"`
 	ParishID      int        `json:"parishId"`
 	ParentID      *uuid.UUID `json:"parentId,omitempty"`
-	UnitID        int        `json:"unitId"`
+	WorkspaceID   int        `json:"workspaceId"`
 	CreatedAt     time.Time  `json:"createdAt"`
 	UpdatedAt     time.Time  `json:"updatedAt"`
 }

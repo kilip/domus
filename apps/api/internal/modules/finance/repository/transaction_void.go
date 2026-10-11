@@ -11,7 +11,7 @@ import (
 	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/posting"
 	"github.com/paroki/domus/api/ent/transaction"
-	entunit "github.com/paroki/domus/api/ent/unit"
+	entworkspace "github.com/paroki/domus/api/ent/workspace"
 	"github.com/paroki/domus/api/internal/core"
 	"github.com/paroki/domus/api/internal/modules/finance/model"
 	"github.com/paroki/domus/api/internal/platform/database"
@@ -27,13 +27,13 @@ func (r TransactionRepository) Void(ctx context.Context, id uuid.UUID, reversalD
 	var resp *model.TransactionResponse
 
 	err := database.WithTx(ctx, r.entcli, func(tx *ent.Tx) error {
-		// Atomically move the transaction: Update().Where(IDEQ, parish & unit match, StatusEQ(posted)).SetStatus(void).Save
+		// Atomically move the transaction: Update().Where(IDEQ, parish & workspace match, StatusEQ(posted)).SetStatus(void).Save
 		// and require exactly 1 affected row, else 409 or 404.
 		n, err := tx.Transaction.Update().
 			Where(
 				transaction.IDEQ(id),
 				transaction.HasParishWith(parish.IDEQ(fc.ParishID)),
-				transaction.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+				transaction.HasWorkspaceWith(entworkspace.IDEQ(fc.WorkspaceID)),
 				transaction.StatusEQ(transaction.StatusPosted),
 			).
 			SetStatus(transaction.StatusVoid).
@@ -42,12 +42,12 @@ func (r TransactionRepository) Void(ctx context.Context, id uuid.UUID, reversalD
 			return err
 		}
 		if n == 0 {
-			// Check if the transaction actually exists in this parish & unit
+			// Check if the transaction actually exists in this parish & workspace
 			txExists, err := tx.Transaction.Query().
 				Where(
 					transaction.IDEQ(id),
 					transaction.HasParishWith(parish.IDEQ(fc.ParishID)),
-					transaction.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+					transaction.HasWorkspaceWith(entworkspace.IDEQ(fc.WorkspaceID)),
 				).
 				Exist(ctx)
 			if err != nil {
@@ -65,7 +65,7 @@ func (r TransactionRepository) Void(ctx context.Context, id uuid.UUID, reversalD
 				entry.HasTransactionWith(
 					transaction.IDEQ(id),
 					transaction.HasParishWith(parish.IDEQ(fc.ParishID)),
-					transaction.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+					transaction.HasWorkspaceWith(entworkspace.IDEQ(fc.WorkspaceID)),
 				),
 				entry.Not(entry.HasReverses()),
 				entry.Not(entry.HasReversedBy()),
@@ -132,7 +132,7 @@ func (r TransactionRepository) Void(ctx context.Context, id uuid.UUID, reversalD
 		loaded, err := tx.Transaction.Query().
 			Where(transaction.IDEQ(id)).
 			WithParish().
-			WithUnit().
+			WithWorkspace().
 			WithCreator().
 			WithEntries(func(eq *ent.EntryQuery) {
 				eq.WithPostings(func(pq *ent.PostingQuery) {

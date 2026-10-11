@@ -36,8 +36,8 @@ type Territory func(*sql.Selector)
 // Transaction is the predicate function for transaction builders.
 type Transaction func(*sql.Selector)
 
-// Unit is the predicate function for unit builders.
-type Unit func(*sql.Selector)
-
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
+
+// Workspace is the predicate function for workspace builders.
+type Workspace func(*sql.Selector)

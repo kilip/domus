@@ -15,7 +15,7 @@ import (
 //   - only draft transactions can be edited or soft-deleted
 //   - posting creates one Entry; void creates a reversal Entry
 //   - at most one active (non-reversed) Entry per transaction
-//   - unit must belong to the same parish
+//   - workspace must belong to the same parish
 type Transaction struct {
 	ent.Schema
 }
@@ -44,7 +44,7 @@ func (Transaction) Fields() []ent.Field {
 func (Transaction) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("parish", Parish.Type).Unique().Required(),
-		edge.To("unit", Unit.Type).Unique(),
+		edge.To("workspace", Workspace.Type).Unique(),
 		edge.To("entries", Entry.Type),
 	}
 }

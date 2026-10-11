@@ -26,13 +26,13 @@ type Config struct {
 }
 
 type Module struct {
-	config       Config
-	unitCtrl     controller.FinanceUnitController
-	activateCtrl controller.ActivateController
-	accountCtrl  controller.AccountController
-	txCtrl       controller.TransactionController
-	attMod       attachment.Module
-	reportCtrl   controller.ReportController
+	config        Config
+	workspaceCtrl controller.FinanceWorkspaceController
+	activateCtrl  controller.ActivateController
+	accountCtrl   controller.AccountController
+	txCtrl        controller.TransactionController
+	attMod        attachment.Module
+	reportCtrl    controller.ReportController
 }
 
 func New(config Config) Module {
@@ -43,9 +43,9 @@ func New(config Config) Module {
 		config.CookieName = DefaultCookieName
 	}
 
-	unitRepo := repository.NewFinanceUnitRepository(config.EntCli, config.Log)
-	unitSvc := service.NewFinanceUnitService(unitRepo, config.Log)
-	unitCtrl := controller.NewFinanceUnitController(unitSvc)
+	workspaceRepo := repository.NewFinanceWorkspaceRepository(config.EntCli, config.Log)
+	workspaceSvc := service.NewFinanceWorkspaceService(workspaceRepo, config.Log)
+	workspaceCtrl := controller.NewFinanceWorkspaceController(workspaceSvc)
 
 	activateRepo := repository.NewActivateRepository(config.EntCli, config.Log)
 	activateSvc := service.NewActivateService(activateRepo, config.Authz, config.Log)
@@ -72,21 +72,21 @@ func New(config Config) Module {
 	reportCtrl := controller.NewReportController(reportSvc)
 
 	return Module{
-		config:       config,
-		unitCtrl:     unitCtrl,
-		activateCtrl: activateCtrl,
-		accountCtrl:  accountCtrl,
-		txCtrl:       txCtrl,
-		attMod:       attMod,
-		reportCtrl:   reportCtrl,
+		config:        config,
+		workspaceCtrl: workspaceCtrl,
+		activateCtrl:  activateCtrl,
+		accountCtrl:   accountCtrl,
+		txCtrl:        txCtrl,
+		attMod:        attMod,
+		reportCtrl:    reportCtrl,
 	}
 }
 
 func (m Module) InitRoutes(r fiber.Router) {
 	fin := r.Group("/fin")
 
-	// Activation and unit listing do not require active context cookie
-	fin.Get("/units", m.unitCtrl.GetAccessibleUnits)
+	// Activation and workspace listing do not require active context cookie
+	fin.Get("/workspaces", m.workspaceCtrl.GetAccessibleWorkspaces)
 	fin.Post("/activate", m.activateCtrl.Activate)
 
 	// All other /fin routes require active finance context cookie
@@ -94,7 +94,7 @@ func (m Module) InitRoutes(r fiber.Router) {
 
 	az := m.config.Authz
 	perm := func(act authz.Action) fiber.Handler {
-		return httpx.RequirePermission(az, FinanceUnitScope, authz.ResourceFinance, act)
+		return httpx.RequirePermission(az, FinanceWorkspaceScope, authz.ResourceFinance, act)
 	}
 
 	read := perm(authz.ActionRead)
@@ -111,7 +111,7 @@ func (m Module) InitRoutes(r fiber.Router) {
 	fin.Get("/transactions/:id", read, m.txCtrl.GetByID)
 	fin.Post("/transactions/:id/void", write, m.txCtrl.Void)
 
-	// Attachments are authorized at the transaction's unit scope, not parish.
+	// Attachments are authorized at the transaction's workspace scope, not parish.
 	m.attMod.Mount(fin, attachment.Spec{
 		OwnerType: repository.AttachmentOwnerTransaction,
 		Path:      "/transactions/:id/attachments",
@@ -136,9 +136,9 @@ type parishMutator interface {
 	ParishID() (int, bool)
 }
 
-type unitMutator interface {
-	SetUnitID(int)
-	UnitID() (int, bool)
+type workspaceMutator interface {
+	SetWorkspaceID(int)
+	WorkspaceID() (int, bool)
 }
 
 func (m Module) InitEntCli(cli *ent.Client) {
@@ -151,9 +151,9 @@ func (m Module) InitEntCli(cli *ent.Client) {
 							p.SetParishID(fc.ParishID)
 						}
 					}
-					if u, ok := mut.(unitMutator); ok {
-						if _, exists := u.UnitID(); !exists && fc.UnitID > 0 {
-							u.SetUnitID(fc.UnitID)
+					if w, ok := mut.(workspaceMutator); ok {
+						if _, exists := w.WorkspaceID(); !exists && fc.WorkspaceID > 0 {
+							w.SetWorkspaceID(fc.WorkspaceID)
 						}
 					}
 				}

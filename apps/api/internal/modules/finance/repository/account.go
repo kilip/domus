@@ -9,7 +9,7 @@ import (
 	"github.com/paroki/domus/api/ent/account"
 	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/posting"
-	entunit "github.com/paroki/domus/api/ent/unit"
+	entworkspace "github.com/paroki/domus/api/ent/workspace"
 	"github.com/paroki/domus/api/internal/core"
 	"github.com/paroki/domus/api/internal/modules/finance/model"
 	"github.com/paroki/domus/api/internal/platform/database"
@@ -43,8 +43,8 @@ func toAccountResponse(acc *ent.Account) model.AccountResponse {
 	if acc.Edges.Parent != nil {
 		resp.ParentID = &acc.Edges.Parent.ID
 	}
-	if acc.Edges.Unit != nil {
-		resp.UnitID = acc.Edges.Unit.ID
+	if acc.Edges.Workspace != nil {
+		resp.WorkspaceID = acc.Edges.Workspace.ID
 	}
 	return resp
 }
@@ -54,11 +54,11 @@ func (r AccountRepository) List(ctx context.Context, filter model.ListAccountsQu
 	q := r.entcli.Account.Query().
 		Where(
 			account.HasParishWith(parish.IDEQ(fc.ParishID)),
-			account.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+			account.HasWorkspaceWith(entworkspace.IDEQ(fc.WorkspaceID)),
 		).
 		WithParish().
 		WithParent().
-		WithUnit()
+		WithWorkspace()
 
 	if filter.Type != nil && *filter.Type != "" {
 		q = q.Where(account.TypeEQ(account.Type(*filter.Type)))
@@ -91,11 +91,11 @@ func (r AccountRepository) GetByID(ctx context.Context, id uuid.UUID) (*model.Ac
 		Where(
 			account.IDEQ(id),
 			account.HasParishWith(parish.IDEQ(fc.ParishID)),
-			account.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+			account.HasWorkspaceWith(entworkspace.IDEQ(fc.WorkspaceID)),
 		).
 		WithParish().
 		WithParent().
-		WithUnit().
+		WithWorkspace().
 		Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -117,11 +117,11 @@ func (r AccountRepository) GetEntByID(ctx context.Context, id uuid.UUID) (*ent.A
 		Where(
 			account.IDEQ(id),
 			account.HasParishWith(parish.IDEQ(fc.ParishID)),
-			account.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+			account.HasWorkspaceWith(entworkspace.IDEQ(fc.WorkspaceID)),
 		).
 		WithParish().
 		WithParent().
-		WithUnit().
+		WithWorkspace().
 		Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -138,11 +138,11 @@ func (r AccountRepository) GetEntsByIDs(ctx context.Context, ids []uuid.UUID) ([
 		Where(
 			account.IDIn(ids...),
 			account.HasParishWith(parish.IDEQ(fc.ParishID)),
-			account.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+			account.HasWorkspaceWith(entworkspace.IDEQ(fc.WorkspaceID)),
 		).
 		WithParish().
 		WithParent().
-		WithUnit().
+		WithWorkspace().
 		All(ctx)
 }
 
@@ -240,8 +240,8 @@ func (r AccountRepository) Create(ctx context.Context, req model.CreateAccountRe
 		if fc.ParishID > 0 {
 			builder.SetParishID(fc.ParishID)
 		}
-		if fc.UnitID > 0 {
-			builder.SetUnitID(fc.UnitID)
+		if fc.WorkspaceID > 0 {
+			builder.SetWorkspaceID(fc.WorkspaceID)
 		}
 
 		acc, err := builder.Save(ctx)
@@ -256,7 +256,7 @@ func (r AccountRepository) Create(ctx context.Context, req model.CreateAccountRe
 			Where(account.IDEQ(acc.ID)).
 			WithParish().
 			WithParent().
-			WithUnit().
+			WithWorkspace().
 			Only(ctx)
 		return err
 	})
@@ -278,7 +278,7 @@ func (r AccountRepository) Update(ctx context.Context, id uuid.UUID, req model.U
 			Where(
 				account.IDEQ(id),
 				account.HasParishWith(parish.IDEQ(fc.ParishID)),
-				account.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+				account.HasWorkspaceWith(entworkspace.IDEQ(fc.WorkspaceID)),
 			).
 			Exist(ctx)
 		if err != nil {
@@ -329,7 +329,7 @@ func (r AccountRepository) Update(ctx context.Context, id uuid.UUID, req model.U
 			Where(account.IDEQ(id)).
 			WithParish().
 			WithParent().
-			WithUnit().
+			WithWorkspace().
 			Only(ctx)
 		return err
 	})
@@ -350,7 +350,7 @@ func (r AccountRepository) Delete(ctx context.Context, id uuid.UUID) error {
 			Where(
 				account.IDEQ(id),
 				account.HasParishWith(parish.IDEQ(fc.ParishID)),
-				account.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+				account.HasWorkspaceWith(entworkspace.IDEQ(fc.WorkspaceID)),
 			).
 			Exist(ctx)
 		if err != nil {

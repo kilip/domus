@@ -17,8 +17,8 @@ import (
 	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/predicate"
 	"github.com/paroki/domus/api/ent/transaction"
-	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
+	"github.com/paroki/domus/api/ent/workspace"
 )
 
 // TransactionUpdate is the builder for updating Transaction entities.
@@ -197,23 +197,23 @@ func (_u *TransactionUpdate) SetParish(v *Parish) *TransactionUpdate {
 	return _u.SetParishID(v.ID)
 }
 
-// SetUnitID sets the "unit" edge to the Unit entity by ID.
-func (_u *TransactionUpdate) SetUnitID(id int) *TransactionUpdate {
-	_u.mutation.SetUnitID(id)
+// SetWorkspaceID sets the "workspace" edge to the Workspace entity by ID.
+func (_u *TransactionUpdate) SetWorkspaceID(id int) *TransactionUpdate {
+	_u.mutation.SetWorkspaceID(id)
 	return _u
 }
 
-// SetNillableUnitID sets the "unit" edge to the Unit entity by ID if the given value is not nil.
-func (_u *TransactionUpdate) SetNillableUnitID(id *int) *TransactionUpdate {
+// SetNillableWorkspaceID sets the "workspace" edge to the Workspace entity by ID if the given value is not nil.
+func (_u *TransactionUpdate) SetNillableWorkspaceID(id *int) *TransactionUpdate {
 	if id != nil {
-		_u = _u.SetUnitID(*id)
+		_u = _u.SetWorkspaceID(*id)
 	}
 	return _u
 }
 
-// SetUnit sets the "unit" edge to the Unit entity.
-func (_u *TransactionUpdate) SetUnit(v *Unit) *TransactionUpdate {
-	return _u.SetUnitID(v.ID)
+// SetWorkspace sets the "workspace" edge to the Workspace entity.
+func (_u *TransactionUpdate) SetWorkspace(v *Workspace) *TransactionUpdate {
+	return _u.SetWorkspaceID(v.ID)
 }
 
 // AddEntryIDs adds the "entries" edge to the Entry entity by IDs.
@@ -254,9 +254,9 @@ func (_u *TransactionUpdate) ClearParish() *TransactionUpdate {
 	return _u
 }
 
-// ClearUnit clears the "unit" edge to the Unit entity.
-func (_u *TransactionUpdate) ClearUnit() *TransactionUpdate {
-	_u.mutation.ClearUnit()
+// ClearWorkspace clears the "workspace" edge to the Workspace entity.
+func (_u *TransactionUpdate) ClearWorkspace() *TransactionUpdate {
+	_u.mutation.ClearWorkspace()
 	return _u
 }
 
@@ -478,29 +478,29 @@ func (_u *TransactionUpdate) sqlSave(ctx context.Context) (_node int, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.UnitCleared() {
+	if _u.mutation.WorkspaceCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   transaction.UnitTable,
-			Columns: []string{transaction.UnitColumn},
+			Table:   transaction.WorkspaceTable,
+			Columns: []string{transaction.WorkspaceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workspace.FieldID, field.TypeInt),
 			},
 		}
 		edge.Schema = _u.schemaConfig.Transaction
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.UnitIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.WorkspaceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   transaction.UnitTable,
-			Columns: []string{transaction.UnitColumn},
+			Table:   transaction.WorkspaceTable,
+			Columns: []string{transaction.WorkspaceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workspace.FieldID, field.TypeInt),
 			},
 		}
 		edge.Schema = _u.schemaConfig.Transaction
@@ -742,23 +742,23 @@ func (_u *TransactionUpdateOne) SetParish(v *Parish) *TransactionUpdateOne {
 	return _u.SetParishID(v.ID)
 }
 
-// SetUnitID sets the "unit" edge to the Unit entity by ID.
-func (_u *TransactionUpdateOne) SetUnitID(id int) *TransactionUpdateOne {
-	_u.mutation.SetUnitID(id)
+// SetWorkspaceID sets the "workspace" edge to the Workspace entity by ID.
+func (_u *TransactionUpdateOne) SetWorkspaceID(id int) *TransactionUpdateOne {
+	_u.mutation.SetWorkspaceID(id)
 	return _u
 }
 
-// SetNillableUnitID sets the "unit" edge to the Unit entity by ID if the given value is not nil.
-func (_u *TransactionUpdateOne) SetNillableUnitID(id *int) *TransactionUpdateOne {
+// SetNillableWorkspaceID sets the "workspace" edge to the Workspace entity by ID if the given value is not nil.
+func (_u *TransactionUpdateOne) SetNillableWorkspaceID(id *int) *TransactionUpdateOne {
 	if id != nil {
-		_u = _u.SetUnitID(*id)
+		_u = _u.SetWorkspaceID(*id)
 	}
 	return _u
 }
 
-// SetUnit sets the "unit" edge to the Unit entity.
-func (_u *TransactionUpdateOne) SetUnit(v *Unit) *TransactionUpdateOne {
-	return _u.SetUnitID(v.ID)
+// SetWorkspace sets the "workspace" edge to the Workspace entity.
+func (_u *TransactionUpdateOne) SetWorkspace(v *Workspace) *TransactionUpdateOne {
+	return _u.SetWorkspaceID(v.ID)
 }
 
 // AddEntryIDs adds the "entries" edge to the Entry entity by IDs.
@@ -799,9 +799,9 @@ func (_u *TransactionUpdateOne) ClearParish() *TransactionUpdateOne {
 	return _u
 }
 
-// ClearUnit clears the "unit" edge to the Unit entity.
-func (_u *TransactionUpdateOne) ClearUnit() *TransactionUpdateOne {
-	_u.mutation.ClearUnit()
+// ClearWorkspace clears the "workspace" edge to the Workspace entity.
+func (_u *TransactionUpdateOne) ClearWorkspace() *TransactionUpdateOne {
+	_u.mutation.ClearWorkspace()
 	return _u
 }
 
@@ -1053,29 +1053,29 @@ func (_u *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transaction
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.UnitCleared() {
+	if _u.mutation.WorkspaceCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   transaction.UnitTable,
-			Columns: []string{transaction.UnitColumn},
+			Table:   transaction.WorkspaceTable,
+			Columns: []string{transaction.WorkspaceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workspace.FieldID, field.TypeInt),
 			},
 		}
 		edge.Schema = _u.schemaConfig.Transaction
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.UnitIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.WorkspaceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   transaction.UnitTable,
-			Columns: []string{transaction.UnitColumn},
+			Table:   transaction.WorkspaceTable,
+			Columns: []string{transaction.WorkspaceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workspace.FieldID, field.TypeInt),
 			},
 		}
 		edge.Schema = _u.schemaConfig.Transaction

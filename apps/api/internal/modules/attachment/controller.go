@@ -18,7 +18,7 @@ func NewController(svc Service) Controller {
 // Upload godoc
 //
 //	@Summary		Upload attachment
-//	@Description	Upload a file (PDF, JPEG, PNG, max 10 MiB) attached to an owner record, e.g. a finance transaction. Permission is checked at the owner's unit scope.
+//	@Description	Upload a file (PDF, JPEG, PNG, max 10 MiB) attached to an owner record, e.g. a finance transaction. Permission is checked at the owner's workspace scope.
 //	@Tags			Attachment
 //	@Accept			mpfd
 //	@Produce		json

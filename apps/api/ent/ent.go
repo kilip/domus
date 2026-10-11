@@ -22,8 +22,8 @@ import (
 	"github.com/paroki/domus/api/ent/posting"
 	"github.com/paroki/domus/api/ent/territory"
 	"github.com/paroki/domus/api/ent/transaction"
-	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
+	"github.com/paroki/domus/api/ent/workspace"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -94,8 +94,8 @@ func checkColumn(t, c string) error {
 			posting.Table:     posting.ValidColumn,
 			territory.Table:   territory.ValidColumn,
 			transaction.Table: transaction.ValidColumn,
-			unit.Table:        unit.ValidColumn,
 			user.Table:        user.ValidColumn,
+			workspace.Table:   workspace.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

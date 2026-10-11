@@ -5,10 +5,10 @@ import "fmt"
 type ScopeType string
 
 const (
-	ScopeSystem  ScopeType = "system"
-	ScopeDiocese ScopeType = "diocese"
-	ScopeParish  ScopeType = "parish"
-	ScopeUnit    ScopeType = "unit"
+	ScopeSystem    ScopeType = "system"
+	ScopeDiocese   ScopeType = "diocese"
+	ScopeParish    ScopeType = "parish"
+	ScopeWorkspace ScopeType = "workspace"
 )
 
 // Scope is the casbin domain. It maps 1:1 to a Membership row's

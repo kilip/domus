@@ -16,8 +16,8 @@ import (
 	"github.com/paroki/domus/api/ent/schema"
 	"github.com/paroki/domus/api/ent/territory"
 	"github.com/paroki/domus/api/ent/transaction"
-	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
+	"github.com/paroki/domus/api/ent/workspace"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -247,25 +247,6 @@ func init() {
 	transactionDescID := transactionMixinFields0[0].Descriptor()
 	// transaction.DefaultID holds the default value on creation for the id field.
 	transaction.DefaultID = transactionDescID.Default.(func() uuid.UUID)
-	unitMixin := schema.Unit{}.Mixin()
-	unitMixinFields0 := unitMixin[0].Fields()
-	_ = unitMixinFields0
-	unitFields := schema.Unit{}.Fields()
-	_ = unitFields
-	// unitDescCreatedAt is the schema descriptor for createdAt field.
-	unitDescCreatedAt := unitMixinFields0[1].Descriptor()
-	// unit.DefaultCreatedAt holds the default value on creation for the createdAt field.
-	unit.DefaultCreatedAt = unitDescCreatedAt.Default.(func() time.Time)
-	// unitDescUpdatedAt is the schema descriptor for updatedAt field.
-	unitDescUpdatedAt := unitMixinFields0[3].Descriptor()
-	// unit.DefaultUpdatedAt holds the default value on creation for the updatedAt field.
-	unit.DefaultUpdatedAt = unitDescUpdatedAt.Default.(func() time.Time)
-	// unit.UpdateDefaultUpdatedAt holds the default value on update for the updatedAt field.
-	unit.UpdateDefaultUpdatedAt = unitDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// unitDescName is the schema descriptor for name field.
-	unitDescName := unitFields[1].Descriptor()
-	// unit.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	unit.NameValidator = unitDescName.Validators[0].(func(string) error)
 	userMixin := schema.User{}.Mixin()
 	userMixinFields0 := userMixin[0].Fields()
 	_ = userMixinFields0
@@ -283,4 +264,23 @@ func init() {
 	userDescID := userMixinFields0[0].Descriptor()
 	// user.DefaultID holds the default value on creation for the id field.
 	user.DefaultID = userDescID.Default.(func() uuid.UUID)
+	workspaceMixin := schema.Workspace{}.Mixin()
+	workspaceMixinFields0 := workspaceMixin[0].Fields()
+	_ = workspaceMixinFields0
+	workspaceFields := schema.Workspace{}.Fields()
+	_ = workspaceFields
+	// workspaceDescCreatedAt is the schema descriptor for createdAt field.
+	workspaceDescCreatedAt := workspaceMixinFields0[1].Descriptor()
+	// workspace.DefaultCreatedAt holds the default value on creation for the createdAt field.
+	workspace.DefaultCreatedAt = workspaceDescCreatedAt.Default.(func() time.Time)
+	// workspaceDescUpdatedAt is the schema descriptor for updatedAt field.
+	workspaceDescUpdatedAt := workspaceMixinFields0[3].Descriptor()
+	// workspace.DefaultUpdatedAt holds the default value on creation for the updatedAt field.
+	workspace.DefaultUpdatedAt = workspaceDescUpdatedAt.Default.(func() time.Time)
+	// workspace.UpdateDefaultUpdatedAt holds the default value on update for the updatedAt field.
+	workspace.UpdateDefaultUpdatedAt = workspaceDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// workspaceDescName is the schema descriptor for name field.
+	workspaceDescName := workspaceFields[1].Descriptor()
+	// workspace.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	workspace.NameValidator = workspaceDescName.Validators[0].(func(string) error)
 }

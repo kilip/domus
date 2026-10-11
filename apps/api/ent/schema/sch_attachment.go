@@ -14,8 +14,8 @@ import (
 // An attachment is generic: it belongs to an owner identified by
 // (owner_type, owner_id), e.g. ("transaction", <tx uuid>). There is no
 // foreign key to the owner table so any module can attach files.
-// parish and unit are denormalized from the owner at creation time and are
-// immutable (an owner's unit never changes); unit is the Casbin scope used
+// parish and workspace are denormalized from the owner at creation time and are
+// immutable (an owner's workspace never changes); workspace is the Casbin scope used
 // to authorize access.
 type Attachment struct {
 	ent.Schema
@@ -46,7 +46,7 @@ func (Attachment) Fields() []ent.Field {
 func (Attachment) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("parish", Parish.Type).Unique().Required().Immutable(),
-		edge.To("unit", Unit.Type).Unique().Required().Immutable(),
+		edge.To("workspace", Workspace.Type).Unique().Required().Immutable(),
 	}
 }
 

@@ -16,7 +16,6 @@ import (
 	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/predicate"
 	"github.com/paroki/domus/api/ent/territory"
-	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
 )
 
@@ -236,25 +235,6 @@ func (_u *TerritoryUpdate) AddChildren(v ...*Territory) *TerritoryUpdate {
 	return _u.AddChildIDs(ids...)
 }
 
-// SetUnitID sets the "unit" edge to the Unit entity by ID.
-func (_u *TerritoryUpdate) SetUnitID(id int) *TerritoryUpdate {
-	_u.mutation.SetUnitID(id)
-	return _u
-}
-
-// SetNillableUnitID sets the "unit" edge to the Unit entity by ID if the given value is not nil.
-func (_u *TerritoryUpdate) SetNillableUnitID(id *int) *TerritoryUpdate {
-	if id != nil {
-		_u = _u.SetUnitID(*id)
-	}
-	return _u
-}
-
-// SetUnit sets the "unit" edge to the Unit entity.
-func (_u *TerritoryUpdate) SetUnit(v *Unit) *TerritoryUpdate {
-	return _u.SetUnitID(v.ID)
-}
-
 // Mutation returns the TerritoryMutation object of the builder.
 func (_u *TerritoryUpdate) Mutation() *TerritoryMutation {
 	return _u.mutation
@@ -303,12 +283,6 @@ func (_u *TerritoryUpdate) RemoveChildren(v ...*Territory) *TerritoryUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveChildIDs(ids...)
-}
-
-// ClearUnit clears the "unit" edge to the Unit entity.
-func (_u *TerritoryUpdate) ClearUnit() *TerritoryUpdate {
-	_u.mutation.ClearUnit()
-	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -590,37 +564,6 @@ func (_u *TerritoryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.UnitCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   territory.UnitTable,
-			Columns: []string{territory.UnitColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
-			},
-		}
-		edge.Schema = _u.schemaConfig.Territory
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.UnitIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   territory.UnitTable,
-			Columns: []string{territory.UnitColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
-			},
-		}
-		edge.Schema = _u.schemaConfig.Territory
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	_spec.Node.Schema = _u.schemaConfig.Territory
 	ctx = internal.NewSchemaConfigContext(ctx, _u.schemaConfig)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -846,25 +789,6 @@ func (_u *TerritoryUpdateOne) AddChildren(v ...*Territory) *TerritoryUpdateOne {
 	return _u.AddChildIDs(ids...)
 }
 
-// SetUnitID sets the "unit" edge to the Unit entity by ID.
-func (_u *TerritoryUpdateOne) SetUnitID(id int) *TerritoryUpdateOne {
-	_u.mutation.SetUnitID(id)
-	return _u
-}
-
-// SetNillableUnitID sets the "unit" edge to the Unit entity by ID if the given value is not nil.
-func (_u *TerritoryUpdateOne) SetNillableUnitID(id *int) *TerritoryUpdateOne {
-	if id != nil {
-		_u = _u.SetUnitID(*id)
-	}
-	return _u
-}
-
-// SetUnit sets the "unit" edge to the Unit entity.
-func (_u *TerritoryUpdateOne) SetUnit(v *Unit) *TerritoryUpdateOne {
-	return _u.SetUnitID(v.ID)
-}
-
 // Mutation returns the TerritoryMutation object of the builder.
 func (_u *TerritoryUpdateOne) Mutation() *TerritoryMutation {
 	return _u.mutation
@@ -913,12 +837,6 @@ func (_u *TerritoryUpdateOne) RemoveChildren(v ...*Territory) *TerritoryUpdateOn
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveChildIDs(ids...)
-}
-
-// ClearUnit clears the "unit" edge to the Unit entity.
-func (_u *TerritoryUpdateOne) ClearUnit() *TerritoryUpdateOne {
-	_u.mutation.ClearUnit()
-	return _u
 }
 
 // Where appends a list predicates to the TerritoryUpdate builder.
@@ -1222,37 +1140,6 @@ func (_u *TerritoryUpdateOne) sqlSave(ctx context.Context) (_node *Territory, er
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(territory.FieldID, field.TypeInt),
-			},
-		}
-		edge.Schema = _u.schemaConfig.Territory
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.UnitCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   territory.UnitTable,
-			Columns: []string{territory.UnitColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
-			},
-		}
-		edge.Schema = _u.schemaConfig.Territory
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.UnitIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   territory.UnitTable,
-			Columns: []string{territory.UnitColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
 			},
 		}
 		edge.Schema = _u.schemaConfig.Territory

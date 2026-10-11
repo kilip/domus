@@ -14,7 +14,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/territory"
-	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
 )
 
@@ -205,25 +204,6 @@ func (_c *TerritoryCreate) AddChildren(v ...*Territory) *TerritoryCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddChildIDs(ids...)
-}
-
-// SetUnitID sets the "unit" edge to the Unit entity by ID.
-func (_c *TerritoryCreate) SetUnitID(id int) *TerritoryCreate {
-	_c.mutation.SetUnitID(id)
-	return _c
-}
-
-// SetNillableUnitID sets the "unit" edge to the Unit entity by ID if the given value is not nil.
-func (_c *TerritoryCreate) SetNillableUnitID(id *int) *TerritoryCreate {
-	if id != nil {
-		_c = _c.SetUnitID(*id)
-	}
-	return _c
-}
-
-// SetUnit sets the "unit" edge to the Unit entity.
-func (_c *TerritoryCreate) SetUnit(v *Unit) *TerritoryCreate {
-	return _c.SetUnitID(v.ID)
 }
 
 // Mutation returns the TerritoryMutation object of the builder.
@@ -475,24 +455,6 @@ func (_c *TerritoryCreate) createSpec() (*Territory, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.UnitIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   territory.UnitTable,
-			Columns: []string{territory.UnitColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
-			},
-		}
-		edge.Schema = _c.schemaConfig.Territory
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.unit_territory = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

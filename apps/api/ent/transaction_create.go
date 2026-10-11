@@ -16,8 +16,8 @@ import (
 	"github.com/paroki/domus/api/ent/entry"
 	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/transaction"
-	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
+	"github.com/paroki/domus/api/ent/workspace"
 )
 
 // TransactionCreate is the builder for creating a Transaction entity.
@@ -175,23 +175,23 @@ func (_c *TransactionCreate) SetParish(v *Parish) *TransactionCreate {
 	return _c.SetParishID(v.ID)
 }
 
-// SetUnitID sets the "unit" edge to the Unit entity by ID.
-func (_c *TransactionCreate) SetUnitID(id int) *TransactionCreate {
-	_c.mutation.SetUnitID(id)
+// SetWorkspaceID sets the "workspace" edge to the Workspace entity by ID.
+func (_c *TransactionCreate) SetWorkspaceID(id int) *TransactionCreate {
+	_c.mutation.SetWorkspaceID(id)
 	return _c
 }
 
-// SetNillableUnitID sets the "unit" edge to the Unit entity by ID if the given value is not nil.
-func (_c *TransactionCreate) SetNillableUnitID(id *int) *TransactionCreate {
+// SetNillableWorkspaceID sets the "workspace" edge to the Workspace entity by ID if the given value is not nil.
+func (_c *TransactionCreate) SetNillableWorkspaceID(id *int) *TransactionCreate {
 	if id != nil {
-		_c = _c.SetUnitID(*id)
+		_c = _c.SetWorkspaceID(*id)
 	}
 	return _c
 }
 
-// SetUnit sets the "unit" edge to the Unit entity.
-func (_c *TransactionCreate) SetUnit(v *Unit) *TransactionCreate {
-	return _c.SetUnitID(v.ID)
+// SetWorkspace sets the "workspace" edge to the Workspace entity.
+func (_c *TransactionCreate) SetWorkspace(v *Workspace) *TransactionCreate {
+	return _c.SetWorkspaceID(v.ID)
 }
 
 // AddEntryIDs adds the "entries" edge to the Entry entity by IDs.
@@ -435,22 +435,22 @@ func (_c *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 		_node.transaction_parish = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.UnitIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.WorkspaceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   transaction.UnitTable,
-			Columns: []string{transaction.UnitColumn},
+			Table:   transaction.WorkspaceTable,
+			Columns: []string{transaction.WorkspaceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workspace.FieldID, field.TypeInt),
 			},
 		}
 		edge.Schema = _c.schemaConfig.Transaction
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.transaction_unit = &nodes[0]
+		_node.transaction_workspace = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.EntriesIDs(); len(nodes) > 0 {

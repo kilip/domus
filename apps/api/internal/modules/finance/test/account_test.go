@@ -83,7 +83,7 @@ func (s *AccountSuite) TestCreate_SuccessAndDerivedBalance() {
 	s.True(res.Data.Postable)
 	s.Equal("active", res.Data.Status)
 	s.Equal(parish.ID, res.Data.ParishID)
-	s.Equal(unit.ID, res.Data.UnitID)
+	s.Equal(unit.ID, res.Data.WorkspaceID)
 	s.Nil(res.Data.ParentID)
 
 	// 2. Liability type -> derived normal balance "credit"
@@ -97,7 +97,7 @@ func (s *AccountSuite) TestCreate_SuccessAndDerivedBalance() {
 
 	resLiab := s.GetResponse()
 	s.Equal("credit", resLiab.Data.NormalBalance)
-	s.Equal(unit.ID, resLiab.Data.UnitID)
+	s.Equal(unit.ID, resLiab.Data.WorkspaceID)
 }
 
 func (s *AccountSuite) TestCreate_DuplicateCode() {
@@ -316,8 +316,8 @@ func (s *AccountSuite) TestUpdate_RulesAndCycles() {
 	s.Equal("1115", res.Code)
 	s.Equal("C Updated", res.Name)
 	s.Equal(&desc, res.Description)
-	s.Equal(unit.ID, res.UnitID)     // Unit unchanged!
-	s.Equal(parish.ID, res.ParishID) // Parish unchanged!
+	s.Equal(unit.ID, res.WorkspaceID) // Unit unchanged!
+	s.Equal(parish.ID, res.ParishID)  // Parish unchanged!
 }
 
 func (s *AccountSuite) TestUpdate_PostingsRestrictions() {
@@ -445,7 +445,7 @@ func (s *AccountSuite) TestGetByID_And_CrossParish() {
 	s.OK()
 	getRes := s.GetResponse().Data
 	s.Equal(acc.ID, getRes.ID)
-	s.Equal(unitA.ID, getRes.UnitID)
+	s.Equal(unitA.ID, getRes.WorkspaceID)
 	s.Equal(parishA.ID, getRes.ParishID)
 
 	// Get from another parish/unit -> 404 Not Found

@@ -16,22 +16,22 @@ import (
 	"github.com/paroki/domus/api/ent/internal"
 	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/predicate"
-	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
+	"github.com/paroki/domus/api/ent/workspace"
 )
 
 // AttachmentQuery is the builder for querying Attachment entities.
 type AttachmentQuery struct {
 	config
-	ctx         *QueryContext
-	order       []attachment.OrderOption
-	inters      []Interceptor
-	predicates  []predicate.Attachment
-	withCreator *UserQuery
-	withUpdater *UserQuery
-	withParish  *ParishQuery
-	withUnit    *UnitQuery
-	withFKs     bool
+	ctx           *QueryContext
+	order         []attachment.OrderOption
+	inters        []Interceptor
+	predicates    []predicate.Attachment
+	withCreator   *UserQuery
+	withUpdater   *UserQuery
+	withParish    *ParishQuery
+	withWorkspace *WorkspaceQuery
+	withFKs       bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -143,9 +143,9 @@ func (_q *AttachmentQuery) QueryParish() *ParishQuery {
 	return query
 }
 
-// QueryUnit chains the current query on the "unit" edge.
-func (_q *AttachmentQuery) QueryUnit() *UnitQuery {
-	query := (&UnitClient{config: _q.config}).Query()
+// QueryWorkspace chains the current query on the "workspace" edge.
+func (_q *AttachmentQuery) QueryWorkspace() *WorkspaceQuery {
+	query := (&WorkspaceClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -156,11 +156,11 @@ func (_q *AttachmentQuery) QueryUnit() *UnitQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(attachment.Table, attachment.FieldID, selector),
-			sqlgraph.To(unit.Table, unit.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, attachment.UnitTable, attachment.UnitColumn),
+			sqlgraph.To(workspace.Table, workspace.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, attachment.WorkspaceTable, attachment.WorkspaceColumn),
 		)
 		schemaConfig := _q.schemaConfig
-		step.To.Schema = schemaConfig.Unit
+		step.To.Schema = schemaConfig.Workspace
 		step.Edge.Schema = schemaConfig.Attachment
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -355,15 +355,15 @@ func (_q *AttachmentQuery) Clone() *AttachmentQuery {
 		return nil
 	}
 	return &AttachmentQuery{
-		config:      _q.config,
-		ctx:         _q.ctx.Clone(),
-		order:       append([]attachment.OrderOption{}, _q.order...),
-		inters:      append([]Interceptor{}, _q.inters...),
-		predicates:  append([]predicate.Attachment{}, _q.predicates...),
-		withCreator: _q.withCreator.Clone(),
-		withUpdater: _q.withUpdater.Clone(),
-		withParish:  _q.withParish.Clone(),
-		withUnit:    _q.withUnit.Clone(),
+		config:        _q.config,
+		ctx:           _q.ctx.Clone(),
+		order:         append([]attachment.OrderOption{}, _q.order...),
+		inters:        append([]Interceptor{}, _q.inters...),
+		predicates:    append([]predicate.Attachment{}, _q.predicates...),
+		withCreator:   _q.withCreator.Clone(),
+		withUpdater:   _q.withUpdater.Clone(),
+		withParish:    _q.withParish.Clone(),
+		withWorkspace: _q.withWorkspace.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -403,14 +403,14 @@ func (_q *AttachmentQuery) WithParish(opts ...func(*ParishQuery)) *AttachmentQue
 	return _q
 }
 
-// WithUnit tells the query-builder to eager-load the nodes that are connected to
-// the "unit" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *AttachmentQuery) WithUnit(opts ...func(*UnitQuery)) *AttachmentQuery {
-	query := (&UnitClient{config: _q.config}).Query()
+// WithWorkspace tells the query-builder to eager-load the nodes that are connected to
+// the "workspace" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *AttachmentQuery) WithWorkspace(opts ...func(*WorkspaceQuery)) *AttachmentQuery {
+	query := (&WorkspaceClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withUnit = query
+	_q.withWorkspace = query
 	return _q
 }
 
@@ -497,10 +497,10 @@ func (_q *AttachmentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*A
 			_q.withCreator != nil,
 			_q.withUpdater != nil,
 			_q.withParish != nil,
-			_q.withUnit != nil,
+			_q.withWorkspace != nil,
 		}
 	)
-	if _q.withParish != nil || _q.withUnit != nil {
+	if _q.withParish != nil || _q.withWorkspace != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -544,9 +544,9 @@ func (_q *AttachmentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*A
 			return nil, err
 		}
 	}
-	if query := _q.withUnit; query != nil {
-		if err := _q.loadUnit(ctx, query, nodes, nil,
-			func(n *Attachment, e *Unit) { n.Edges.Unit = e }); err != nil {
+	if query := _q.withWorkspace; query != nil {
+		if err := _q.loadWorkspace(ctx, query, nodes, nil,
+			func(n *Attachment, e *Workspace) { n.Edges.Workspace = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -643,14 +643,14 @@ func (_q *AttachmentQuery) loadParish(ctx context.Context, query *ParishQuery, n
 	}
 	return nil
 }
-func (_q *AttachmentQuery) loadUnit(ctx context.Context, query *UnitQuery, nodes []*Attachment, init func(*Attachment), assign func(*Attachment, *Unit)) error {
+func (_q *AttachmentQuery) loadWorkspace(ctx context.Context, query *WorkspaceQuery, nodes []*Attachment, init func(*Attachment), assign func(*Attachment, *Workspace)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Attachment)
 	for i := range nodes {
-		if nodes[i].attachment_unit == nil {
+		if nodes[i].attachment_workspace == nil {
 			continue
 		}
-		fk := *nodes[i].attachment_unit
+		fk := *nodes[i].attachment_workspace
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -659,7 +659,7 @@ func (_q *AttachmentQuery) loadUnit(ctx context.Context, query *UnitQuery, nodes
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(unit.IDIn(ids...))
+	query.Where(workspace.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -667,7 +667,7 @@ func (_q *AttachmentQuery) loadUnit(ctx context.Context, query *UnitQuery, nodes
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "attachment_unit" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "attachment_workspace" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

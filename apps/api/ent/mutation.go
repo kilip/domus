@@ -22,8 +22,8 @@ import (
 	"github.com/paroki/domus/api/ent/predicate"
 	"github.com/paroki/domus/api/ent/territory"
 	"github.com/paroki/domus/api/ent/transaction"
-	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
+	"github.com/paroki/domus/api/ent/workspace"
 )
 
 const (
@@ -45,46 +45,46 @@ const (
 	TypePosting     = "Posting"
 	TypeTerritory   = "Territory"
 	TypeTransaction = "Transaction"
-	TypeUnit        = "Unit"
 	TypeUser        = "User"
+	TypeWorkspace   = "Workspace"
 )
 
 // AccountMutation represents an operation that mutates the Account nodes in the graph.
 type AccountMutation struct {
 	config
-	op              Op
-	typ             string
-	id              *uuid.UUID
-	createdAt       *time.Time
-	updatedAt       *time.Time
-	deletedAt       *time.Time
-	code            *string
-	name            *string
-	_type           *account.Type
-	normal_balance  *account.NormalBalance
-	postable        *bool
-	description     *string
-	status          *account.Status
-	clearedFields   map[string]struct{}
-	creator         *uuid.UUID
-	clearedcreator  bool
-	updater         *uuid.UUID
-	clearedupdater  bool
-	parish          *int
-	clearedparish   bool
-	unit            *int
-	clearedunit     bool
-	parent          *uuid.UUID
-	clearedparent   bool
-	children        map[uuid.UUID]struct{}
-	removedchildren map[uuid.UUID]struct{}
-	clearedchildren bool
-	postings        map[uuid.UUID]struct{}
-	removedpostings map[uuid.UUID]struct{}
-	clearedpostings bool
-	done            bool
-	oldValue        func(context.Context) (*Account, error)
-	predicates      []predicate.Account
+	op               Op
+	typ              string
+	id               *uuid.UUID
+	createdAt        *time.Time
+	updatedAt        *time.Time
+	deletedAt        *time.Time
+	code             *string
+	name             *string
+	_type            *account.Type
+	normal_balance   *account.NormalBalance
+	postable         *bool
+	description      *string
+	status           *account.Status
+	clearedFields    map[string]struct{}
+	creator          *uuid.UUID
+	clearedcreator   bool
+	updater          *uuid.UUID
+	clearedupdater   bool
+	parish           *int
+	clearedparish    bool
+	workspace        *int
+	clearedworkspace bool
+	parent           *uuid.UUID
+	clearedparent    bool
+	children         map[uuid.UUID]struct{}
+	removedchildren  map[uuid.UUID]struct{}
+	clearedchildren  bool
+	postings         map[uuid.UUID]struct{}
+	removedpostings  map[uuid.UUID]struct{}
+	clearedpostings  bool
+	done             bool
+	oldValue         func(context.Context) (*Account, error)
+	predicates       []predicate.Account
 }
 
 var _ ent.Mutation = (*AccountMutation)(nil)
@@ -768,43 +768,43 @@ func (m *AccountMutation) ResetParish() {
 	m.clearedparish = false
 }
 
-// SetUnitID sets the "unit" edge to the Unit entity by id.
-func (m *AccountMutation) SetUnitID(id int) {
-	m.unit = &id
+// SetWorkspaceID sets the "workspace" edge to the Workspace entity by id.
+func (m *AccountMutation) SetWorkspaceID(id int) {
+	m.workspace = &id
 }
 
-// ClearUnit clears the "unit" edge to the Unit entity.
-func (m *AccountMutation) ClearUnit() {
-	m.clearedunit = true
+// ClearWorkspace clears the "workspace" edge to the Workspace entity.
+func (m *AccountMutation) ClearWorkspace() {
+	m.clearedworkspace = true
 }
 
-// UnitCleared reports if the "unit" edge to the Unit entity was cleared.
-func (m *AccountMutation) UnitCleared() bool {
-	return m.clearedunit
+// WorkspaceCleared reports if the "workspace" edge to the Workspace entity was cleared.
+func (m *AccountMutation) WorkspaceCleared() bool {
+	return m.clearedworkspace
 }
 
-// UnitID returns the "unit" edge ID in the mutation.
-func (m *AccountMutation) UnitID() (id int, exists bool) {
-	if m.unit != nil {
-		return *m.unit, true
+// WorkspaceID returns the "workspace" edge ID in the mutation.
+func (m *AccountMutation) WorkspaceID() (id int, exists bool) {
+	if m.workspace != nil {
+		return *m.workspace, true
 	}
 	return
 }
 
-// UnitIDs returns the "unit" edge IDs in the mutation.
+// WorkspaceIDs returns the "workspace" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// UnitID instead. It exists only for internal usage by the builders.
-func (m *AccountMutation) UnitIDs() (ids []int) {
-	if id := m.unit; id != nil {
+// WorkspaceID instead. It exists only for internal usage by the builders.
+func (m *AccountMutation) WorkspaceIDs() (ids []int) {
+	if id := m.workspace; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetUnit resets all changes to the "unit" edge.
-func (m *AccountMutation) ResetUnit() {
-	m.unit = nil
-	m.clearedunit = false
+// ResetWorkspace resets all changes to the "workspace" edge.
+func (m *AccountMutation) ResetWorkspace() {
+	m.workspace = nil
+	m.clearedworkspace = false
 }
 
 // SetParentID sets the "parent" edge to the Account entity by id.
@@ -1299,8 +1299,8 @@ func (m *AccountMutation) AddedEdges() []string {
 	if m.parish != nil {
 		edges = append(edges, account.EdgeParish)
 	}
-	if m.unit != nil {
-		edges = append(edges, account.EdgeUnit)
+	if m.workspace != nil {
+		edges = append(edges, account.EdgeWorkspace)
 	}
 	if m.parent != nil {
 		edges = append(edges, account.EdgeParent)
@@ -1330,8 +1330,8 @@ func (m *AccountMutation) AddedIDs(name string) []ent.Value {
 		if id := m.parish; id != nil {
 			return []ent.Value{*id}
 		}
-	case account.EdgeUnit:
-		if id := m.unit; id != nil {
+	case account.EdgeWorkspace:
+		if id := m.workspace; id != nil {
 			return []ent.Value{*id}
 		}
 	case account.EdgeParent:
@@ -1398,8 +1398,8 @@ func (m *AccountMutation) ClearedEdges() []string {
 	if m.clearedparish {
 		edges = append(edges, account.EdgeParish)
 	}
-	if m.clearedunit {
-		edges = append(edges, account.EdgeUnit)
+	if m.clearedworkspace {
+		edges = append(edges, account.EdgeWorkspace)
 	}
 	if m.clearedparent {
 		edges = append(edges, account.EdgeParent)
@@ -1423,8 +1423,8 @@ func (m *AccountMutation) EdgeCleared(name string) bool {
 		return m.clearedupdater
 	case account.EdgeParish:
 		return m.clearedparish
-	case account.EdgeUnit:
-		return m.clearedunit
+	case account.EdgeWorkspace:
+		return m.clearedworkspace
 	case account.EdgeParent:
 		return m.clearedparent
 	case account.EdgeChildren:
@@ -1448,8 +1448,8 @@ func (m *AccountMutation) ClearEdge(name string) error {
 	case account.EdgeParish:
 		m.ClearParish()
 		return nil
-	case account.EdgeUnit:
-		m.ClearUnit()
+	case account.EdgeWorkspace:
+		m.ClearWorkspace()
 		return nil
 	case account.EdgeParent:
 		m.ClearParent()
@@ -1471,8 +1471,8 @@ func (m *AccountMutation) ResetEdge(name string) error {
 	case account.EdgeParish:
 		m.ResetParish()
 		return nil
-	case account.EdgeUnit:
-		m.ResetUnit()
+	case account.EdgeWorkspace:
+		m.ResetWorkspace()
 		return nil
 	case account.EdgeParent:
 		m.ResetParent()
@@ -1490,32 +1490,32 @@ func (m *AccountMutation) ResetEdge(name string) error {
 // AttachmentMutation represents an operation that mutates the Attachment nodes in the graph.
 type AttachmentMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *uuid.UUID
-	createdAt      *time.Time
-	updatedAt      *time.Time
-	owner_type     *string
-	owner_id       *uuid.UUID
-	bucket         *string
-	object_key     *string
-	filename       *string
-	mime_type      *string
-	size           *int64
-	addsize        *int64
-	checksum       *string
-	clearedFields  map[string]struct{}
-	creator        *uuid.UUID
-	clearedcreator bool
-	updater        *uuid.UUID
-	clearedupdater bool
-	parish         *int
-	clearedparish  bool
-	unit           *int
-	clearedunit    bool
-	done           bool
-	oldValue       func(context.Context) (*Attachment, error)
-	predicates     []predicate.Attachment
+	op               Op
+	typ              string
+	id               *uuid.UUID
+	createdAt        *time.Time
+	updatedAt        *time.Time
+	owner_type       *string
+	owner_id         *uuid.UUID
+	bucket           *string
+	object_key       *string
+	filename         *string
+	mime_type        *string
+	size             *int64
+	addsize          *int64
+	checksum         *string
+	clearedFields    map[string]struct{}
+	creator          *uuid.UUID
+	clearedcreator   bool
+	updater          *uuid.UUID
+	clearedupdater   bool
+	parish           *int
+	clearedparish    bool
+	workspace        *int
+	clearedworkspace bool
+	done             bool
+	oldValue         func(context.Context) (*Attachment, error)
+	predicates       []predicate.Attachment
 }
 
 var _ ent.Mutation = (*AttachmentMutation)(nil)
@@ -2193,43 +2193,43 @@ func (m *AttachmentMutation) ResetParish() {
 	m.clearedparish = false
 }
 
-// SetUnitID sets the "unit" edge to the Unit entity by id.
-func (m *AttachmentMutation) SetUnitID(id int) {
-	m.unit = &id
+// SetWorkspaceID sets the "workspace" edge to the Workspace entity by id.
+func (m *AttachmentMutation) SetWorkspaceID(id int) {
+	m.workspace = &id
 }
 
-// ClearUnit clears the "unit" edge to the Unit entity.
-func (m *AttachmentMutation) ClearUnit() {
-	m.clearedunit = true
+// ClearWorkspace clears the "workspace" edge to the Workspace entity.
+func (m *AttachmentMutation) ClearWorkspace() {
+	m.clearedworkspace = true
 }
 
-// UnitCleared reports if the "unit" edge to the Unit entity was cleared.
-func (m *AttachmentMutation) UnitCleared() bool {
-	return m.clearedunit
+// WorkspaceCleared reports if the "workspace" edge to the Workspace entity was cleared.
+func (m *AttachmentMutation) WorkspaceCleared() bool {
+	return m.clearedworkspace
 }
 
-// UnitID returns the "unit" edge ID in the mutation.
-func (m *AttachmentMutation) UnitID() (id int, exists bool) {
-	if m.unit != nil {
-		return *m.unit, true
+// WorkspaceID returns the "workspace" edge ID in the mutation.
+func (m *AttachmentMutation) WorkspaceID() (id int, exists bool) {
+	if m.workspace != nil {
+		return *m.workspace, true
 	}
 	return
 }
 
-// UnitIDs returns the "unit" edge IDs in the mutation.
+// WorkspaceIDs returns the "workspace" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// UnitID instead. It exists only for internal usage by the builders.
-func (m *AttachmentMutation) UnitIDs() (ids []int) {
-	if id := m.unit; id != nil {
+// WorkspaceID instead. It exists only for internal usage by the builders.
+func (m *AttachmentMutation) WorkspaceIDs() (ids []int) {
+	if id := m.workspace; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetUnit resets all changes to the "unit" edge.
-func (m *AttachmentMutation) ResetUnit() {
-	m.unit = nil
-	m.clearedunit = false
+// ResetWorkspace resets all changes to the "workspace" edge.
+func (m *AttachmentMutation) ResetWorkspace() {
+	m.workspace = nil
+	m.clearedworkspace = false
 }
 
 // Where appends a list predicates to the AttachmentMutation builder.
@@ -2577,8 +2577,8 @@ func (m *AttachmentMutation) AddedEdges() []string {
 	if m.parish != nil {
 		edges = append(edges, attachment.EdgeParish)
 	}
-	if m.unit != nil {
-		edges = append(edges, attachment.EdgeUnit)
+	if m.workspace != nil {
+		edges = append(edges, attachment.EdgeWorkspace)
 	}
 	return edges
 }
@@ -2599,8 +2599,8 @@ func (m *AttachmentMutation) AddedIDs(name string) []ent.Value {
 		if id := m.parish; id != nil {
 			return []ent.Value{*id}
 		}
-	case attachment.EdgeUnit:
-		if id := m.unit; id != nil {
+	case attachment.EdgeWorkspace:
+		if id := m.workspace; id != nil {
 			return []ent.Value{*id}
 		}
 	}
@@ -2631,8 +2631,8 @@ func (m *AttachmentMutation) ClearedEdges() []string {
 	if m.clearedparish {
 		edges = append(edges, attachment.EdgeParish)
 	}
-	if m.clearedunit {
-		edges = append(edges, attachment.EdgeUnit)
+	if m.clearedworkspace {
+		edges = append(edges, attachment.EdgeWorkspace)
 	}
 	return edges
 }
@@ -2647,8 +2647,8 @@ func (m *AttachmentMutation) EdgeCleared(name string) bool {
 		return m.clearedupdater
 	case attachment.EdgeParish:
 		return m.clearedparish
-	case attachment.EdgeUnit:
-		return m.clearedunit
+	case attachment.EdgeWorkspace:
+		return m.clearedworkspace
 	}
 	return false
 }
@@ -2666,8 +2666,8 @@ func (m *AttachmentMutation) ClearEdge(name string) error {
 	case attachment.EdgeParish:
 		m.ClearParish()
 		return nil
-	case attachment.EdgeUnit:
-		m.ClearUnit()
+	case attachment.EdgeWorkspace:
+		m.ClearWorkspace()
 		return nil
 	}
 	return fmt.Errorf("unknown Attachment unique edge %s", name)
@@ -2686,8 +2686,8 @@ func (m *AttachmentMutation) ResetEdge(name string) error {
 	case attachment.EdgeParish:
 		m.ResetParish()
 		return nil
-	case attachment.EdgeUnit:
-		m.ResetUnit()
+	case attachment.EdgeWorkspace:
+		m.ResetWorkspace()
 		return nil
 	}
 	return fmt.Errorf("unknown Attachment edge %s", name)
@@ -5191,9 +5191,9 @@ type ParishMutation struct {
 	territories        map[int]struct{}
 	removedterritories map[int]struct{}
 	clearedterritories bool
-	units              map[int]struct{}
-	removedunits       map[int]struct{}
-	clearedunits       bool
+	workspaces         map[int]struct{}
+	removedworkspaces  map[int]struct{}
+	clearedworkspaces  bool
 	done               bool
 	oldValue           func(context.Context) (*Parish, error)
 	predicates         []predicate.Parish
@@ -5713,58 +5713,58 @@ func (m *ParishMutation) ResetTerritories() {
 	m.removedterritories = nil
 }
 
-// AddUnitIDs adds the "units" edge to the Unit entity by ids.
-func (m *ParishMutation) AddUnitIDs(ids ...int) {
-	if m.units == nil {
-		m.units = make(map[int]struct{})
+// AddWorkspaceIDs adds the "workspaces" edge to the Workspace entity by ids.
+func (m *ParishMutation) AddWorkspaceIDs(ids ...int) {
+	if m.workspaces == nil {
+		m.workspaces = make(map[int]struct{})
 	}
 	for i := range ids {
-		m.units[ids[i]] = struct{}{}
+		m.workspaces[ids[i]] = struct{}{}
 	}
 }
 
-// ClearUnits clears the "units" edge to the Unit entity.
-func (m *ParishMutation) ClearUnits() {
-	m.clearedunits = true
+// ClearWorkspaces clears the "workspaces" edge to the Workspace entity.
+func (m *ParishMutation) ClearWorkspaces() {
+	m.clearedworkspaces = true
 }
 
-// UnitsCleared reports if the "units" edge to the Unit entity was cleared.
-func (m *ParishMutation) UnitsCleared() bool {
-	return m.clearedunits
+// WorkspacesCleared reports if the "workspaces" edge to the Workspace entity was cleared.
+func (m *ParishMutation) WorkspacesCleared() bool {
+	return m.clearedworkspaces
 }
 
-// RemoveUnitIDs removes the "units" edge to the Unit entity by IDs.
-func (m *ParishMutation) RemoveUnitIDs(ids ...int) {
-	if m.removedunits == nil {
-		m.removedunits = make(map[int]struct{})
+// RemoveWorkspaceIDs removes the "workspaces" edge to the Workspace entity by IDs.
+func (m *ParishMutation) RemoveWorkspaceIDs(ids ...int) {
+	if m.removedworkspaces == nil {
+		m.removedworkspaces = make(map[int]struct{})
 	}
 	for i := range ids {
-		delete(m.units, ids[i])
-		m.removedunits[ids[i]] = struct{}{}
+		delete(m.workspaces, ids[i])
+		m.removedworkspaces[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedUnits returns the removed IDs of the "units" edge to the Unit entity.
-func (m *ParishMutation) RemovedUnitsIDs() (ids []int) {
-	for id := range m.removedunits {
+// RemovedWorkspaces returns the removed IDs of the "workspaces" edge to the Workspace entity.
+func (m *ParishMutation) RemovedWorkspacesIDs() (ids []int) {
+	for id := range m.removedworkspaces {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// UnitsIDs returns the "units" edge IDs in the mutation.
-func (m *ParishMutation) UnitsIDs() (ids []int) {
-	for id := range m.units {
+// WorkspacesIDs returns the "workspaces" edge IDs in the mutation.
+func (m *ParishMutation) WorkspacesIDs() (ids []int) {
+	for id := range m.workspaces {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetUnits resets all changes to the "units" edge.
-func (m *ParishMutation) ResetUnits() {
-	m.units = nil
-	m.clearedunits = false
-	m.removedunits = nil
+// ResetWorkspaces resets all changes to the "workspaces" edge.
+func (m *ParishMutation) ResetWorkspaces() {
+	m.workspaces = nil
+	m.clearedworkspaces = false
+	m.removedworkspaces = nil
 }
 
 // Where appends a list predicates to the ParishMutation builder.
@@ -6042,8 +6042,8 @@ func (m *ParishMutation) AddedEdges() []string {
 	if m.territories != nil {
 		edges = append(edges, parish.EdgeTerritories)
 	}
-	if m.units != nil {
-		edges = append(edges, parish.EdgeUnits)
+	if m.workspaces != nil {
+		edges = append(edges, parish.EdgeWorkspaces)
 	}
 	return edges
 }
@@ -6062,9 +6062,9 @@ func (m *ParishMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case parish.EdgeUnits:
-		ids := make([]ent.Value, 0, len(m.units))
-		for id := range m.units {
+	case parish.EdgeWorkspaces:
+		ids := make([]ent.Value, 0, len(m.workspaces))
+		for id := range m.workspaces {
 			ids = append(ids, id)
 		}
 		return ids
@@ -6078,8 +6078,8 @@ func (m *ParishMutation) RemovedEdges() []string {
 	if m.removedterritories != nil {
 		edges = append(edges, parish.EdgeTerritories)
 	}
-	if m.removedunits != nil {
-		edges = append(edges, parish.EdgeUnits)
+	if m.removedworkspaces != nil {
+		edges = append(edges, parish.EdgeWorkspaces)
 	}
 	return edges
 }
@@ -6094,9 +6094,9 @@ func (m *ParishMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case parish.EdgeUnits:
-		ids := make([]ent.Value, 0, len(m.removedunits))
-		for id := range m.removedunits {
+	case parish.EdgeWorkspaces:
+		ids := make([]ent.Value, 0, len(m.removedworkspaces))
+		for id := range m.removedworkspaces {
 			ids = append(ids, id)
 		}
 		return ids
@@ -6113,8 +6113,8 @@ func (m *ParishMutation) ClearedEdges() []string {
 	if m.clearedterritories {
 		edges = append(edges, parish.EdgeTerritories)
 	}
-	if m.clearedunits {
-		edges = append(edges, parish.EdgeUnits)
+	if m.clearedworkspaces {
+		edges = append(edges, parish.EdgeWorkspaces)
 	}
 	return edges
 }
@@ -6127,8 +6127,8 @@ func (m *ParishMutation) EdgeCleared(name string) bool {
 		return m.cleareddiocese
 	case parish.EdgeTerritories:
 		return m.clearedterritories
-	case parish.EdgeUnits:
-		return m.clearedunits
+	case parish.EdgeWorkspaces:
+		return m.clearedworkspaces
 	}
 	return false
 }
@@ -6154,8 +6154,8 @@ func (m *ParishMutation) ResetEdge(name string) error {
 	case parish.EdgeTerritories:
 		m.ResetTerritories()
 		return nil
-	case parish.EdgeUnits:
-		m.ResetUnits()
+	case parish.EdgeWorkspaces:
+		m.ResetWorkspaces()
 		return nil
 	}
 	return fmt.Errorf("unknown Parish edge %s", name)
@@ -7409,8 +7409,6 @@ type TerritoryMutation struct {
 	children        map[int]struct{}
 	removedchildren map[int]struct{}
 	clearedchildren bool
-	unit            *int
-	clearedunit     bool
 	done            bool
 	oldValue        func(context.Context) (*Territory, error)
 	predicates      []predicate.Territory
@@ -8131,45 +8129,6 @@ func (m *TerritoryMutation) ResetChildren() {
 	m.removedchildren = nil
 }
 
-// SetUnitID sets the "unit" edge to the Unit entity by id.
-func (m *TerritoryMutation) SetUnitID(id int) {
-	m.unit = &id
-}
-
-// ClearUnit clears the "unit" edge to the Unit entity.
-func (m *TerritoryMutation) ClearUnit() {
-	m.clearedunit = true
-}
-
-// UnitCleared reports if the "unit" edge to the Unit entity was cleared.
-func (m *TerritoryMutation) UnitCleared() bool {
-	return m.clearedunit
-}
-
-// UnitID returns the "unit" edge ID in the mutation.
-func (m *TerritoryMutation) UnitID() (id int, exists bool) {
-	if m.unit != nil {
-		return *m.unit, true
-	}
-	return
-}
-
-// UnitIDs returns the "unit" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// UnitID instead. It exists only for internal usage by the builders.
-func (m *TerritoryMutation) UnitIDs() (ids []int) {
-	if id := m.unit; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetUnit resets all changes to the "unit" edge.
-func (m *TerritoryMutation) ResetUnit() {
-	m.unit = nil
-	m.clearedunit = false
-}
-
 // Where appends a list predicates to the TerritoryMutation builder.
 func (m *TerritoryMutation) Where(ps ...predicate.Territory) {
 	m.predicates = append(m.predicates, ps...)
@@ -8477,7 +8436,7 @@ func (m *TerritoryMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TerritoryMutation) AddedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 5)
 	if m.creator != nil {
 		edges = append(edges, territory.EdgeCreator)
 	}
@@ -8492,9 +8451,6 @@ func (m *TerritoryMutation) AddedEdges() []string {
 	}
 	if m.children != nil {
 		edges = append(edges, territory.EdgeChildren)
-	}
-	if m.unit != nil {
-		edges = append(edges, territory.EdgeUnit)
 	}
 	return edges
 }
@@ -8525,17 +8481,13 @@ func (m *TerritoryMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case territory.EdgeUnit:
-		if id := m.unit; id != nil {
-			return []ent.Value{*id}
-		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TerritoryMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 5)
 	if m.removedchildren != nil {
 		edges = append(edges, territory.EdgeChildren)
 	}
@@ -8558,7 +8510,7 @@ func (m *TerritoryMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TerritoryMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 5)
 	if m.clearedcreator {
 		edges = append(edges, territory.EdgeCreator)
 	}
@@ -8573,9 +8525,6 @@ func (m *TerritoryMutation) ClearedEdges() []string {
 	}
 	if m.clearedchildren {
 		edges = append(edges, territory.EdgeChildren)
-	}
-	if m.clearedunit {
-		edges = append(edges, territory.EdgeUnit)
 	}
 	return edges
 }
@@ -8594,8 +8543,6 @@ func (m *TerritoryMutation) EdgeCleared(name string) bool {
 		return m.clearedparent
 	case territory.EdgeChildren:
 		return m.clearedchildren
-	case territory.EdgeUnit:
-		return m.clearedunit
 	}
 	return false
 }
@@ -8615,9 +8562,6 @@ func (m *TerritoryMutation) ClearEdge(name string) error {
 		return nil
 	case territory.EdgeParent:
 		m.ClearParent()
-		return nil
-	case territory.EdgeUnit:
-		m.ClearUnit()
 		return nil
 	}
 	return fmt.Errorf("unknown Territory unique edge %s", name)
@@ -8642,9 +8586,6 @@ func (m *TerritoryMutation) ResetEdge(name string) error {
 	case territory.EdgeChildren:
 		m.ResetChildren()
 		return nil
-	case territory.EdgeUnit:
-		m.ResetUnit()
-		return nil
 	}
 	return fmt.Errorf("unknown Territory edge %s", name)
 }
@@ -8652,32 +8593,32 @@ func (m *TerritoryMutation) ResetEdge(name string) error {
 // TransactionMutation represents an operation that mutates the Transaction nodes in the graph.
 type TransactionMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *uuid.UUID
-	createdAt      *time.Time
-	updatedAt      *time.Time
-	deletedAt      *time.Time
-	number         *string
-	date           *time.Time
-	kind           *transaction.Kind
-	description    *string
-	status         *transaction.Status
-	clearedFields  map[string]struct{}
-	creator        *uuid.UUID
-	clearedcreator bool
-	updater        *uuid.UUID
-	clearedupdater bool
-	parish         *int
-	clearedparish  bool
-	unit           *int
-	clearedunit    bool
-	entries        map[uuid.UUID]struct{}
-	removedentries map[uuid.UUID]struct{}
-	clearedentries bool
-	done           bool
-	oldValue       func(context.Context) (*Transaction, error)
-	predicates     []predicate.Transaction
+	op               Op
+	typ              string
+	id               *uuid.UUID
+	createdAt        *time.Time
+	updatedAt        *time.Time
+	deletedAt        *time.Time
+	number           *string
+	date             *time.Time
+	kind             *transaction.Kind
+	description      *string
+	status           *transaction.Status
+	clearedFields    map[string]struct{}
+	creator          *uuid.UUID
+	clearedcreator   bool
+	updater          *uuid.UUID
+	clearedupdater   bool
+	parish           *int
+	clearedparish    bool
+	workspace        *int
+	clearedworkspace bool
+	entries          map[uuid.UUID]struct{}
+	removedentries   map[uuid.UUID]struct{}
+	clearedentries   bool
+	done             bool
+	oldValue         func(context.Context) (*Transaction, error)
+	predicates       []predicate.Transaction
 }
 
 var _ ent.Mutation = (*TransactionMutation)(nil)
@@ -9289,43 +9230,43 @@ func (m *TransactionMutation) ResetParish() {
 	m.clearedparish = false
 }
 
-// SetUnitID sets the "unit" edge to the Unit entity by id.
-func (m *TransactionMutation) SetUnitID(id int) {
-	m.unit = &id
+// SetWorkspaceID sets the "workspace" edge to the Workspace entity by id.
+func (m *TransactionMutation) SetWorkspaceID(id int) {
+	m.workspace = &id
 }
 
-// ClearUnit clears the "unit" edge to the Unit entity.
-func (m *TransactionMutation) ClearUnit() {
-	m.clearedunit = true
+// ClearWorkspace clears the "workspace" edge to the Workspace entity.
+func (m *TransactionMutation) ClearWorkspace() {
+	m.clearedworkspace = true
 }
 
-// UnitCleared reports if the "unit" edge to the Unit entity was cleared.
-func (m *TransactionMutation) UnitCleared() bool {
-	return m.clearedunit
+// WorkspaceCleared reports if the "workspace" edge to the Workspace entity was cleared.
+func (m *TransactionMutation) WorkspaceCleared() bool {
+	return m.clearedworkspace
 }
 
-// UnitID returns the "unit" edge ID in the mutation.
-func (m *TransactionMutation) UnitID() (id int, exists bool) {
-	if m.unit != nil {
-		return *m.unit, true
+// WorkspaceID returns the "workspace" edge ID in the mutation.
+func (m *TransactionMutation) WorkspaceID() (id int, exists bool) {
+	if m.workspace != nil {
+		return *m.workspace, true
 	}
 	return
 }
 
-// UnitIDs returns the "unit" edge IDs in the mutation.
+// WorkspaceIDs returns the "workspace" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// UnitID instead. It exists only for internal usage by the builders.
-func (m *TransactionMutation) UnitIDs() (ids []int) {
-	if id := m.unit; id != nil {
+// WorkspaceID instead. It exists only for internal usage by the builders.
+func (m *TransactionMutation) WorkspaceIDs() (ids []int) {
+	if id := m.workspace; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetUnit resets all changes to the "unit" edge.
-func (m *TransactionMutation) ResetUnit() {
-	m.unit = nil
-	m.clearedunit = false
+// ResetWorkspace resets all changes to the "workspace" edge.
+func (m *TransactionMutation) ResetWorkspace() {
+	m.workspace = nil
+	m.clearedworkspace = false
 }
 
 // AddEntryIDs adds the "entries" edge to the Entry entity by ids.
@@ -9693,8 +9634,8 @@ func (m *TransactionMutation) AddedEdges() []string {
 	if m.parish != nil {
 		edges = append(edges, transaction.EdgeParish)
 	}
-	if m.unit != nil {
-		edges = append(edges, transaction.EdgeUnit)
+	if m.workspace != nil {
+		edges = append(edges, transaction.EdgeWorkspace)
 	}
 	if m.entries != nil {
 		edges = append(edges, transaction.EdgeEntries)
@@ -9718,8 +9659,8 @@ func (m *TransactionMutation) AddedIDs(name string) []ent.Value {
 		if id := m.parish; id != nil {
 			return []ent.Value{*id}
 		}
-	case transaction.EdgeUnit:
-		if id := m.unit; id != nil {
+	case transaction.EdgeWorkspace:
+		if id := m.workspace; id != nil {
 			return []ent.Value{*id}
 		}
 	case transaction.EdgeEntries:
@@ -9767,8 +9708,8 @@ func (m *TransactionMutation) ClearedEdges() []string {
 	if m.clearedparish {
 		edges = append(edges, transaction.EdgeParish)
 	}
-	if m.clearedunit {
-		edges = append(edges, transaction.EdgeUnit)
+	if m.clearedworkspace {
+		edges = append(edges, transaction.EdgeWorkspace)
 	}
 	if m.clearedentries {
 		edges = append(edges, transaction.EdgeEntries)
@@ -9786,8 +9727,8 @@ func (m *TransactionMutation) EdgeCleared(name string) bool {
 		return m.clearedupdater
 	case transaction.EdgeParish:
 		return m.clearedparish
-	case transaction.EdgeUnit:
-		return m.clearedunit
+	case transaction.EdgeWorkspace:
+		return m.clearedworkspace
 	case transaction.EdgeEntries:
 		return m.clearedentries
 	}
@@ -9807,8 +9748,8 @@ func (m *TransactionMutation) ClearEdge(name string) error {
 	case transaction.EdgeParish:
 		m.ClearParish()
 		return nil
-	case transaction.EdgeUnit:
-		m.ClearUnit()
+	case transaction.EdgeWorkspace:
+		m.ClearWorkspace()
 		return nil
 	}
 	return fmt.Errorf("unknown Transaction unique edge %s", name)
@@ -9827,1280 +9768,14 @@ func (m *TransactionMutation) ResetEdge(name string) error {
 	case transaction.EdgeParish:
 		m.ResetParish()
 		return nil
-	case transaction.EdgeUnit:
-		m.ResetUnit()
+	case transaction.EdgeWorkspace:
+		m.ResetWorkspace()
 		return nil
 	case transaction.EdgeEntries:
 		m.ResetEntries()
 		return nil
 	}
 	return fmt.Errorf("unknown Transaction edge %s", name)
-}
-
-// UnitMutation represents an operation that mutates the Unit nodes in the graph.
-type UnitMutation struct {
-	config
-	op               Op
-	typ              string
-	id               *int
-	createdAt        *time.Time
-	updatedAt        *time.Time
-	deletedAt        *time.Time
-	name             *string
-	code             *string
-	kind             *unit.Kind
-	description      *string
-	status           *unit.Status
-	clearedFields    map[string]struct{}
-	creator          *uuid.UUID
-	clearedcreator   bool
-	updater          *uuid.UUID
-	clearedupdater   bool
-	parish           *int
-	clearedparish    bool
-	parent           *int
-	clearedparent    bool
-	children         map[int]struct{}
-	removedchildren  map[int]struct{}
-	clearedchildren  bool
-	territory        *int
-	clearedterritory bool
-	done             bool
-	oldValue         func(context.Context) (*Unit, error)
-	predicates       []predicate.Unit
-}
-
-var _ ent.Mutation = (*UnitMutation)(nil)
-
-// unitOption allows management of the mutation configuration using functional options.
-type unitOption func(*UnitMutation)
-
-// newUnitMutation creates new mutation for the Unit entity.
-func newUnitMutation(c config, op Op, opts ...unitOption) *UnitMutation {
-	m := &UnitMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeUnit,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withUnitID sets the ID field of the mutation.
-func withUnitID(id int) unitOption {
-	return func(m *UnitMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *Unit
-		)
-		m.oldValue = func(ctx context.Context) (*Unit, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().Unit.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withUnit sets the old Unit of the mutation.
-func withUnit(node *Unit) unitOption {
-	return func(m *UnitMutation) {
-		m.oldValue = func(context.Context) (*Unit, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m UnitMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m UnitMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of Unit entities.
-func (m *UnitMutation) SetID(id int) {
-	m.id = &id
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *UnitMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *UnitMutation) IDs(ctx context.Context) ([]int, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []int{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().Unit.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetCreatedBy sets the "createdBy" field.
-func (m *UnitMutation) SetCreatedBy(u uuid.UUID) {
-	m.creator = &u
-}
-
-// CreatedBy returns the value of the "createdBy" field in the mutation.
-func (m *UnitMutation) CreatedBy() (r uuid.UUID, exists bool) {
-	v := m.creator
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedBy returns the old "createdBy" field's value of the Unit entity.
-// If the Unit object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UnitMutation) OldCreatedBy(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedBy is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedBy requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedBy: %w", err)
-	}
-	return oldValue.CreatedBy, nil
-}
-
-// ResetCreatedBy resets all changes to the "createdBy" field.
-func (m *UnitMutation) ResetCreatedBy() {
-	m.creator = nil
-}
-
-// SetCreatedAt sets the "createdAt" field.
-func (m *UnitMutation) SetCreatedAt(t time.Time) {
-	m.createdAt = &t
-}
-
-// CreatedAt returns the value of the "createdAt" field in the mutation.
-func (m *UnitMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.createdAt
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "createdAt" field's value of the Unit entity.
-// If the Unit object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UnitMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "createdAt" field.
-func (m *UnitMutation) ResetCreatedAt() {
-	m.createdAt = nil
-}
-
-// SetUpdatedBy sets the "updatedBy" field.
-func (m *UnitMutation) SetUpdatedBy(u uuid.UUID) {
-	m.updater = &u
-}
-
-// UpdatedBy returns the value of the "updatedBy" field in the mutation.
-func (m *UnitMutation) UpdatedBy() (r uuid.UUID, exists bool) {
-	v := m.updater
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedBy returns the old "updatedBy" field's value of the Unit entity.
-// If the Unit object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UnitMutation) OldUpdatedBy(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedBy is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedBy requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedBy: %w", err)
-	}
-	return oldValue.UpdatedBy, nil
-}
-
-// ResetUpdatedBy resets all changes to the "updatedBy" field.
-func (m *UnitMutation) ResetUpdatedBy() {
-	m.updater = nil
-}
-
-// SetUpdatedAt sets the "updatedAt" field.
-func (m *UnitMutation) SetUpdatedAt(t time.Time) {
-	m.updatedAt = &t
-}
-
-// UpdatedAt returns the value of the "updatedAt" field in the mutation.
-func (m *UnitMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updatedAt
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updatedAt" field's value of the Unit entity.
-// If the Unit object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UnitMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updatedAt" field.
-func (m *UnitMutation) ResetUpdatedAt() {
-	m.updatedAt = nil
-}
-
-// SetDeletedAt sets the "deletedAt" field.
-func (m *UnitMutation) SetDeletedAt(t time.Time) {
-	m.deletedAt = &t
-}
-
-// DeletedAt returns the value of the "deletedAt" field in the mutation.
-func (m *UnitMutation) DeletedAt() (r time.Time, exists bool) {
-	v := m.deletedAt
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDeletedAt returns the old "deletedAt" field's value of the Unit entity.
-// If the Unit object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UnitMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
-	}
-	return oldValue.DeletedAt, nil
-}
-
-// ClearDeletedAt clears the value of the "deletedAt" field.
-func (m *UnitMutation) ClearDeletedAt() {
-	m.deletedAt = nil
-	m.clearedFields[unit.FieldDeletedAt] = struct{}{}
-}
-
-// DeletedAtCleared returns if the "deletedAt" field was cleared in this mutation.
-func (m *UnitMutation) DeletedAtCleared() bool {
-	_, ok := m.clearedFields[unit.FieldDeletedAt]
-	return ok
-}
-
-// ResetDeletedAt resets all changes to the "deletedAt" field.
-func (m *UnitMutation) ResetDeletedAt() {
-	m.deletedAt = nil
-	delete(m.clearedFields, unit.FieldDeletedAt)
-}
-
-// SetName sets the "name" field.
-func (m *UnitMutation) SetName(s string) {
-	m.name = &s
-}
-
-// Name returns the value of the "name" field in the mutation.
-func (m *UnitMutation) Name() (r string, exists bool) {
-	v := m.name
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldName returns the old "name" field's value of the Unit entity.
-// If the Unit object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UnitMutation) OldName(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldName is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldName requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldName: %w", err)
-	}
-	return oldValue.Name, nil
-}
-
-// ResetName resets all changes to the "name" field.
-func (m *UnitMutation) ResetName() {
-	m.name = nil
-}
-
-// SetCode sets the "code" field.
-func (m *UnitMutation) SetCode(s string) {
-	m.code = &s
-}
-
-// Code returns the value of the "code" field in the mutation.
-func (m *UnitMutation) Code() (r string, exists bool) {
-	v := m.code
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCode returns the old "code" field's value of the Unit entity.
-// If the Unit object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UnitMutation) OldCode(ctx context.Context) (v *string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCode is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCode requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCode: %w", err)
-	}
-	return oldValue.Code, nil
-}
-
-// ClearCode clears the value of the "code" field.
-func (m *UnitMutation) ClearCode() {
-	m.code = nil
-	m.clearedFields[unit.FieldCode] = struct{}{}
-}
-
-// CodeCleared returns if the "code" field was cleared in this mutation.
-func (m *UnitMutation) CodeCleared() bool {
-	_, ok := m.clearedFields[unit.FieldCode]
-	return ok
-}
-
-// ResetCode resets all changes to the "code" field.
-func (m *UnitMutation) ResetCode() {
-	m.code = nil
-	delete(m.clearedFields, unit.FieldCode)
-}
-
-// SetKind sets the "kind" field.
-func (m *UnitMutation) SetKind(u unit.Kind) {
-	m.kind = &u
-}
-
-// Kind returns the value of the "kind" field in the mutation.
-func (m *UnitMutation) Kind() (r unit.Kind, exists bool) {
-	v := m.kind
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldKind returns the old "kind" field's value of the Unit entity.
-// If the Unit object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UnitMutation) OldKind(ctx context.Context) (v unit.Kind, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldKind is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldKind requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldKind: %w", err)
-	}
-	return oldValue.Kind, nil
-}
-
-// ResetKind resets all changes to the "kind" field.
-func (m *UnitMutation) ResetKind() {
-	m.kind = nil
-}
-
-// SetDescription sets the "description" field.
-func (m *UnitMutation) SetDescription(s string) {
-	m.description = &s
-}
-
-// Description returns the value of the "description" field in the mutation.
-func (m *UnitMutation) Description() (r string, exists bool) {
-	v := m.description
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDescription returns the old "description" field's value of the Unit entity.
-// If the Unit object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UnitMutation) OldDescription(ctx context.Context) (v *string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDescription requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
-	}
-	return oldValue.Description, nil
-}
-
-// ClearDescription clears the value of the "description" field.
-func (m *UnitMutation) ClearDescription() {
-	m.description = nil
-	m.clearedFields[unit.FieldDescription] = struct{}{}
-}
-
-// DescriptionCleared returns if the "description" field was cleared in this mutation.
-func (m *UnitMutation) DescriptionCleared() bool {
-	_, ok := m.clearedFields[unit.FieldDescription]
-	return ok
-}
-
-// ResetDescription resets all changes to the "description" field.
-func (m *UnitMutation) ResetDescription() {
-	m.description = nil
-	delete(m.clearedFields, unit.FieldDescription)
-}
-
-// SetStatus sets the "status" field.
-func (m *UnitMutation) SetStatus(u unit.Status) {
-	m.status = &u
-}
-
-// Status returns the value of the "status" field in the mutation.
-func (m *UnitMutation) Status() (r unit.Status, exists bool) {
-	v := m.status
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldStatus returns the old "status" field's value of the Unit entity.
-// If the Unit object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UnitMutation) OldStatus(ctx context.Context) (v unit.Status, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldStatus requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
-	}
-	return oldValue.Status, nil
-}
-
-// ResetStatus resets all changes to the "status" field.
-func (m *UnitMutation) ResetStatus() {
-	m.status = nil
-}
-
-// SetCreatorID sets the "creator" edge to the User entity by id.
-func (m *UnitMutation) SetCreatorID(id uuid.UUID) {
-	m.creator = &id
-}
-
-// ClearCreator clears the "creator" edge to the User entity.
-func (m *UnitMutation) ClearCreator() {
-	m.clearedcreator = true
-	m.clearedFields[unit.FieldCreatedBy] = struct{}{}
-}
-
-// CreatorCleared reports if the "creator" edge to the User entity was cleared.
-func (m *UnitMutation) CreatorCleared() bool {
-	return m.clearedcreator
-}
-
-// CreatorID returns the "creator" edge ID in the mutation.
-func (m *UnitMutation) CreatorID() (id uuid.UUID, exists bool) {
-	if m.creator != nil {
-		return *m.creator, true
-	}
-	return
-}
-
-// CreatorIDs returns the "creator" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// CreatorID instead. It exists only for internal usage by the builders.
-func (m *UnitMutation) CreatorIDs() (ids []uuid.UUID) {
-	if id := m.creator; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetCreator resets all changes to the "creator" edge.
-func (m *UnitMutation) ResetCreator() {
-	m.creator = nil
-	m.clearedcreator = false
-}
-
-// SetUpdaterID sets the "updater" edge to the User entity by id.
-func (m *UnitMutation) SetUpdaterID(id uuid.UUID) {
-	m.updater = &id
-}
-
-// ClearUpdater clears the "updater" edge to the User entity.
-func (m *UnitMutation) ClearUpdater() {
-	m.clearedupdater = true
-	m.clearedFields[unit.FieldUpdatedBy] = struct{}{}
-}
-
-// UpdaterCleared reports if the "updater" edge to the User entity was cleared.
-func (m *UnitMutation) UpdaterCleared() bool {
-	return m.clearedupdater
-}
-
-// UpdaterID returns the "updater" edge ID in the mutation.
-func (m *UnitMutation) UpdaterID() (id uuid.UUID, exists bool) {
-	if m.updater != nil {
-		return *m.updater, true
-	}
-	return
-}
-
-// UpdaterIDs returns the "updater" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// UpdaterID instead. It exists only for internal usage by the builders.
-func (m *UnitMutation) UpdaterIDs() (ids []uuid.UUID) {
-	if id := m.updater; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetUpdater resets all changes to the "updater" edge.
-func (m *UnitMutation) ResetUpdater() {
-	m.updater = nil
-	m.clearedupdater = false
-}
-
-// SetParishID sets the "parish" edge to the Parish entity by id.
-func (m *UnitMutation) SetParishID(id int) {
-	m.parish = &id
-}
-
-// ClearParish clears the "parish" edge to the Parish entity.
-func (m *UnitMutation) ClearParish() {
-	m.clearedparish = true
-}
-
-// ParishCleared reports if the "parish" edge to the Parish entity was cleared.
-func (m *UnitMutation) ParishCleared() bool {
-	return m.clearedparish
-}
-
-// ParishID returns the "parish" edge ID in the mutation.
-func (m *UnitMutation) ParishID() (id int, exists bool) {
-	if m.parish != nil {
-		return *m.parish, true
-	}
-	return
-}
-
-// ParishIDs returns the "parish" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// ParishID instead. It exists only for internal usage by the builders.
-func (m *UnitMutation) ParishIDs() (ids []int) {
-	if id := m.parish; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetParish resets all changes to the "parish" edge.
-func (m *UnitMutation) ResetParish() {
-	m.parish = nil
-	m.clearedparish = false
-}
-
-// SetParentID sets the "parent" edge to the Unit entity by id.
-func (m *UnitMutation) SetParentID(id int) {
-	m.parent = &id
-}
-
-// ClearParent clears the "parent" edge to the Unit entity.
-func (m *UnitMutation) ClearParent() {
-	m.clearedparent = true
-}
-
-// ParentCleared reports if the "parent" edge to the Unit entity was cleared.
-func (m *UnitMutation) ParentCleared() bool {
-	return m.clearedparent
-}
-
-// ParentID returns the "parent" edge ID in the mutation.
-func (m *UnitMutation) ParentID() (id int, exists bool) {
-	if m.parent != nil {
-		return *m.parent, true
-	}
-	return
-}
-
-// ParentIDs returns the "parent" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// ParentID instead. It exists only for internal usage by the builders.
-func (m *UnitMutation) ParentIDs() (ids []int) {
-	if id := m.parent; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetParent resets all changes to the "parent" edge.
-func (m *UnitMutation) ResetParent() {
-	m.parent = nil
-	m.clearedparent = false
-}
-
-// AddChildIDs adds the "children" edge to the Unit entity by ids.
-func (m *UnitMutation) AddChildIDs(ids ...int) {
-	if m.children == nil {
-		m.children = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.children[ids[i]] = struct{}{}
-	}
-}
-
-// ClearChildren clears the "children" edge to the Unit entity.
-func (m *UnitMutation) ClearChildren() {
-	m.clearedchildren = true
-}
-
-// ChildrenCleared reports if the "children" edge to the Unit entity was cleared.
-func (m *UnitMutation) ChildrenCleared() bool {
-	return m.clearedchildren
-}
-
-// RemoveChildIDs removes the "children" edge to the Unit entity by IDs.
-func (m *UnitMutation) RemoveChildIDs(ids ...int) {
-	if m.removedchildren == nil {
-		m.removedchildren = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.children, ids[i])
-		m.removedchildren[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedChildren returns the removed IDs of the "children" edge to the Unit entity.
-func (m *UnitMutation) RemovedChildrenIDs() (ids []int) {
-	for id := range m.removedchildren {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ChildrenIDs returns the "children" edge IDs in the mutation.
-func (m *UnitMutation) ChildrenIDs() (ids []int) {
-	for id := range m.children {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetChildren resets all changes to the "children" edge.
-func (m *UnitMutation) ResetChildren() {
-	m.children = nil
-	m.clearedchildren = false
-	m.removedchildren = nil
-}
-
-// SetTerritoryID sets the "territory" edge to the Territory entity by id.
-func (m *UnitMutation) SetTerritoryID(id int) {
-	m.territory = &id
-}
-
-// ClearTerritory clears the "territory" edge to the Territory entity.
-func (m *UnitMutation) ClearTerritory() {
-	m.clearedterritory = true
-}
-
-// TerritoryCleared reports if the "territory" edge to the Territory entity was cleared.
-func (m *UnitMutation) TerritoryCleared() bool {
-	return m.clearedterritory
-}
-
-// TerritoryID returns the "territory" edge ID in the mutation.
-func (m *UnitMutation) TerritoryID() (id int, exists bool) {
-	if m.territory != nil {
-		return *m.territory, true
-	}
-	return
-}
-
-// TerritoryIDs returns the "territory" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// TerritoryID instead. It exists only for internal usage by the builders.
-func (m *UnitMutation) TerritoryIDs() (ids []int) {
-	if id := m.territory; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetTerritory resets all changes to the "territory" edge.
-func (m *UnitMutation) ResetTerritory() {
-	m.territory = nil
-	m.clearedterritory = false
-}
-
-// Where appends a list predicates to the UnitMutation builder.
-func (m *UnitMutation) Where(ps ...predicate.Unit) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the UnitMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *UnitMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.Unit, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *UnitMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *UnitMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (Unit).
-func (m *UnitMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *UnitMutation) Fields() []string {
-	fields := make([]string, 0, 10)
-	if m.creator != nil {
-		fields = append(fields, unit.FieldCreatedBy)
-	}
-	if m.createdAt != nil {
-		fields = append(fields, unit.FieldCreatedAt)
-	}
-	if m.updater != nil {
-		fields = append(fields, unit.FieldUpdatedBy)
-	}
-	if m.updatedAt != nil {
-		fields = append(fields, unit.FieldUpdatedAt)
-	}
-	if m.deletedAt != nil {
-		fields = append(fields, unit.FieldDeletedAt)
-	}
-	if m.name != nil {
-		fields = append(fields, unit.FieldName)
-	}
-	if m.code != nil {
-		fields = append(fields, unit.FieldCode)
-	}
-	if m.kind != nil {
-		fields = append(fields, unit.FieldKind)
-	}
-	if m.description != nil {
-		fields = append(fields, unit.FieldDescription)
-	}
-	if m.status != nil {
-		fields = append(fields, unit.FieldStatus)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *UnitMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case unit.FieldCreatedBy:
-		return m.CreatedBy()
-	case unit.FieldCreatedAt:
-		return m.CreatedAt()
-	case unit.FieldUpdatedBy:
-		return m.UpdatedBy()
-	case unit.FieldUpdatedAt:
-		return m.UpdatedAt()
-	case unit.FieldDeletedAt:
-		return m.DeletedAt()
-	case unit.FieldName:
-		return m.Name()
-	case unit.FieldCode:
-		return m.Code()
-	case unit.FieldKind:
-		return m.Kind()
-	case unit.FieldDescription:
-		return m.Description()
-	case unit.FieldStatus:
-		return m.Status()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *UnitMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case unit.FieldCreatedBy:
-		return m.OldCreatedBy(ctx)
-	case unit.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case unit.FieldUpdatedBy:
-		return m.OldUpdatedBy(ctx)
-	case unit.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
-	case unit.FieldDeletedAt:
-		return m.OldDeletedAt(ctx)
-	case unit.FieldName:
-		return m.OldName(ctx)
-	case unit.FieldCode:
-		return m.OldCode(ctx)
-	case unit.FieldKind:
-		return m.OldKind(ctx)
-	case unit.FieldDescription:
-		return m.OldDescription(ctx)
-	case unit.FieldStatus:
-		return m.OldStatus(ctx)
-	}
-	return nil, fmt.Errorf("unknown Unit field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *UnitMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case unit.FieldCreatedBy:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedBy(v)
-		return nil
-	case unit.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case unit.FieldUpdatedBy:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedBy(v)
-		return nil
-	case unit.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
-	case unit.FieldDeletedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDeletedAt(v)
-		return nil
-	case unit.FieldName:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetName(v)
-		return nil
-	case unit.FieldCode:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCode(v)
-		return nil
-	case unit.FieldKind:
-		v, ok := value.(unit.Kind)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetKind(v)
-		return nil
-	case unit.FieldDescription:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDescription(v)
-		return nil
-	case unit.FieldStatus:
-		v, ok := value.(unit.Status)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetStatus(v)
-		return nil
-	}
-	return fmt.Errorf("unknown Unit field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *UnitMutation) AddedFields() []string {
-	return nil
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *UnitMutation) AddedField(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *UnitMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown Unit numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *UnitMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(unit.FieldDeletedAt) {
-		fields = append(fields, unit.FieldDeletedAt)
-	}
-	if m.FieldCleared(unit.FieldCode) {
-		fields = append(fields, unit.FieldCode)
-	}
-	if m.FieldCleared(unit.FieldDescription) {
-		fields = append(fields, unit.FieldDescription)
-	}
-	return fields
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *UnitMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *UnitMutation) ClearField(name string) error {
-	switch name {
-	case unit.FieldDeletedAt:
-		m.ClearDeletedAt()
-		return nil
-	case unit.FieldCode:
-		m.ClearCode()
-		return nil
-	case unit.FieldDescription:
-		m.ClearDescription()
-		return nil
-	}
-	return fmt.Errorf("unknown Unit nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *UnitMutation) ResetField(name string) error {
-	switch name {
-	case unit.FieldCreatedBy:
-		m.ResetCreatedBy()
-		return nil
-	case unit.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case unit.FieldUpdatedBy:
-		m.ResetUpdatedBy()
-		return nil
-	case unit.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
-	case unit.FieldDeletedAt:
-		m.ResetDeletedAt()
-		return nil
-	case unit.FieldName:
-		m.ResetName()
-		return nil
-	case unit.FieldCode:
-		m.ResetCode()
-		return nil
-	case unit.FieldKind:
-		m.ResetKind()
-		return nil
-	case unit.FieldDescription:
-		m.ResetDescription()
-		return nil
-	case unit.FieldStatus:
-		m.ResetStatus()
-		return nil
-	}
-	return fmt.Errorf("unknown Unit field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *UnitMutation) AddedEdges() []string {
-	edges := make([]string, 0, 6)
-	if m.creator != nil {
-		edges = append(edges, unit.EdgeCreator)
-	}
-	if m.updater != nil {
-		edges = append(edges, unit.EdgeUpdater)
-	}
-	if m.parish != nil {
-		edges = append(edges, unit.EdgeParish)
-	}
-	if m.parent != nil {
-		edges = append(edges, unit.EdgeParent)
-	}
-	if m.children != nil {
-		edges = append(edges, unit.EdgeChildren)
-	}
-	if m.territory != nil {
-		edges = append(edges, unit.EdgeTerritory)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *UnitMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case unit.EdgeCreator:
-		if id := m.creator; id != nil {
-			return []ent.Value{*id}
-		}
-	case unit.EdgeUpdater:
-		if id := m.updater; id != nil {
-			return []ent.Value{*id}
-		}
-	case unit.EdgeParish:
-		if id := m.parish; id != nil {
-			return []ent.Value{*id}
-		}
-	case unit.EdgeParent:
-		if id := m.parent; id != nil {
-			return []ent.Value{*id}
-		}
-	case unit.EdgeChildren:
-		ids := make([]ent.Value, 0, len(m.children))
-		for id := range m.children {
-			ids = append(ids, id)
-		}
-		return ids
-	case unit.EdgeTerritory:
-		if id := m.territory; id != nil {
-			return []ent.Value{*id}
-		}
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *UnitMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 6)
-	if m.removedchildren != nil {
-		edges = append(edges, unit.EdgeChildren)
-	}
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *UnitMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case unit.EdgeChildren:
-		ids := make([]ent.Value, 0, len(m.removedchildren))
-		for id := range m.removedchildren {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *UnitMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 6)
-	if m.clearedcreator {
-		edges = append(edges, unit.EdgeCreator)
-	}
-	if m.clearedupdater {
-		edges = append(edges, unit.EdgeUpdater)
-	}
-	if m.clearedparish {
-		edges = append(edges, unit.EdgeParish)
-	}
-	if m.clearedparent {
-		edges = append(edges, unit.EdgeParent)
-	}
-	if m.clearedchildren {
-		edges = append(edges, unit.EdgeChildren)
-	}
-	if m.clearedterritory {
-		edges = append(edges, unit.EdgeTerritory)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *UnitMutation) EdgeCleared(name string) bool {
-	switch name {
-	case unit.EdgeCreator:
-		return m.clearedcreator
-	case unit.EdgeUpdater:
-		return m.clearedupdater
-	case unit.EdgeParish:
-		return m.clearedparish
-	case unit.EdgeParent:
-		return m.clearedparent
-	case unit.EdgeChildren:
-		return m.clearedchildren
-	case unit.EdgeTerritory:
-		return m.clearedterritory
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *UnitMutation) ClearEdge(name string) error {
-	switch name {
-	case unit.EdgeCreator:
-		m.ClearCreator()
-		return nil
-	case unit.EdgeUpdater:
-		m.ClearUpdater()
-		return nil
-	case unit.EdgeParish:
-		m.ClearParish()
-		return nil
-	case unit.EdgeParent:
-		m.ClearParent()
-		return nil
-	case unit.EdgeTerritory:
-		m.ClearTerritory()
-		return nil
-	}
-	return fmt.Errorf("unknown Unit unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *UnitMutation) ResetEdge(name string) error {
-	switch name {
-	case unit.EdgeCreator:
-		m.ResetCreator()
-		return nil
-	case unit.EdgeUpdater:
-		m.ResetUpdater()
-		return nil
-	case unit.EdgeParish:
-		m.ResetParish()
-		return nil
-	case unit.EdgeParent:
-		m.ResetParent()
-		return nil
-	case unit.EdgeChildren:
-		m.ResetChildren()
-		return nil
-	case unit.EdgeTerritory:
-		m.ResetTerritory()
-		return nil
-	}
-	return fmt.Errorf("unknown Unit edge %s", name)
 }
 
 // UserMutation represents an operation that mutates the User nodes in the graph.
@@ -11636,4 +10311,940 @@ func (m *UserMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *UserMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown User edge %s", name)
+}
+
+// WorkspaceMutation represents an operation that mutates the Workspace nodes in the graph.
+type WorkspaceMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *int
+	createdAt      *time.Time
+	updatedAt      *time.Time
+	deletedAt      *time.Time
+	name           *string
+	description    *string
+	status         *workspace.Status
+	clearedFields  map[string]struct{}
+	creator        *uuid.UUID
+	clearedcreator bool
+	updater        *uuid.UUID
+	clearedupdater bool
+	parish         *int
+	clearedparish  bool
+	done           bool
+	oldValue       func(context.Context) (*Workspace, error)
+	predicates     []predicate.Workspace
+}
+
+var _ ent.Mutation = (*WorkspaceMutation)(nil)
+
+// workspaceOption allows management of the mutation configuration using functional options.
+type workspaceOption func(*WorkspaceMutation)
+
+// newWorkspaceMutation creates new mutation for the Workspace entity.
+func newWorkspaceMutation(c config, op Op, opts ...workspaceOption) *WorkspaceMutation {
+	m := &WorkspaceMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeWorkspace,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withWorkspaceID sets the ID field of the mutation.
+func withWorkspaceID(id int) workspaceOption {
+	return func(m *WorkspaceMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Workspace
+		)
+		m.oldValue = func(ctx context.Context) (*Workspace, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Workspace.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withWorkspace sets the old Workspace of the mutation.
+func withWorkspace(node *Workspace) workspaceOption {
+	return func(m *WorkspaceMutation) {
+		m.oldValue = func(context.Context) (*Workspace, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m WorkspaceMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m WorkspaceMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Workspace entities.
+func (m *WorkspaceMutation) SetID(id int) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *WorkspaceMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *WorkspaceMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Workspace.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedBy sets the "createdBy" field.
+func (m *WorkspaceMutation) SetCreatedBy(u uuid.UUID) {
+	m.creator = &u
+}
+
+// CreatedBy returns the value of the "createdBy" field in the mutation.
+func (m *WorkspaceMutation) CreatedBy() (r uuid.UUID, exists bool) {
+	v := m.creator
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedBy returns the old "createdBy" field's value of the Workspace entity.
+// If the Workspace object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkspaceMutation) OldCreatedBy(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedBy: %w", err)
+	}
+	return oldValue.CreatedBy, nil
+}
+
+// ResetCreatedBy resets all changes to the "createdBy" field.
+func (m *WorkspaceMutation) ResetCreatedBy() {
+	m.creator = nil
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (m *WorkspaceMutation) SetCreatedAt(t time.Time) {
+	m.createdAt = &t
+}
+
+// CreatedAt returns the value of the "createdAt" field in the mutation.
+func (m *WorkspaceMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.createdAt
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "createdAt" field's value of the Workspace entity.
+// If the Workspace object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkspaceMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "createdAt" field.
+func (m *WorkspaceMutation) ResetCreatedAt() {
+	m.createdAt = nil
+}
+
+// SetUpdatedBy sets the "updatedBy" field.
+func (m *WorkspaceMutation) SetUpdatedBy(u uuid.UUID) {
+	m.updater = &u
+}
+
+// UpdatedBy returns the value of the "updatedBy" field in the mutation.
+func (m *WorkspaceMutation) UpdatedBy() (r uuid.UUID, exists bool) {
+	v := m.updater
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedBy returns the old "updatedBy" field's value of the Workspace entity.
+// If the Workspace object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkspaceMutation) OldUpdatedBy(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedBy: %w", err)
+	}
+	return oldValue.UpdatedBy, nil
+}
+
+// ResetUpdatedBy resets all changes to the "updatedBy" field.
+func (m *WorkspaceMutation) ResetUpdatedBy() {
+	m.updater = nil
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (m *WorkspaceMutation) SetUpdatedAt(t time.Time) {
+	m.updatedAt = &t
+}
+
+// UpdatedAt returns the value of the "updatedAt" field in the mutation.
+func (m *WorkspaceMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updatedAt
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updatedAt" field's value of the Workspace entity.
+// If the Workspace object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkspaceMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updatedAt" field.
+func (m *WorkspaceMutation) ResetUpdatedAt() {
+	m.updatedAt = nil
+}
+
+// SetDeletedAt sets the "deletedAt" field.
+func (m *WorkspaceMutation) SetDeletedAt(t time.Time) {
+	m.deletedAt = &t
+}
+
+// DeletedAt returns the value of the "deletedAt" field in the mutation.
+func (m *WorkspaceMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deletedAt
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deletedAt" field's value of the Workspace entity.
+// If the Workspace object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkspaceMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (m *WorkspaceMutation) ClearDeletedAt() {
+	m.deletedAt = nil
+	m.clearedFields[workspace.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deletedAt" field was cleared in this mutation.
+func (m *WorkspaceMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[workspace.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deletedAt" field.
+func (m *WorkspaceMutation) ResetDeletedAt() {
+	m.deletedAt = nil
+	delete(m.clearedFields, workspace.FieldDeletedAt)
+}
+
+// SetName sets the "name" field.
+func (m *WorkspaceMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *WorkspaceMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Workspace entity.
+// If the Workspace object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkspaceMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *WorkspaceMutation) ResetName() {
+	m.name = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *WorkspaceMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *WorkspaceMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the Workspace entity.
+// If the Workspace object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkspaceMutation) OldDescription(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ClearDescription clears the value of the "description" field.
+func (m *WorkspaceMutation) ClearDescription() {
+	m.description = nil
+	m.clearedFields[workspace.FieldDescription] = struct{}{}
+}
+
+// DescriptionCleared returns if the "description" field was cleared in this mutation.
+func (m *WorkspaceMutation) DescriptionCleared() bool {
+	_, ok := m.clearedFields[workspace.FieldDescription]
+	return ok
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *WorkspaceMutation) ResetDescription() {
+	m.description = nil
+	delete(m.clearedFields, workspace.FieldDescription)
+}
+
+// SetStatus sets the "status" field.
+func (m *WorkspaceMutation) SetStatus(w workspace.Status) {
+	m.status = &w
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *WorkspaceMutation) Status() (r workspace.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the Workspace entity.
+// If the Workspace object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkspaceMutation) OldStatus(ctx context.Context) (v workspace.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *WorkspaceMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetCreatorID sets the "creator" edge to the User entity by id.
+func (m *WorkspaceMutation) SetCreatorID(id uuid.UUID) {
+	m.creator = &id
+}
+
+// ClearCreator clears the "creator" edge to the User entity.
+func (m *WorkspaceMutation) ClearCreator() {
+	m.clearedcreator = true
+	m.clearedFields[workspace.FieldCreatedBy] = struct{}{}
+}
+
+// CreatorCleared reports if the "creator" edge to the User entity was cleared.
+func (m *WorkspaceMutation) CreatorCleared() bool {
+	return m.clearedcreator
+}
+
+// CreatorID returns the "creator" edge ID in the mutation.
+func (m *WorkspaceMutation) CreatorID() (id uuid.UUID, exists bool) {
+	if m.creator != nil {
+		return *m.creator, true
+	}
+	return
+}
+
+// CreatorIDs returns the "creator" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// CreatorID instead. It exists only for internal usage by the builders.
+func (m *WorkspaceMutation) CreatorIDs() (ids []uuid.UUID) {
+	if id := m.creator; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetCreator resets all changes to the "creator" edge.
+func (m *WorkspaceMutation) ResetCreator() {
+	m.creator = nil
+	m.clearedcreator = false
+}
+
+// SetUpdaterID sets the "updater" edge to the User entity by id.
+func (m *WorkspaceMutation) SetUpdaterID(id uuid.UUID) {
+	m.updater = &id
+}
+
+// ClearUpdater clears the "updater" edge to the User entity.
+func (m *WorkspaceMutation) ClearUpdater() {
+	m.clearedupdater = true
+	m.clearedFields[workspace.FieldUpdatedBy] = struct{}{}
+}
+
+// UpdaterCleared reports if the "updater" edge to the User entity was cleared.
+func (m *WorkspaceMutation) UpdaterCleared() bool {
+	return m.clearedupdater
+}
+
+// UpdaterID returns the "updater" edge ID in the mutation.
+func (m *WorkspaceMutation) UpdaterID() (id uuid.UUID, exists bool) {
+	if m.updater != nil {
+		return *m.updater, true
+	}
+	return
+}
+
+// UpdaterIDs returns the "updater" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UpdaterID instead. It exists only for internal usage by the builders.
+func (m *WorkspaceMutation) UpdaterIDs() (ids []uuid.UUID) {
+	if id := m.updater; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUpdater resets all changes to the "updater" edge.
+func (m *WorkspaceMutation) ResetUpdater() {
+	m.updater = nil
+	m.clearedupdater = false
+}
+
+// SetParishID sets the "parish" edge to the Parish entity by id.
+func (m *WorkspaceMutation) SetParishID(id int) {
+	m.parish = &id
+}
+
+// ClearParish clears the "parish" edge to the Parish entity.
+func (m *WorkspaceMutation) ClearParish() {
+	m.clearedparish = true
+}
+
+// ParishCleared reports if the "parish" edge to the Parish entity was cleared.
+func (m *WorkspaceMutation) ParishCleared() bool {
+	return m.clearedparish
+}
+
+// ParishID returns the "parish" edge ID in the mutation.
+func (m *WorkspaceMutation) ParishID() (id int, exists bool) {
+	if m.parish != nil {
+		return *m.parish, true
+	}
+	return
+}
+
+// ParishIDs returns the "parish" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ParishID instead. It exists only for internal usage by the builders.
+func (m *WorkspaceMutation) ParishIDs() (ids []int) {
+	if id := m.parish; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetParish resets all changes to the "parish" edge.
+func (m *WorkspaceMutation) ResetParish() {
+	m.parish = nil
+	m.clearedparish = false
+}
+
+// Where appends a list predicates to the WorkspaceMutation builder.
+func (m *WorkspaceMutation) Where(ps ...predicate.Workspace) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the WorkspaceMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *WorkspaceMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Workspace, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *WorkspaceMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *WorkspaceMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Workspace).
+func (m *WorkspaceMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *WorkspaceMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.creator != nil {
+		fields = append(fields, workspace.FieldCreatedBy)
+	}
+	if m.createdAt != nil {
+		fields = append(fields, workspace.FieldCreatedAt)
+	}
+	if m.updater != nil {
+		fields = append(fields, workspace.FieldUpdatedBy)
+	}
+	if m.updatedAt != nil {
+		fields = append(fields, workspace.FieldUpdatedAt)
+	}
+	if m.deletedAt != nil {
+		fields = append(fields, workspace.FieldDeletedAt)
+	}
+	if m.name != nil {
+		fields = append(fields, workspace.FieldName)
+	}
+	if m.description != nil {
+		fields = append(fields, workspace.FieldDescription)
+	}
+	if m.status != nil {
+		fields = append(fields, workspace.FieldStatus)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *WorkspaceMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case workspace.FieldCreatedBy:
+		return m.CreatedBy()
+	case workspace.FieldCreatedAt:
+		return m.CreatedAt()
+	case workspace.FieldUpdatedBy:
+		return m.UpdatedBy()
+	case workspace.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case workspace.FieldDeletedAt:
+		return m.DeletedAt()
+	case workspace.FieldName:
+		return m.Name()
+	case workspace.FieldDescription:
+		return m.Description()
+	case workspace.FieldStatus:
+		return m.Status()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *WorkspaceMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case workspace.FieldCreatedBy:
+		return m.OldCreatedBy(ctx)
+	case workspace.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case workspace.FieldUpdatedBy:
+		return m.OldUpdatedBy(ctx)
+	case workspace.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case workspace.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
+	case workspace.FieldName:
+		return m.OldName(ctx)
+	case workspace.FieldDescription:
+		return m.OldDescription(ctx)
+	case workspace.FieldStatus:
+		return m.OldStatus(ctx)
+	}
+	return nil, fmt.Errorf("unknown Workspace field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *WorkspaceMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case workspace.FieldCreatedBy:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedBy(v)
+		return nil
+	case workspace.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case workspace.FieldUpdatedBy:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedBy(v)
+		return nil
+	case workspace.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case workspace.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
+		return nil
+	case workspace.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case workspace.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
+	case workspace.FieldStatus:
+		v, ok := value.(workspace.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Workspace field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *WorkspaceMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *WorkspaceMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *WorkspaceMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Workspace numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *WorkspaceMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(workspace.FieldDeletedAt) {
+		fields = append(fields, workspace.FieldDeletedAt)
+	}
+	if m.FieldCleared(workspace.FieldDescription) {
+		fields = append(fields, workspace.FieldDescription)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *WorkspaceMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *WorkspaceMutation) ClearField(name string) error {
+	switch name {
+	case workspace.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	case workspace.FieldDescription:
+		m.ClearDescription()
+		return nil
+	}
+	return fmt.Errorf("unknown Workspace nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *WorkspaceMutation) ResetField(name string) error {
+	switch name {
+	case workspace.FieldCreatedBy:
+		m.ResetCreatedBy()
+		return nil
+	case workspace.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case workspace.FieldUpdatedBy:
+		m.ResetUpdatedBy()
+		return nil
+	case workspace.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case workspace.FieldDeletedAt:
+		m.ResetDeletedAt()
+		return nil
+	case workspace.FieldName:
+		m.ResetName()
+		return nil
+	case workspace.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case workspace.FieldStatus:
+		m.ResetStatus()
+		return nil
+	}
+	return fmt.Errorf("unknown Workspace field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *WorkspaceMutation) AddedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.creator != nil {
+		edges = append(edges, workspace.EdgeCreator)
+	}
+	if m.updater != nil {
+		edges = append(edges, workspace.EdgeUpdater)
+	}
+	if m.parish != nil {
+		edges = append(edges, workspace.EdgeParish)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *WorkspaceMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case workspace.EdgeCreator:
+		if id := m.creator; id != nil {
+			return []ent.Value{*id}
+		}
+	case workspace.EdgeUpdater:
+		if id := m.updater; id != nil {
+			return []ent.Value{*id}
+		}
+	case workspace.EdgeParish:
+		if id := m.parish; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *WorkspaceMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 3)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *WorkspaceMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *WorkspaceMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.clearedcreator {
+		edges = append(edges, workspace.EdgeCreator)
+	}
+	if m.clearedupdater {
+		edges = append(edges, workspace.EdgeUpdater)
+	}
+	if m.clearedparish {
+		edges = append(edges, workspace.EdgeParish)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *WorkspaceMutation) EdgeCleared(name string) bool {
+	switch name {
+	case workspace.EdgeCreator:
+		return m.clearedcreator
+	case workspace.EdgeUpdater:
+		return m.clearedupdater
+	case workspace.EdgeParish:
+		return m.clearedparish
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *WorkspaceMutation) ClearEdge(name string) error {
+	switch name {
+	case workspace.EdgeCreator:
+		m.ClearCreator()
+		return nil
+	case workspace.EdgeUpdater:
+		m.ClearUpdater()
+		return nil
+	case workspace.EdgeParish:
+		m.ClearParish()
+		return nil
+	}
+	return fmt.Errorf("unknown Workspace unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *WorkspaceMutation) ResetEdge(name string) error {
+	switch name {
+	case workspace.EdgeCreator:
+		m.ResetCreator()
+		return nil
+	case workspace.EdgeUpdater:
+		m.ResetUpdater()
+		return nil
+	case workspace.EdgeParish:
+		m.ResetParish()
+		return nil
+	}
+	return fmt.Errorf("unknown Workspace edge %s", name)
 }

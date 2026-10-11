@@ -48,7 +48,7 @@ const docTemplate = `{
                     "size": {
                         "type": "integer"
                     },
-                    "unitId": {
+                    "workspaceId": {
                         "type": "integer"
                     }
                 },
@@ -216,11 +216,11 @@ const docTemplate = `{
                 },
                 "type": "object"
             },
-            "httpx.WebResponse-array_model_FinanceUnitResponse": {
+            "httpx.WebResponse-array_model_FinanceWorkspaceResponse": {
                 "properties": {
                     "data": {
                         "items": {
-                            "$ref": "#/components/schemas/model.FinanceUnitResponse"
+                            "$ref": "#/components/schemas/model.FinanceWorkspaceResponse"
                         },
                         "type": "array",
                         "uniqueItems": false
@@ -276,11 +276,11 @@ const docTemplate = `{
                 },
                 "type": "object"
             },
-            "httpx.WebResponse-array_model_UnitResponse": {
+            "httpx.WebResponse-array_model_WorkspaceResponse": {
                 "properties": {
                     "data": {
                         "items": {
-                            "$ref": "#/components/schemas/model.UnitResponse"
+                            "$ref": "#/components/schemas/model.WorkspaceResponse"
                         },
                         "type": "array",
                         "uniqueItems": false
@@ -423,10 +423,10 @@ const docTemplate = `{
                 },
                 "type": "object"
             },
-            "httpx.WebResponse-model_UnitResponse": {
+            "httpx.WebResponse-model_WorkspaceResponse": {
                 "properties": {
                     "data": {
-                        "$ref": "#/components/schemas/model.UnitResponse"
+                        "$ref": "#/components/schemas/model.WorkspaceResponse"
                     },
                     "meta": {
                         "$ref": "#/components/schemas/httpx.Meta"
@@ -469,11 +469,11 @@ const docTemplate = `{
                     "type": {
                         "type": "string"
                     },
-                    "unitId": {
-                        "type": "integer"
-                    },
                     "updatedAt": {
                         "type": "string"
+                    },
+                    "workspaceId": {
+                        "type": "integer"
                     }
                 },
                 "type": "object"
@@ -484,14 +484,14 @@ const docTemplate = `{
                         "minimum": 1,
                         "type": "integer"
                     },
-                    "unitId": {
+                    "workspaceId": {
                         "minimum": 1,
                         "type": "integer"
                     }
                 },
                 "required": [
                     "parishId",
-                    "unitId"
+                    "workspaceId"
                 ],
                 "type": "object"
             },
@@ -500,7 +500,7 @@ const docTemplate = `{
                     "activeParishId": {
                         "type": "integer"
                     },
-                    "activeUnitId": {
+                    "activeWorkspaceId": {
                         "type": "integer"
                     }
                 },
@@ -703,29 +703,13 @@ const docTemplate = `{
                 ],
                 "type": "object"
             },
-            "model.CreateUnitRequest": {
+            "model.CreateWorkspaceRequest": {
                 "properties": {
-                    "code": {
-                        "type": "string"
-                    },
                     "description": {
-                        "type": "string"
-                    },
-                    "kind": {
-                        "enum": [
-                            "council",
-                            "territorial",
-                            "category",
-                            "section",
-                            "committee"
-                        ],
                         "type": "string"
                     },
                     "name": {
                         "type": "string"
-                    },
-                    "parentId": {
-                        "type": "integer"
                     },
                     "parishId": {
                         "type": "integer"
@@ -736,13 +720,9 @@ const docTemplate = `{
                             "inactive"
                         ],
                         "type": "string"
-                    },
-                    "territoryId": {
-                        "type": "integer"
                     }
                 },
                 "required": [
-                    "kind",
                     "name",
                     "parishId"
                 ],
@@ -798,16 +778,10 @@ const docTemplate = `{
                 },
                 "type": "object"
             },
-            "model.FinanceUnitResponse": {
+            "model.FinanceWorkspaceResponse": {
                 "properties": {
-                    "code": {
-                        "type": "string"
-                    },
                     "id": {
                         "type": "integer"
-                    },
-                    "kind": {
-                        "type": "string"
                     },
                     "name": {
                         "type": "string"
@@ -1042,18 +1016,12 @@ const docTemplate = `{
                 },
                 "type": "object"
             },
-            "model.SearchUnitRequest": {
+            "model.SearchWorkspaceRequest": {
                 "properties": {
                     "cursor": {
                         "type": "string"
                     },
-                    "kind": {
-                        "type": "string"
-                    },
                     "limit": {
-                        "type": "integer"
-                    },
-                    "parentId": {
                         "type": "integer"
                     },
                     "parishId": {
@@ -1061,9 +1029,6 @@ const docTemplate = `{
                     },
                     "status": {
                         "type": "string"
-                    },
-                    "territoryId": {
-                        "type": "integer"
                     }
                 },
                 "type": "object"
@@ -1099,9 +1064,6 @@ const docTemplate = `{
                     },
                     "status": {
                         "type": "string"
-                    },
-                    "unitId": {
-                        "type": "integer"
                     }
                 },
                 "type": "object"
@@ -1146,7 +1108,7 @@ const docTemplate = `{
                     "status": {
                         "type": "string"
                     },
-                    "unitId": {
+                    "workspaceId": {
                         "type": "integer"
                     }
                 },
@@ -1175,7 +1137,7 @@ const docTemplate = `{
                     "totalAmount": {
                         "type": "integer"
                     },
-                    "unitId": {
+                    "workspaceId": {
                         "type": "integer"
                     }
                 },
@@ -1231,47 +1193,6 @@ const docTemplate = `{
                         "type": "integer"
                     },
                     "debit": {
-                        "type": "integer"
-                    }
-                },
-                "type": "object"
-            },
-            "model.UnitResponse": {
-                "properties": {
-                    "code": {
-                        "type": "string"
-                    },
-                    "description": {
-                        "type": "string"
-                    },
-                    "id": {
-                        "type": "integer"
-                    },
-                    "kind": {
-                        "type": "string"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "parent": {
-                        "$ref": "#/components/schemas/model.UnitResponse"
-                    },
-                    "parentId": {
-                        "type": "integer"
-                    },
-                    "parish": {
-                        "$ref": "#/components/schemas/model.ParishResponse"
-                    },
-                    "parishId": {
-                        "type": "integer"
-                    },
-                    "status": {
-                        "type": "string"
-                    },
-                    "territory": {
-                        "$ref": "#/components/schemas/model.TerritoryResponse"
-                    },
-                    "territoryId": {
                         "type": "integer"
                     }
                 },
@@ -1399,29 +1320,13 @@ const docTemplate = `{
                 ],
                 "type": "object"
             },
-            "model.UpdateUnitRequest": {
+            "model.UpdateWorkspaceRequest": {
                 "properties": {
-                    "code": {
-                        "type": "string"
-                    },
                     "description": {
-                        "type": "string"
-                    },
-                    "kind": {
-                        "enum": [
-                            "council",
-                            "territorial",
-                            "category",
-                            "section",
-                            "committee"
-                        ],
                         "type": "string"
                     },
                     "name": {
                         "type": "string"
-                    },
-                    "parentId": {
-                        "type": "integer"
                     },
                     "parishId": {
                         "type": "integer"
@@ -1432,13 +1337,9 @@ const docTemplate = `{
                             "inactive"
                         ],
                         "type": "string"
-                    },
-                    "territoryId": {
-                        "type": "integer"
                     }
                 },
                 "required": [
-                    "kind",
                     "name",
                     "parishId"
                 ],
@@ -1451,6 +1352,29 @@ const docTemplate = `{
                     },
                     "reason": {
                         "maxLength": 500,
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "model.WorkspaceResponse": {
+                "properties": {
+                    "description": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "parish": {
+                        "$ref": "#/components/schemas/model.ParishResponse"
+                    },
+                    "parishId": {
+                        "type": "integer"
+                    },
+                    "status": {
                         "type": "string"
                     }
                 },
@@ -2307,7 +2231,7 @@ const docTemplate = `{
         },
         "/fin/activate": {
             "post": {
-                "description": "Set active parish and unit for finance module in user cookie",
+                "description": "Set active parish and workspace for finance module in user cookie",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -3059,9 +2983,9 @@ const docTemplate = `{
                 ]
             }
         },
-        "/fin/units": {
+        "/fin/workspaces": {
             "get": {
-                "description": "Get list of units accessible to the current user for finance module",
+                "description": "Get list of workspaces accessible to the current user for finance module",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -3076,7 +3000,7 @@ const docTemplate = `{
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/httpx.WebResponse-array_model_FinanceUnitResponse"
+                                    "$ref": "#/components/schemas/httpx.WebResponse-array_model_FinanceWorkspaceResponse"
                                 }
                             }
                         },
@@ -3098,7 +3022,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "summary": "Get accessible finance units",
+                "summary": "Get accessible finance workspaces",
                 "tags": [
                     "Finance"
                 ]
@@ -3565,7 +3489,7 @@ const docTemplate = `{
                 ]
             },
             "post": {
-                "description": "Upload a file (PDF, JPEG, PNG, max 10 MiB) attached to an owner record, e.g. a finance transaction. Permission is checked at the owner's unit scope.",
+                "description": "Upload a file (PDF, JPEG, PNG, max 10 MiB) attached to an owner record, e.g. a finance transaction. Permission is checked at the owner's workspace scope.",
                 "parameters": [
                     {
                         "description": "Parish ID",
@@ -4240,20 +4164,20 @@ const docTemplate = `{
                 ]
             }
         },
-        "/units": {
+        "/workspaces": {
             "post": {
-                "description": "Create a new unit",
+                "description": "Create a new workspace",
                 "requestBody": {
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/model.CreateUnitRequest",
+                                "$ref": "#/components/schemas/model.CreateWorkspaceRequest",
                                 "summary": "request",
-                                "description": "Create unit request"
+                                "description": "Create workspace request"
                             }
                         }
                     },
-                    "description": "Create unit request",
+                    "description": "Create workspace request",
                     "required": true
                 },
                 "responses": {
@@ -4261,7 +4185,7 @@ const docTemplate = `{
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/httpx.WebResponse-model_UnitResponse"
+                                    "$ref": "#/components/schemas/httpx.WebResponse-model_WorkspaceResponse"
                                 }
                             }
                         },
@@ -4313,26 +4237,26 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "summary": "Create unit",
+                "summary": "Create workspace",
                 "tags": [
-                    "Unit"
+                    "Workspace"
                 ]
             }
         },
-        "/units/search": {
+        "/workspaces/search": {
             "post": {
-                "description": "Search units with filters and cursor pagination",
+                "description": "Search workspaces with filters and cursor pagination",
                 "requestBody": {
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/model.SearchUnitRequest",
+                                "$ref": "#/components/schemas/model.SearchWorkspaceRequest",
                                 "summary": "request",
-                                "description": "Search unit request"
+                                "description": "Search workspace request"
                             }
                         }
                     },
-                    "description": "Search unit request",
+                    "description": "Search workspace request",
                     "required": true
                 },
                 "responses": {
@@ -4340,7 +4264,7 @@ const docTemplate = `{
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/httpx.WebResponse-array_model_UnitResponse"
+                                    "$ref": "#/components/schemas/httpx.WebResponse-array_model_WorkspaceResponse"
                                 }
                             }
                         },
@@ -4392,18 +4316,18 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "summary": "Search units",
+                "summary": "Search workspaces",
                 "tags": [
-                    "Unit"
+                    "Workspace"
                 ]
             }
         },
-        "/units/{id}": {
+        "/workspaces/{id}": {
             "delete": {
-                "description": "Delete unit by ID",
+                "description": "Delete workspace by ID",
                 "parameters": [
                     {
-                        "description": "Unit ID",
+                        "description": "Workspace ID",
                         "in": "path",
                         "name": "id",
                         "required": true,
@@ -4462,16 +4386,16 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "summary": "Delete unit",
+                "summary": "Delete workspace",
                 "tags": [
-                    "Unit"
+                    "Workspace"
                 ]
             },
             "get": {
-                "description": "Get unit details by ID",
+                "description": "Get workspace details by ID",
                 "parameters": [
                     {
-                        "description": "Unit ID",
+                        "description": "Workspace ID",
                         "in": "path",
                         "name": "id",
                         "required": true,
@@ -4485,7 +4409,7 @@ const docTemplate = `{
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/httpx.WebResponse-model_UnitResponse"
+                                    "$ref": "#/components/schemas/httpx.WebResponse-model_WorkspaceResponse"
                                 }
                             }
                         },
@@ -4537,16 +4461,16 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "summary": "Get unit by ID",
+                "summary": "Get workspace by ID",
                 "tags": [
-                    "Unit"
+                    "Workspace"
                 ]
             },
             "put": {
-                "description": "Update unit by ID",
+                "description": "Update workspace by ID",
                 "parameters": [
                     {
-                        "description": "Unit ID",
+                        "description": "Workspace ID",
                         "in": "path",
                         "name": "id",
                         "required": true,
@@ -4559,13 +4483,13 @@ const docTemplate = `{
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/model.UpdateUnitRequest",
+                                "$ref": "#/components/schemas/model.UpdateWorkspaceRequest",
                                 "summary": "request",
-                                "description": "Update unit request"
+                                "description": "Update workspace request"
                             }
                         }
                     },
-                    "description": "Update unit request",
+                    "description": "Update workspace request",
                     "required": true
                 },
                 "responses": {
@@ -4573,7 +4497,7 @@ const docTemplate = `{
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/httpx.WebResponse-model_UnitResponse"
+                                    "$ref": "#/components/schemas/httpx.WebResponse-model_WorkspaceResponse"
                                 }
                             }
                         },
@@ -4635,9 +4559,9 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "summary": "Update unit",
+                "summary": "Update workspace",
                 "tags": [
-                    "Unit"
+                    "Workspace"
                 ]
             }
         }

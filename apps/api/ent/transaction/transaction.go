@@ -42,8 +42,8 @@ const (
 	EdgeUpdater = "updater"
 	// EdgeParish holds the string denoting the parish edge name in mutations.
 	EdgeParish = "parish"
-	// EdgeUnit holds the string denoting the unit edge name in mutations.
-	EdgeUnit = "unit"
+	// EdgeWorkspace holds the string denoting the workspace edge name in mutations.
+	EdgeWorkspace = "workspace"
 	// EdgeEntries holds the string denoting the entries edge name in mutations.
 	EdgeEntries = "entries"
 	// Table holds the table name of the transaction in the database.
@@ -69,13 +69,13 @@ const (
 	ParishInverseTable = "parishes"
 	// ParishColumn is the table column denoting the parish relation/edge.
 	ParishColumn = "transaction_parish"
-	// UnitTable is the table that holds the unit relation/edge.
-	UnitTable = "transactions"
-	// UnitInverseTable is the table name for the Unit entity.
-	// It exists in this package in order to avoid circular dependency with the "unit" package.
-	UnitInverseTable = "units"
-	// UnitColumn is the table column denoting the unit relation/edge.
-	UnitColumn = "transaction_unit"
+	// WorkspaceTable is the table that holds the workspace relation/edge.
+	WorkspaceTable = "transactions"
+	// WorkspaceInverseTable is the table name for the Workspace entity.
+	// It exists in this package in order to avoid circular dependency with the "workspace" package.
+	WorkspaceInverseTable = "workspaces"
+	// WorkspaceColumn is the table column denoting the workspace relation/edge.
+	WorkspaceColumn = "transaction_workspace"
 	// EntriesTable is the table that holds the entries relation/edge.
 	EntriesTable = "entries"
 	// EntriesInverseTable is the table name for the Entry entity.
@@ -104,7 +104,7 @@ var Columns = []string{
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"transaction_parish",
-	"transaction_unit",
+	"transaction_workspace",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -268,10 +268,10 @@ func ByParishField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
-// ByUnitField orders the results by unit field.
-func ByUnitField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByWorkspaceField orders the results by workspace field.
+func ByWorkspaceField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newUnitStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newWorkspaceStep(), sql.OrderByField(field, opts...))
 	}
 }
 
@@ -309,11 +309,11 @@ func newParishStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2O, false, ParishTable, ParishColumn),
 	)
 }
-func newUnitStep() *sqlgraph.Step {
+func newWorkspaceStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(UnitInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, false, UnitTable, UnitColumn),
+		sqlgraph.To(WorkspaceInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, WorkspaceTable, WorkspaceColumn),
 	)
 }
 func newEntriesStep() *sqlgraph.Step {

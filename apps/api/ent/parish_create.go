@@ -14,7 +14,7 @@ import (
 	"github.com/paroki/domus/api/ent/diocese"
 	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/territory"
-	"github.com/paroki/domus/api/ent/unit"
+	"github.com/paroki/domus/api/ent/workspace"
 )
 
 // ParishCreate is the builder for creating a Parish entity.
@@ -155,19 +155,19 @@ func (_c *ParishCreate) AddTerritories(v ...*Territory) *ParishCreate {
 	return _c.AddTerritoryIDs(ids...)
 }
 
-// AddUnitIDs adds the "units" edge to the Unit entity by IDs.
-func (_c *ParishCreate) AddUnitIDs(ids ...int) *ParishCreate {
-	_c.mutation.AddUnitIDs(ids...)
+// AddWorkspaceIDs adds the "workspaces" edge to the Workspace entity by IDs.
+func (_c *ParishCreate) AddWorkspaceIDs(ids ...int) *ParishCreate {
+	_c.mutation.AddWorkspaceIDs(ids...)
 	return _c
 }
 
-// AddUnits adds the "units" edges to the Unit entity.
-func (_c *ParishCreate) AddUnits(v ...*Unit) *ParishCreate {
+// AddWorkspaces adds the "workspaces" edges to the Workspace entity.
+func (_c *ParishCreate) AddWorkspaces(v ...*Workspace) *ParishCreate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddUnitIDs(ids...)
+	return _c.AddWorkspaceIDs(ids...)
 }
 
 // Mutation returns the ParishMutation object of the builder.
@@ -316,18 +316,18 @@ func (_c *ParishCreate) createSpec() (*Parish, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.UnitsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.WorkspacesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   parish.UnitsTable,
-			Columns: []string{parish.UnitsColumn},
+			Table:   parish.WorkspacesTable,
+			Columns: []string{parish.WorkspacesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workspace.FieldID, field.TypeInt),
 			},
 		}
-		edge.Schema = _c.schemaConfig.Unit
+		edge.Schema = _c.schemaConfig.Workspace
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}

@@ -80,7 +80,7 @@ func (s Service) Upload(ctx context.Context, ownerType string, owner Owner, file
 
 	// 4. Object key & ID generation
 	attachmentID := core.GenerateID()
-	objectKey := fmt.Sprintf("%s/%d/%d/%s/%s-%s", ownerType, owner.ParishID, owner.UnitID, owner.ID.String(), attachmentID.String(), sanitizedFilename)
+	objectKey := fmt.Sprintf("%s/%d/%d/%s/%s-%s", ownerType, owner.ParishID, owner.WorkspaceID, owner.ID.String(), attachmentID.String(), sanitizedFilename)
 
 	// 5. Stream to storage and compute SHA-256
 	combinedReader := io.MultiReader(bytes.NewReader(buf[:n]), file)

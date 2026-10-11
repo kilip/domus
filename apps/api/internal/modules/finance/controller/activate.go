@@ -27,10 +27,10 @@ func NewActivateController(svc service.ActivateService, cookieName string) Activ
 	}
 }
 
-// Activate sets the active parish and unit context in the cookie.
+// Activate sets the active parish and workspace context in the cookie.
 //
 //	@Summary		Activate finance context
-//	@Description	Set active parish and unit for finance module in user cookie
+//	@Description	Set active parish and workspace for finance module in user cookie
 //	@Tags			Finance
 //	@Accept			json
 //	@Produce		json

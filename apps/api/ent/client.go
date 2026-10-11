@@ -26,8 +26,8 @@ import (
 	"github.com/paroki/domus/api/ent/posting"
 	"github.com/paroki/domus/api/ent/territory"
 	"github.com/paroki/domus/api/ent/transaction"
-	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
+	"github.com/paroki/domus/api/ent/workspace"
 
 	"github.com/paroki/domus/api/ent/internal"
 )
@@ -57,10 +57,10 @@ type Client struct {
 	Territory *TerritoryClient
 	// Transaction is the client for interacting with the Transaction builders.
 	Transaction *TransactionClient
-	// Unit is the client for interacting with the Unit builders.
-	Unit *UnitClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// Workspace is the client for interacting with the Workspace builders.
+	Workspace *WorkspaceClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -82,8 +82,8 @@ func (c *Client) init() {
 	c.Posting = NewPostingClient(c.config)
 	c.Territory = NewTerritoryClient(c.config)
 	c.Transaction = NewTransactionClient(c.config)
-	c.Unit = NewUnitClient(c.config)
 	c.User = NewUserClient(c.config)
+	c.Workspace = NewWorkspaceClient(c.config)
 }
 
 type (
@@ -188,8 +188,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Posting:     NewPostingClient(cfg),
 		Territory:   NewTerritoryClient(cfg),
 		Transaction: NewTransactionClient(cfg),
-		Unit:        NewUnitClient(cfg),
 		User:        NewUserClient(cfg),
+		Workspace:   NewWorkspaceClient(cfg),
 	}, nil
 }
 
@@ -219,8 +219,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Posting:     NewPostingClient(cfg),
 		Territory:   NewTerritoryClient(cfg),
 		Transaction: NewTransactionClient(cfg),
-		Unit:        NewUnitClient(cfg),
 		User:        NewUserClient(cfg),
+		Workspace:   NewWorkspaceClient(cfg),
 	}, nil
 }
 
@@ -251,7 +251,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Account, c.Attachment, c.Diocese, c.Entry, c.Membership, c.Parish,
-		c.Parishioner, c.Posting, c.Territory, c.Transaction, c.Unit, c.User,
+		c.Parishioner, c.Posting, c.Territory, c.Transaction, c.User, c.Workspace,
 	} {
 		n.Use(hooks...)
 	}
@@ -262,7 +262,7 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Account, c.Attachment, c.Diocese, c.Entry, c.Membership, c.Parish,
-		c.Parishioner, c.Posting, c.Territory, c.Transaction, c.Unit, c.User,
+		c.Parishioner, c.Posting, c.Territory, c.Transaction, c.User, c.Workspace,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -291,10 +291,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Territory.mutate(ctx, m)
 	case *TransactionMutation:
 		return c.Transaction.mutate(ctx, m)
-	case *UnitMutation:
-		return c.Unit.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
+	case *WorkspaceMutation:
+		return c.Workspace.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -465,18 +465,18 @@ func (c *AccountClient) QueryParish(_m *Account) *ParishQuery {
 	return query
 }
 
-// QueryUnit queries the unit edge of a Account.
-func (c *AccountClient) QueryUnit(_m *Account) *UnitQuery {
-	query := (&UnitClient{config: c.config}).Query()
+// QueryWorkspace queries the workspace edge of a Account.
+func (c *AccountClient) QueryWorkspace(_m *Account) *WorkspaceQuery {
+	query := (&WorkspaceClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(account.Table, account.FieldID, id),
-			sqlgraph.To(unit.Table, unit.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, account.UnitTable, account.UnitColumn),
+			sqlgraph.To(workspace.Table, workspace.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, account.WorkspaceTable, account.WorkspaceColumn),
 		)
 		schemaConfig := _m.schemaConfig
-		step.To.Schema = schemaConfig.Unit
+		step.To.Schema = schemaConfig.Workspace
 		step.Edge.Schema = schemaConfig.Account
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -731,18 +731,18 @@ func (c *AttachmentClient) QueryParish(_m *Attachment) *ParishQuery {
 	return query
 }
 
-// QueryUnit queries the unit edge of a Attachment.
-func (c *AttachmentClient) QueryUnit(_m *Attachment) *UnitQuery {
-	query := (&UnitClient{config: c.config}).Query()
+// QueryWorkspace queries the workspace edge of a Attachment.
+func (c *AttachmentClient) QueryWorkspace(_m *Attachment) *WorkspaceQuery {
+	query := (&WorkspaceClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(attachment.Table, attachment.FieldID, id),
-			sqlgraph.To(unit.Table, unit.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, attachment.UnitTable, attachment.UnitColumn),
+			sqlgraph.To(workspace.Table, workspace.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, attachment.WorkspaceTable, attachment.WorkspaceColumn),
 		)
 		schemaConfig := _m.schemaConfig
-		step.To.Schema = schemaConfig.Unit
+		step.To.Schema = schemaConfig.Workspace
 		step.Edge.Schema = schemaConfig.Attachment
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1491,19 +1491,19 @@ func (c *ParishClient) QueryTerritories(_m *Parish) *TerritoryQuery {
 	return query
 }
 
-// QueryUnits queries the units edge of a Parish.
-func (c *ParishClient) QueryUnits(_m *Parish) *UnitQuery {
-	query := (&UnitClient{config: c.config}).Query()
+// QueryWorkspaces queries the workspaces edge of a Parish.
+func (c *ParishClient) QueryWorkspaces(_m *Parish) *WorkspaceQuery {
+	query := (&WorkspaceClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(parish.Table, parish.FieldID, id),
-			sqlgraph.To(unit.Table, unit.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, parish.UnitsTable, parish.UnitsColumn),
+			sqlgraph.To(workspace.Table, workspace.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, parish.WorkspacesTable, parish.WorkspacesColumn),
 		)
 		schemaConfig := _m.schemaConfig
-		step.To.Schema = schemaConfig.Unit
-		step.Edge.Schema = schemaConfig.Unit
+		step.To.Schema = schemaConfig.Workspace
+		step.Edge.Schema = schemaConfig.Workspace
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
@@ -2080,25 +2080,6 @@ func (c *TerritoryClient) QueryChildren(_m *Territory) *TerritoryQuery {
 	return query
 }
 
-// QueryUnit queries the unit edge of a Territory.
-func (c *TerritoryClient) QueryUnit(_m *Territory) *UnitQuery {
-	query := (&UnitClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(territory.Table, territory.FieldID, id),
-			sqlgraph.To(unit.Table, unit.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, territory.UnitTable, territory.UnitColumn),
-		)
-		schemaConfig := _m.schemaConfig
-		step.To.Schema = schemaConfig.Unit
-		step.Edge.Schema = schemaConfig.Territory
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // Hooks returns the client hooks.
 func (c *TerritoryClient) Hooks() []Hook {
 	return c.hooks.Territory
@@ -2289,18 +2270,18 @@ func (c *TransactionClient) QueryParish(_m *Transaction) *ParishQuery {
 	return query
 }
 
-// QueryUnit queries the unit edge of a Transaction.
-func (c *TransactionClient) QueryUnit(_m *Transaction) *UnitQuery {
-	query := (&UnitClient{config: c.config}).Query()
+// QueryWorkspace queries the workspace edge of a Transaction.
+func (c *TransactionClient) QueryWorkspace(_m *Transaction) *WorkspaceQuery {
+	query := (&WorkspaceClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(transaction.Table, transaction.FieldID, id),
-			sqlgraph.To(unit.Table, unit.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, transaction.UnitTable, transaction.UnitColumn),
+			sqlgraph.To(workspace.Table, workspace.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, transaction.WorkspaceTable, transaction.WorkspaceColumn),
 		)
 		schemaConfig := _m.schemaConfig
-		step.To.Schema = schemaConfig.Unit
+		step.To.Schema = schemaConfig.Workspace
 		step.Edge.Schema = schemaConfig.Transaction
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -2349,253 +2330,6 @@ func (c *TransactionClient) mutate(ctx context.Context, m *TransactionMutation) 
 		return (&TransactionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Transaction mutation op: %q", m.Op())
-	}
-}
-
-// UnitClient is a client for the Unit schema.
-type UnitClient struct {
-	config
-}
-
-// NewUnitClient returns a client for the Unit from the given config.
-func NewUnitClient(c config) *UnitClient {
-	return &UnitClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `unit.Hooks(f(g(h())))`.
-func (c *UnitClient) Use(hooks ...Hook) {
-	c.hooks.Unit = append(c.hooks.Unit, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `unit.Intercept(f(g(h())))`.
-func (c *UnitClient) Intercept(interceptors ...Interceptor) {
-	c.inters.Unit = append(c.inters.Unit, interceptors...)
-}
-
-// Create returns a builder for creating a Unit entity.
-func (c *UnitClient) Create() *UnitCreate {
-	mutation := newUnitMutation(c.config, OpCreate)
-	return &UnitCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of Unit entities.
-func (c *UnitClient) CreateBulk(builders ...*UnitCreate) *UnitCreateBulk {
-	return &UnitCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *UnitClient) MapCreateBulk(slice any, setFunc func(*UnitCreate, int)) *UnitCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &UnitCreateBulk{err: fmt.Errorf("calling to UnitClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*UnitCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &UnitCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for Unit.
-func (c *UnitClient) Update() *UnitUpdate {
-	mutation := newUnitMutation(c.config, OpUpdate)
-	return &UnitUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *UnitClient) UpdateOne(_m *Unit) *UnitUpdateOne {
-	mutation := newUnitMutation(c.config, OpUpdateOne, withUnit(_m))
-	return &UnitUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *UnitClient) UpdateOneID(id int) *UnitUpdateOne {
-	mutation := newUnitMutation(c.config, OpUpdateOne, withUnitID(id))
-	return &UnitUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for Unit.
-func (c *UnitClient) Delete() *UnitDelete {
-	mutation := newUnitMutation(c.config, OpDelete)
-	return &UnitDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *UnitClient) DeleteOne(_m *Unit) *UnitDeleteOne {
-	return c.DeleteOneID(_m.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *UnitClient) DeleteOneID(id int) *UnitDeleteOne {
-	builder := c.Delete().Where(unit.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &UnitDeleteOne{builder}
-}
-
-// Query returns a query builder for Unit.
-func (c *UnitClient) Query() *UnitQuery {
-	return &UnitQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeUnit},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a Unit entity by its id.
-func (c *UnitClient) Get(ctx context.Context, id int) (*Unit, error) {
-	return c.Query().Where(unit.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *UnitClient) GetX(ctx context.Context, id int) *Unit {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryCreator queries the creator edge of a Unit.
-func (c *UnitClient) QueryCreator(_m *Unit) *UserQuery {
-	query := (&UserClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(unit.Table, unit.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, unit.CreatorTable, unit.CreatorColumn),
-		)
-		schemaConfig := _m.schemaConfig
-		step.To.Schema = schemaConfig.User
-		step.Edge.Schema = schemaConfig.Unit
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryUpdater queries the updater edge of a Unit.
-func (c *UnitClient) QueryUpdater(_m *Unit) *UserQuery {
-	query := (&UserClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(unit.Table, unit.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, unit.UpdaterTable, unit.UpdaterColumn),
-		)
-		schemaConfig := _m.schemaConfig
-		step.To.Schema = schemaConfig.User
-		step.Edge.Schema = schemaConfig.Unit
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryParish queries the parish edge of a Unit.
-func (c *UnitClient) QueryParish(_m *Unit) *ParishQuery {
-	query := (&ParishClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(unit.Table, unit.FieldID, id),
-			sqlgraph.To(parish.Table, parish.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, unit.ParishTable, unit.ParishColumn),
-		)
-		schemaConfig := _m.schemaConfig
-		step.To.Schema = schemaConfig.Parish
-		step.Edge.Schema = schemaConfig.Unit
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryParent queries the parent edge of a Unit.
-func (c *UnitClient) QueryParent(_m *Unit) *UnitQuery {
-	query := (&UnitClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(unit.Table, unit.FieldID, id),
-			sqlgraph.To(unit.Table, unit.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, unit.ParentTable, unit.ParentColumn),
-		)
-		schemaConfig := _m.schemaConfig
-		step.To.Schema = schemaConfig.Unit
-		step.Edge.Schema = schemaConfig.Unit
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryChildren queries the children edge of a Unit.
-func (c *UnitClient) QueryChildren(_m *Unit) *UnitQuery {
-	query := (&UnitClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(unit.Table, unit.FieldID, id),
-			sqlgraph.To(unit.Table, unit.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, unit.ChildrenTable, unit.ChildrenColumn),
-		)
-		schemaConfig := _m.schemaConfig
-		step.To.Schema = schemaConfig.Unit
-		step.Edge.Schema = schemaConfig.Unit
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryTerritory queries the territory edge of a Unit.
-func (c *UnitClient) QueryTerritory(_m *Unit) *TerritoryQuery {
-	query := (&TerritoryClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(unit.Table, unit.FieldID, id),
-			sqlgraph.To(territory.Table, territory.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, unit.TerritoryTable, unit.TerritoryColumn),
-		)
-		schemaConfig := _m.schemaConfig
-		step.To.Schema = schemaConfig.Territory
-		step.Edge.Schema = schemaConfig.Territory
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *UnitClient) Hooks() []Hook {
-	return c.hooks.Unit
-}
-
-// Interceptors returns the client interceptors.
-func (c *UnitClient) Interceptors() []Interceptor {
-	return c.inters.Unit
-}
-
-func (c *UnitClient) mutate(ctx context.Context, m *UnitMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&UnitCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&UnitUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&UnitUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&UnitDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown Unit mutation op: %q", m.Op())
 	}
 }
 
@@ -2732,15 +2466,205 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 	}
 }
 
+// WorkspaceClient is a client for the Workspace schema.
+type WorkspaceClient struct {
+	config
+}
+
+// NewWorkspaceClient returns a client for the Workspace from the given config.
+func NewWorkspaceClient(c config) *WorkspaceClient {
+	return &WorkspaceClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `workspace.Hooks(f(g(h())))`.
+func (c *WorkspaceClient) Use(hooks ...Hook) {
+	c.hooks.Workspace = append(c.hooks.Workspace, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `workspace.Intercept(f(g(h())))`.
+func (c *WorkspaceClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Workspace = append(c.inters.Workspace, interceptors...)
+}
+
+// Create returns a builder for creating a Workspace entity.
+func (c *WorkspaceClient) Create() *WorkspaceCreate {
+	mutation := newWorkspaceMutation(c.config, OpCreate)
+	return &WorkspaceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Workspace entities.
+func (c *WorkspaceClient) CreateBulk(builders ...*WorkspaceCreate) *WorkspaceCreateBulk {
+	return &WorkspaceCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *WorkspaceClient) MapCreateBulk(slice any, setFunc func(*WorkspaceCreate, int)) *WorkspaceCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &WorkspaceCreateBulk{err: fmt.Errorf("calling to WorkspaceClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*WorkspaceCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &WorkspaceCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Workspace.
+func (c *WorkspaceClient) Update() *WorkspaceUpdate {
+	mutation := newWorkspaceMutation(c.config, OpUpdate)
+	return &WorkspaceUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *WorkspaceClient) UpdateOne(_m *Workspace) *WorkspaceUpdateOne {
+	mutation := newWorkspaceMutation(c.config, OpUpdateOne, withWorkspace(_m))
+	return &WorkspaceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *WorkspaceClient) UpdateOneID(id int) *WorkspaceUpdateOne {
+	mutation := newWorkspaceMutation(c.config, OpUpdateOne, withWorkspaceID(id))
+	return &WorkspaceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Workspace.
+func (c *WorkspaceClient) Delete() *WorkspaceDelete {
+	mutation := newWorkspaceMutation(c.config, OpDelete)
+	return &WorkspaceDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *WorkspaceClient) DeleteOne(_m *Workspace) *WorkspaceDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *WorkspaceClient) DeleteOneID(id int) *WorkspaceDeleteOne {
+	builder := c.Delete().Where(workspace.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &WorkspaceDeleteOne{builder}
+}
+
+// Query returns a query builder for Workspace.
+func (c *WorkspaceClient) Query() *WorkspaceQuery {
+	return &WorkspaceQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeWorkspace},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Workspace entity by its id.
+func (c *WorkspaceClient) Get(ctx context.Context, id int) (*Workspace, error) {
+	return c.Query().Where(workspace.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *WorkspaceClient) GetX(ctx context.Context, id int) *Workspace {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCreator queries the creator edge of a Workspace.
+func (c *WorkspaceClient) QueryCreator(_m *Workspace) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(workspace.Table, workspace.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, workspace.CreatorTable, workspace.CreatorColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Workspace
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUpdater queries the updater edge of a Workspace.
+func (c *WorkspaceClient) QueryUpdater(_m *Workspace) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(workspace.Table, workspace.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, workspace.UpdaterTable, workspace.UpdaterColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Workspace
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryParish queries the parish edge of a Workspace.
+func (c *WorkspaceClient) QueryParish(_m *Workspace) *ParishQuery {
+	query := (&ParishClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(workspace.Table, workspace.FieldID, id),
+			sqlgraph.To(parish.Table, parish.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, workspace.ParishTable, workspace.ParishColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Parish
+		step.Edge.Schema = schemaConfig.Workspace
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *WorkspaceClient) Hooks() []Hook {
+	return c.hooks.Workspace
+}
+
+// Interceptors returns the client interceptors.
+func (c *WorkspaceClient) Interceptors() []Interceptor {
+	return c.inters.Workspace
+}
+
+func (c *WorkspaceClient) mutate(ctx context.Context, m *WorkspaceMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&WorkspaceCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&WorkspaceUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&WorkspaceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&WorkspaceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Workspace mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
 		Account, Attachment, Diocese, Entry, Membership, Parish, Parishioner, Posting,
-		Territory, Transaction, Unit, User []ent.Hook
+		Territory, Transaction, User, Workspace []ent.Hook
 	}
 	inters struct {
 		Account, Attachment, Diocese, Entry, Membership, Parish, Parishioner, Posting,
-		Territory, Transaction, Unit, User []ent.Interceptor
+		Territory, Transaction, User, Workspace []ent.Interceptor
 	}
 )
 

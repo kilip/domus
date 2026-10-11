@@ -45,8 +45,8 @@ type ParishEdges struct {
 	Diocese *Diocese `json:"diocese,omitempty"`
 	// Territories holds the value of the territories edge.
 	Territories []*Territory `json:"territories,omitempty"`
-	// Units holds the value of the units edge.
-	Units []*Unit `json:"units,omitempty"`
+	// Workspaces holds the value of the workspaces edge.
+	Workspaces []*Workspace `json:"workspaces,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
@@ -72,13 +72,13 @@ func (e ParishEdges) TerritoriesOrErr() ([]*Territory, error) {
 	return nil, &NotLoadedError{edge: "territories"}
 }
 
-// UnitsOrErr returns the Units value or an error if the edge
+// WorkspacesOrErr returns the Workspaces value or an error if the edge
 // was not loaded in eager-loading.
-func (e ParishEdges) UnitsOrErr() ([]*Unit, error) {
+func (e ParishEdges) WorkspacesOrErr() ([]*Workspace, error) {
 	if e.loadedTypes[2] {
-		return e.Units, nil
+		return e.Workspaces, nil
 	}
-	return nil, &NotLoadedError{edge: "units"}
+	return nil, &NotLoadedError{edge: "workspaces"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -194,9 +194,9 @@ func (_m *Parish) QueryTerritories() *TerritoryQuery {
 	return NewParishClient(_m.config).QueryTerritories(_m)
 }
 
-// QueryUnits queries the "units" edge of the Parish entity.
-func (_m *Parish) QueryUnits() *UnitQuery {
-	return NewParishClient(_m.config).QueryUnits(_m)
+// QueryWorkspaces queries the "workspaces" edge of the Parish entity.
+func (_m *Parish) QueryWorkspaces() *WorkspaceQuery {
+	return NewParishClient(_m.config).QueryWorkspaces(_m)
 }
 
 // Update returns a builder for updating this Parish.

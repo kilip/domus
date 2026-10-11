@@ -8,18 +8,27 @@ import {
 } from "react";
 import { useApi } from "~/lib/api";
 import { useActiveModule } from "~/shared/modules/useActiveModule";
-import type { FinanceUnit } from "./types";
+import type { FinanceWorkspace } from "./types";
 
-export const ACTIVE_FINANCE_UNIT_ID_KEY = "activeFinanceUnitId";
-export const FINANCE_UNITS_KEY = "financeUnits";
+export const ACTIVE_FINANCE_WORKSPACE_ID_KEY = "activeFinanceWorkspaceId";
+export const FINANCE_WORKSPACES_KEY = "financeWorkspaces";
+// Aliases for compatibility
+export const ACTIVE_FINANCE_UNIT_ID_KEY = ACTIVE_FINANCE_WORKSPACE_ID_KEY;
+export const FINANCE_UNITS_KEY = FINANCE_WORKSPACES_KEY;
 
 interface FinanceContextValue {
+  activeWorkspaceId: number | null;
+  activeWorkspace: FinanceWorkspace | null;
+  workspaces: FinanceWorkspace[];
+  // Backwards compatibility properties
   activeUnitId: number | null;
-  activeUnit: FinanceUnit | null;
-  units: FinanceUnit[];
+  activeUnit: FinanceWorkspace | null;
+  units: FinanceWorkspace[];
   isLoading: boolean;
   hasNoAccess: boolean;
+  switchWorkspace: (workspaceId: number) => Promise<void>;
   switchUnit: (unitId: number) => Promise<void>;
+  refreshWorkspaces: () => Promise<void>;
   refreshUnits: () => Promise<void>;
 }
 
@@ -27,124 +36,148 @@ const FinanceContext = createContext<FinanceContextValue | null>(null);
 
 export function FinanceProvider({ children }: { children: ReactNode }) {
   const api = useApi();
-  const [activeUnitId, setActiveUnitId] = useState<number | null>(null);
-  const [activeUnit, setActiveUnit] = useState<FinanceUnit | null>(null);
-  const [units, setUnits] = useState<FinanceUnit[]>([]);
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState<number | null>(
+    null,
+  );
+  const [activeWorkspace, setActiveWorkspace] =
+    useState<FinanceWorkspace | null>(null);
+  const [workspaces, setWorkspaces] = useState<FinanceWorkspace[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasNoAccess, setHasNoAccess] = useState(false);
 
-  const activateUnit = useCallback(
-    async (unit: FinanceUnit) => {
+  const activateWorkspace = useCallback(
+    async (workspace: FinanceWorkspace) => {
       try {
         await api.POST("/fin/activate", {
           body: {
-            parishId: unit.parishId,
-            unitId: unit.id,
+            parishId: workspace.parishId,
+            workspaceId: workspace.id,
           },
         });
       } catch (err) {
-        console.error("Failed to activate finance unit context:", err);
+        console.error("Failed to activate finance workspace context:", err);
       }
     },
     [api],
   );
 
-  const initUnits = useCallback(async () => {
+  const initWorkspaces = useCallback(async () => {
     setIsLoading(true);
     setHasNoAccess(false);
 
-    const storedUnitIdStr = localStorage.getItem(ACTIVE_FINANCE_UNIT_ID_KEY);
-    const storedUnitsStr = localStorage.getItem(FINANCE_UNITS_KEY);
+    const storedWorkspaceIdStr =
+      localStorage.getItem(ACTIVE_FINANCE_WORKSPACE_ID_KEY) ||
+      localStorage.getItem("activeFinanceUnitId");
+    const storedWorkspacesStr =
+      localStorage.getItem(FINANCE_WORKSPACES_KEY) ||
+      localStorage.getItem("financeUnits");
 
-    let parsedStoredUnits: FinanceUnit[] | null = null;
-    if (storedUnitsStr) {
+    let parsedStoredWorkspaces: FinanceWorkspace[] | null = null;
+    if (storedWorkspacesStr) {
       try {
-        parsedStoredUnits = JSON.parse(storedUnitsStr) as FinanceUnit[];
+        parsedStoredWorkspaces = JSON.parse(
+          storedWorkspacesStr,
+        ) as FinanceWorkspace[];
       } catch {
-        parsedStoredUnits = null;
+        parsedStoredWorkspaces = null;
       }
     }
 
-    if (storedUnitIdStr && parsedStoredUnits && parsedStoredUnits.length > 0) {
-      const storedId = Number(storedUnitIdStr);
-      const matchedUnit = parsedStoredUnits.find((u) => u.id === storedId);
+    if (
+      storedWorkspaceIdStr &&
+      parsedStoredWorkspaces &&
+      parsedStoredWorkspaces.length > 0
+    ) {
+      const storedId = Number(storedWorkspaceIdStr);
+      const matched = parsedStoredWorkspaces.find((w) => w.id === storedId);
 
-      if (matchedUnit) {
-        setUnits(parsedStoredUnits);
-        setActiveUnitId(matchedUnit.id);
-        setActiveUnit(matchedUnit);
-        await activateUnit(matchedUnit);
+      if (matched) {
+        setWorkspaces(parsedStoredWorkspaces);
+        setActiveWorkspaceId(matched.id);
+        setActiveWorkspace(matched);
+        await activateWorkspace(matched);
         setIsLoading(false);
         return;
       }
     }
 
-    // Fallback: Fetch accessible units from API
+    // Fallback: Fetch accessible workspaces from API
     try {
-      const res = await api.GET("/fin/units");
-      const fetchedUnits = (res.data?.data ?? []) as FinanceUnit[];
+      const res = await api.GET("/fin/workspaces");
+      const fetchedWorkspaces = (res.data?.data ?? []) as FinanceWorkspace[];
 
-      if (fetchedUnits.length === 0) {
-        setUnits([]);
-        setActiveUnitId(null);
-        setActiveUnit(null);
+      if (fetchedWorkspaces.length === 0) {
+        setWorkspaces([]);
+        setActiveWorkspaceId(null);
+        setActiveWorkspace(null);
         setHasNoAccess(true);
         setIsLoading(false);
         return;
       }
 
-      const firstUnit = fetchedUnits[0];
-      setUnits(fetchedUnits);
-      setActiveUnitId(firstUnit.id);
-      setActiveUnit(firstUnit);
+      const firstWorkspace = fetchedWorkspaces[0];
+      setWorkspaces(fetchedWorkspaces);
+      setActiveWorkspaceId(firstWorkspace.id);
+      setActiveWorkspace(firstWorkspace);
 
-      localStorage.setItem(ACTIVE_FINANCE_UNIT_ID_KEY, String(firstUnit.id));
-      localStorage.setItem(FINANCE_UNITS_KEY, JSON.stringify(fetchedUnits));
+      localStorage.setItem(
+        ACTIVE_FINANCE_WORKSPACE_ID_KEY,
+        String(firstWorkspace.id),
+      );
+      localStorage.setItem(
+        FINANCE_WORKSPACES_KEY,
+        JSON.stringify(fetchedWorkspaces),
+      );
 
-      await activateUnit(firstUnit);
+      await activateWorkspace(firstWorkspace);
     } catch (err) {
-      console.error("Failed to fetch finance units:", err);
+      console.error("Failed to fetch finance workspaces:", err);
       setHasNoAccess(true);
     } finally {
       setIsLoading(false);
     }
-  }, [api, activateUnit]);
+  }, [api, activateWorkspace]);
 
   const { activeModule } = useActiveModule();
 
   useEffect(() => {
     if (activeModule?.id === "fin") {
-      void initUnits();
+      void initWorkspaces();
     } else {
       setIsLoading(false);
       setHasNoAccess(false);
     }
-  }, [activeModule?.id, initUnits]);
+  }, [activeModule?.id, initWorkspaces]);
 
-  const switchUnit = useCallback(
-    async (unitId: number) => {
-      const targetUnit = units.find((u) => u.id === unitId);
-      if (!targetUnit) return;
+  const switchWorkspace = useCallback(
+    async (workspaceId: number) => {
+      const target = workspaces.find((w) => w.id === workspaceId);
+      if (!target) return;
 
-      setActiveUnitId(targetUnit.id);
-      setActiveUnit(targetUnit);
-      localStorage.setItem(ACTIVE_FINANCE_UNIT_ID_KEY, String(targetUnit.id));
+      setActiveWorkspaceId(target.id);
+      setActiveWorkspace(target);
+      localStorage.setItem(ACTIVE_FINANCE_WORKSPACE_ID_KEY, String(target.id));
 
-      await activateUnit(targetUnit);
+      await activateWorkspace(target);
     },
-    [units, activateUnit],
+    [workspaces, activateWorkspace],
   );
 
   return (
     <FinanceContext.Provider
       value={{
-        activeUnitId,
-        activeUnit,
-        units,
+        activeWorkspaceId,
+        activeWorkspace,
+        workspaces,
+        activeUnitId: activeWorkspaceId,
+        activeUnit: activeWorkspace,
+        units: workspaces,
         isLoading,
         hasNoAccess,
-        switchUnit,
-        refreshUnits: initUnits,
+        switchWorkspace,
+        switchUnit: switchWorkspace,
+        refreshWorkspaces: initWorkspaces,
+        refreshUnits: initWorkspaces,
       }}
     >
       {children}

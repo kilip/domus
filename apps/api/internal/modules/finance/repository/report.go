@@ -14,7 +14,7 @@ import (
 	"github.com/paroki/domus/api/ent/posting"
 	"github.com/paroki/domus/api/ent/predicate"
 	"github.com/paroki/domus/api/ent/transaction"
-	entunit "github.com/paroki/domus/api/ent/unit"
+	entworkspace "github.com/paroki/domus/api/ent/workspace"
 	"github.com/paroki/domus/api/internal/modules/finance/model"
 )
 
@@ -36,7 +36,7 @@ func (r ReportRepository) GetAccount(ctx context.Context, accountID uuid.UUID) (
 		Where(
 			account.IDEQ(accountID),
 			account.HasParishWith(parish.IDEQ(fc.ParishID)),
-			account.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+			account.HasWorkspaceWith(entworkspace.IDEQ(fc.WorkspaceID)),
 		).
 		Only(ctx)
 }
@@ -46,7 +46,7 @@ func (r ReportRepository) ListAccounts(ctx context.Context) ([]*ent.Account, err
 	return r.entcli.Account.Query().
 		Where(
 			account.HasParishWith(parish.IDEQ(fc.ParishID)),
-			account.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+			account.HasWorkspaceWith(entworkspace.IDEQ(fc.WorkspaceID)),
 		).
 		WithParent().
 		All(ctx)
@@ -60,12 +60,12 @@ func (r ReportRepository) forEachPosting(ctx context.Context, pred predicate.Pos
 			Where(
 				posting.HasAccountWith(
 					account.HasParishWith(parish.IDEQ(fc.ParishID)),
-					account.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+					account.HasWorkspaceWith(entworkspace.IDEQ(fc.WorkspaceID)),
 				),
 				posting.HasEntryWith(
 					entry.HasTransactionWith(
 						transaction.HasParishWith(parish.IDEQ(fc.ParishID)),
-						transaction.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+						transaction.HasWorkspaceWith(entworkspace.IDEQ(fc.WorkspaceID)),
 					),
 				),
 			)
@@ -79,7 +79,7 @@ func (r ReportRepository) forEachPosting(ctx context.Context, pred predicate.Pos
 			WithAccount().
 			WithEntry(func(eq *ent.EntryQuery) {
 				eq.WithTransaction(func(tq *ent.TransactionQuery) {
-					tq.WithUnit()
+					tq.WithWorkspace()
 				})
 			}).
 			Order(ent.Asc(posting.FieldID)).
@@ -110,12 +110,12 @@ func (r ReportRepository) forEachPostingForAccount(ctx context.Context, accountI
 				posting.HasAccountWith(
 					account.IDEQ(accountID),
 					account.HasParishWith(parish.IDEQ(fc.ParishID)),
-					account.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+					account.HasWorkspaceWith(entworkspace.IDEQ(fc.WorkspaceID)),
 				),
 				posting.HasEntryWith(
 					entry.HasTransactionWith(
 						transaction.HasParishWith(parish.IDEQ(fc.ParishID)),
-						transaction.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+						transaction.HasWorkspaceWith(entworkspace.IDEQ(fc.WorkspaceID)),
 					),
 				),
 			)
@@ -199,12 +199,12 @@ func (r ReportRepository) GetLedger(
 			posting.HasAccountWith(
 				account.IDEQ(acc.ID),
 				account.HasParishWith(parish.IDEQ(fc.ParishID)),
-				account.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+				account.HasWorkspaceWith(entworkspace.IDEQ(fc.WorkspaceID)),
 			),
 			posting.HasEntryWith(
 				entry.HasTransactionWith(
 					transaction.HasParishWith(parish.IDEQ(fc.ParishID)),
-					transaction.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+					transaction.HasWorkspaceWith(entworkspace.IDEQ(fc.WorkspaceID)),
 				),
 				entry.DateGTE(from),
 				entry.DateLTE(to),

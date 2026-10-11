@@ -1,8 +1,8 @@
 // Package attachment provides reusable file attachments for any module.
 //
 // An owning module mounts the routes with Mount, supplying an OwnerResolver
-// that maps (parishId, ownerId) to the owner's unit. Permission is checked
-// at the owner's unit scope through Casbin.
+// that maps (parishId, ownerId) to the owner's workspace. Permission is checked
+// at the owner's workspace scope through Casbin.
 package attachment
 
 import (
@@ -75,7 +75,7 @@ func ownerFrom(c fiber.Ctx) Owner {
 	return o
 }
 
-// guard resolves the owner and checks the permission at the owner's unit scope.
+// guard resolves the owner and checks the permission at the owner's workspace scope.
 func (m Module) guard(spec Spec, act authz.Action) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		var parishID int
@@ -99,7 +99,7 @@ func (m Module) guard(spec Spec, act authz.Action) fiber.Handler {
 		}
 
 		user := core.UserFromContext(c)
-		scope := authz.Scope{Type: authz.ScopeUnit, ID: int64(owner.UnitID)}
+		scope := authz.Scope{Type: authz.ScopeWorkspace, ID: int64(owner.WorkspaceID)}
 		ok, err := m.config.Authz.Can(c.Context(), user.ID.String(), scope, spec.Resource, act)
 		if err != nil {
 			return err

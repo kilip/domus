@@ -45,8 +45,6 @@ const (
 	EdgeParent = "parent"
 	// EdgeChildren holds the string denoting the children edge name in mutations.
 	EdgeChildren = "children"
-	// EdgeUnit holds the string denoting the unit edge name in mutations.
-	EdgeUnit = "unit"
 	// Table holds the table name of the territory in the database.
 	Table = "territories"
 	// CreatorTable is the table that holds the creator relation/edge.
@@ -78,13 +76,6 @@ const (
 	ChildrenTable = "territories"
 	// ChildrenColumn is the table column denoting the children relation/edge.
 	ChildrenColumn = "territory_children"
-	// UnitTable is the table that holds the unit relation/edge.
-	UnitTable = "territories"
-	// UnitInverseTable is the table name for the Unit entity.
-	// It exists in this package in order to avoid circular dependency with the "unit" package.
-	UnitInverseTable = "units"
-	// UnitColumn is the table column denoting the unit relation/edge.
-	UnitColumn = "unit_territory"
 )
 
 // Columns holds all SQL columns for territory fields.
@@ -107,7 +98,6 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"parish_territories",
 	"territory_children",
-	"unit_territory",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -263,13 +253,6 @@ func ByChildren(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newChildrenStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-
-// ByUnitField orders the results by unit field.
-func ByUnitField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newUnitStep(), sql.OrderByField(field, opts...))
-	}
-}
 func newCreatorStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -303,12 +286,5 @@ func newChildrenStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(Table, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, ChildrenTable, ChildrenColumn),
-	)
-}
-func newUnitStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(UnitInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, true, UnitTable, UnitColumn),
 	)
 }

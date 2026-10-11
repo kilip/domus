@@ -64,10 +64,10 @@ type ScopeType string
 
 // ScopeType values.
 const (
-	ScopeTypeSystem  ScopeType = "system"
-	ScopeTypeDiocese ScopeType = "diocese"
-	ScopeTypeParish  ScopeType = "parish"
-	ScopeTypeUnit    ScopeType = "unit"
+	ScopeTypeSystem    ScopeType = "system"
+	ScopeTypeDiocese   ScopeType = "diocese"
+	ScopeTypeParish    ScopeType = "parish"
+	ScopeTypeWorkspace ScopeType = "workspace"
 )
 
 func (st ScopeType) String() string {
@@ -77,7 +77,7 @@ func (st ScopeType) String() string {
 // ScopeTypeValidator is a validator for the "scope_type" field enum values. It is called by the builders before save.
 func ScopeTypeValidator(st ScopeType) error {
 	switch st {
-	case ScopeTypeSystem, ScopeTypeDiocese, ScopeTypeParish, ScopeTypeUnit:
+	case ScopeTypeSystem, ScopeTypeDiocese, ScopeTypeParish, ScopeTypeWorkspace:
 		return nil
 	default:
 		return fmt.Errorf("membership: invalid enum value for scope_type field: %q", st)

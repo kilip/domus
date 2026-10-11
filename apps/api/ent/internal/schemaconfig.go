@@ -17,8 +17,8 @@ type SchemaConfig struct {
 	Posting     string // Posting table.
 	Territory   string // Territory table.
 	Transaction string // Transaction table.
-	Unit        string // Unit table.
 	User        string // User table.
+	Workspace   string // Workspace table.
 }
 
 type schemaCtxKey struct{}

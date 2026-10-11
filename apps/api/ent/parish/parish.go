@@ -30,8 +30,8 @@ const (
 	EdgeDiocese = "diocese"
 	// EdgeTerritories holds the string denoting the territories edge name in mutations.
 	EdgeTerritories = "territories"
-	// EdgeUnits holds the string denoting the units edge name in mutations.
-	EdgeUnits = "units"
+	// EdgeWorkspaces holds the string denoting the workspaces edge name in mutations.
+	EdgeWorkspaces = "workspaces"
 	// Table holds the table name of the parish in the database.
 	Table = "parishes"
 	// DioceseTable is the table that holds the diocese relation/edge.
@@ -48,13 +48,13 @@ const (
 	TerritoriesInverseTable = "territories"
 	// TerritoriesColumn is the table column denoting the territories relation/edge.
 	TerritoriesColumn = "parish_territories"
-	// UnitsTable is the table that holds the units relation/edge.
-	UnitsTable = "units"
-	// UnitsInverseTable is the table name for the Unit entity.
-	// It exists in this package in order to avoid circular dependency with the "unit" package.
-	UnitsInverseTable = "units"
-	// UnitsColumn is the table column denoting the units relation/edge.
-	UnitsColumn = "parish_units"
+	// WorkspacesTable is the table that holds the workspaces relation/edge.
+	WorkspacesTable = "workspaces"
+	// WorkspacesInverseTable is the table name for the Workspace entity.
+	// It exists in this package in order to avoid circular dependency with the "workspace" package.
+	WorkspacesInverseTable = "workspaces"
+	// WorkspacesColumn is the table column denoting the workspaces relation/edge.
+	WorkspacesColumn = "parish_workspaces"
 )
 
 // Columns holds all SQL columns for parish fields.
@@ -159,17 +159,17 @@ func ByTerritories(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByUnitsCount orders the results by units count.
-func ByUnitsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByWorkspacesCount orders the results by workspaces count.
+func ByWorkspacesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newUnitsStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newWorkspacesStep(), opts...)
 	}
 }
 
-// ByUnits orders the results by units terms.
-func ByUnits(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByWorkspaces orders the results by workspaces terms.
+func ByWorkspaces(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newUnitsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newWorkspacesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newDioceseStep() *sqlgraph.Step {
@@ -186,10 +186,10 @@ func newTerritoriesStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, TerritoriesTable, TerritoriesColumn),
 	)
 }
-func newUnitsStep() *sqlgraph.Step {
+func newWorkspacesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(UnitsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, UnitsTable, UnitsColumn),
+		sqlgraph.To(WorkspacesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, WorkspacesTable, WorkspacesColumn),
 	)
 }

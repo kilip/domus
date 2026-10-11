@@ -11,7 +11,7 @@ import (
 //
 // A Territory is a geographic area of a parish (e.g. deanery, station, region,
 // neighborhood). It answers "where does a parishioner live?". Organizational bodies
-// (boards, sections, categorical groups) are modeled by Unit, not here.
+// (boards, sections, categorical groups) are modeled by Workspace, not here.
 //
 // Rules that cannot be expressed in the database are enforced in the service
 // layer:
@@ -54,11 +54,6 @@ func (Territory) Edges() []ent.Edge {
 		// Geographic tree (adjacency list, at most 3 levels deep).
 		edge.To("children", Territory.Type).
 			From("parent").
-			Unique(),
-		// Organizational body of this territory (Unit.kind = territorial).
-		// A territory has at most one such unit.
-		edge.From("unit", Unit.Type).
-			Ref("territory").
 			Unique(),
 	}
 }

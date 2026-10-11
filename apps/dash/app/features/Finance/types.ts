@@ -1,7 +1,7 @@
-export interface FinanceUnit {
+export interface FinanceWorkspace {
   id: number;
   name: string;
-  code?: string;
-  kind: string;
   parishId: number;
 }
+
+export type FinanceUnit = FinanceWorkspace;

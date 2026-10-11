@@ -18,23 +18,23 @@ import (
 	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/predicate"
 	"github.com/paroki/domus/api/ent/transaction"
-	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
+	"github.com/paroki/domus/api/ent/workspace"
 )
 
 // TransactionQuery is the builder for querying Transaction entities.
 type TransactionQuery struct {
 	config
-	ctx         *QueryContext
-	order       []transaction.OrderOption
-	inters      []Interceptor
-	predicates  []predicate.Transaction
-	withCreator *UserQuery
-	withUpdater *UserQuery
-	withParish  *ParishQuery
-	withUnit    *UnitQuery
-	withEntries *EntryQuery
-	withFKs     bool
+	ctx           *QueryContext
+	order         []transaction.OrderOption
+	inters        []Interceptor
+	predicates    []predicate.Transaction
+	withCreator   *UserQuery
+	withUpdater   *UserQuery
+	withParish    *ParishQuery
+	withWorkspace *WorkspaceQuery
+	withEntries   *EntryQuery
+	withFKs       bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -146,9 +146,9 @@ func (_q *TransactionQuery) QueryParish() *ParishQuery {
 	return query
 }
 
-// QueryUnit chains the current query on the "unit" edge.
-func (_q *TransactionQuery) QueryUnit() *UnitQuery {
-	query := (&UnitClient{config: _q.config}).Query()
+// QueryWorkspace chains the current query on the "workspace" edge.
+func (_q *TransactionQuery) QueryWorkspace() *WorkspaceQuery {
+	query := (&WorkspaceClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -159,11 +159,11 @@ func (_q *TransactionQuery) QueryUnit() *UnitQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(transaction.Table, transaction.FieldID, selector),
-			sqlgraph.To(unit.Table, unit.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, transaction.UnitTable, transaction.UnitColumn),
+			sqlgraph.To(workspace.Table, workspace.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, transaction.WorkspaceTable, transaction.WorkspaceColumn),
 		)
 		schemaConfig := _q.schemaConfig
-		step.To.Schema = schemaConfig.Unit
+		step.To.Schema = schemaConfig.Workspace
 		step.Edge.Schema = schemaConfig.Transaction
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -383,16 +383,16 @@ func (_q *TransactionQuery) Clone() *TransactionQuery {
 		return nil
 	}
 	return &TransactionQuery{
-		config:      _q.config,
-		ctx:         _q.ctx.Clone(),
-		order:       append([]transaction.OrderOption{}, _q.order...),
-		inters:      append([]Interceptor{}, _q.inters...),
-		predicates:  append([]predicate.Transaction{}, _q.predicates...),
-		withCreator: _q.withCreator.Clone(),
-		withUpdater: _q.withUpdater.Clone(),
-		withParish:  _q.withParish.Clone(),
-		withUnit:    _q.withUnit.Clone(),
-		withEntries: _q.withEntries.Clone(),
+		config:        _q.config,
+		ctx:           _q.ctx.Clone(),
+		order:         append([]transaction.OrderOption{}, _q.order...),
+		inters:        append([]Interceptor{}, _q.inters...),
+		predicates:    append([]predicate.Transaction{}, _q.predicates...),
+		withCreator:   _q.withCreator.Clone(),
+		withUpdater:   _q.withUpdater.Clone(),
+		withParish:    _q.withParish.Clone(),
+		withWorkspace: _q.withWorkspace.Clone(),
+		withEntries:   _q.withEntries.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -432,14 +432,14 @@ func (_q *TransactionQuery) WithParish(opts ...func(*ParishQuery)) *TransactionQ
 	return _q
 }
 
-// WithUnit tells the query-builder to eager-load the nodes that are connected to
-// the "unit" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *TransactionQuery) WithUnit(opts ...func(*UnitQuery)) *TransactionQuery {
-	query := (&UnitClient{config: _q.config}).Query()
+// WithWorkspace tells the query-builder to eager-load the nodes that are connected to
+// the "workspace" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TransactionQuery) WithWorkspace(opts ...func(*WorkspaceQuery)) *TransactionQuery {
+	query := (&WorkspaceClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withUnit = query
+	_q.withWorkspace = query
 	return _q
 }
 
@@ -537,11 +537,11 @@ func (_q *TransactionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 			_q.withCreator != nil,
 			_q.withUpdater != nil,
 			_q.withParish != nil,
-			_q.withUnit != nil,
+			_q.withWorkspace != nil,
 			_q.withEntries != nil,
 		}
 	)
-	if _q.withParish != nil || _q.withUnit != nil {
+	if _q.withParish != nil || _q.withWorkspace != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -585,9 +585,9 @@ func (_q *TransactionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 			return nil, err
 		}
 	}
-	if query := _q.withUnit; query != nil {
-		if err := _q.loadUnit(ctx, query, nodes, nil,
-			func(n *Transaction, e *Unit) { n.Edges.Unit = e }); err != nil {
+	if query := _q.withWorkspace; query != nil {
+		if err := _q.loadWorkspace(ctx, query, nodes, nil,
+			func(n *Transaction, e *Workspace) { n.Edges.Workspace = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -691,14 +691,14 @@ func (_q *TransactionQuery) loadParish(ctx context.Context, query *ParishQuery, 
 	}
 	return nil
 }
-func (_q *TransactionQuery) loadUnit(ctx context.Context, query *UnitQuery, nodes []*Transaction, init func(*Transaction), assign func(*Transaction, *Unit)) error {
+func (_q *TransactionQuery) loadWorkspace(ctx context.Context, query *WorkspaceQuery, nodes []*Transaction, init func(*Transaction), assign func(*Transaction, *Workspace)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Transaction)
 	for i := range nodes {
-		if nodes[i].transaction_unit == nil {
+		if nodes[i].transaction_workspace == nil {
 			continue
 		}
-		fk := *nodes[i].transaction_unit
+		fk := *nodes[i].transaction_workspace
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -707,7 +707,7 @@ func (_q *TransactionQuery) loadUnit(ctx context.Context, query *UnitQuery, node
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(unit.IDIn(ids...))
+	query.Where(workspace.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -715,7 +715,7 @@ func (_q *TransactionQuery) loadUnit(ctx context.Context, query *UnitQuery, node
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "transaction_unit" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "transaction_workspace" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

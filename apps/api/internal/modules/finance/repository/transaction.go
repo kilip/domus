@@ -17,7 +17,7 @@ import (
 	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/posting"
 	"github.com/paroki/domus/api/ent/transaction"
-	entunit "github.com/paroki/domus/api/ent/unit"
+	entworkspace "github.com/paroki/domus/api/ent/workspace"
 	"github.com/paroki/domus/api/internal/core"
 	"github.com/paroki/domus/api/internal/modules/attachment"
 	"github.com/paroki/domus/api/internal/modules/finance/model"
@@ -52,8 +52,8 @@ func toTransactionResponse(tx *ent.Transaction) model.TransactionResponse {
 		Entries:     make([]model.EntryResponse, 0),
 		Attachments: make([]attachment.Response, 0),
 	}
-	if tx.Edges.Unit != nil {
-		resp.UnitID = &tx.Edges.Unit.ID
+	if tx.Edges.Workspace != nil {
+		resp.WorkspaceID = &tx.Edges.Workspace.ID
 	}
 	if tx.Edges.Creator != nil {
 		resp.CreatedBy = toCoreUser(tx.Edges.Creator)
@@ -117,8 +117,8 @@ func toTransactionSummary(tx *ent.Transaction) model.TransactionSummary {
 		Description: tx.Description,
 		TotalAmount: totalAmount,
 	}
-	if tx.Edges.Unit != nil {
-		summary.UnitID = &tx.Edges.Unit.ID
+	if tx.Edges.Workspace != nil {
+		summary.WorkspaceID = &tx.Edges.Workspace.ID
 	}
 	return summary
 }
@@ -179,8 +179,8 @@ func (r TransactionRepository) Create(ctx context.Context, req model.CreateTrans
 			if fc.ParishID > 0 {
 				txBuilder.SetParishID(fc.ParishID)
 			}
-			if fc.UnitID > 0 {
-				txBuilder.SetUnitID(fc.UnitID)
+			if fc.WorkspaceID > 0 {
+				txBuilder.SetWorkspaceID(fc.WorkspaceID)
 			}
 
 			if req.Description != nil && *req.Description != "" {
@@ -232,7 +232,7 @@ func (r TransactionRepository) Create(ctx context.Context, req model.CreateTrans
 			loaded, err := tx.Transaction.Query().
 				Where(transaction.IDEQ(txEnt.ID)).
 				WithParish().
-				WithUnit().
+				WithWorkspace().
 				WithCreator().
 				WithEntries(func(eq *ent.EntryQuery) {
 					eq.WithPostings(func(pq *ent.PostingQuery) {
@@ -270,10 +270,10 @@ func (r TransactionRepository) GetByID(ctx context.Context, id uuid.UUID) (*mode
 		Where(
 			transaction.IDEQ(id),
 			transaction.HasParishWith(parish.IDEQ(fc.ParishID)),
-			transaction.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+			transaction.HasWorkspaceWith(entworkspace.IDEQ(fc.WorkspaceID)),
 		).
 		WithParish().
-		WithUnit().
+		WithWorkspace().
 		WithCreator().
 		WithEntries(func(eq *ent.EntryQuery) {
 			eq.WithPostings(func(pq *ent.PostingQuery) {
@@ -299,7 +299,7 @@ func (r TransactionRepository) Search(ctx context.Context, req model.SearchTrans
 	q := r.entcli.Transaction.Query().
 		Where(
 			transaction.HasParishWith(parish.IDEQ(fc.ParishID)),
-			transaction.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+			transaction.HasWorkspaceWith(entworkspace.IDEQ(fc.WorkspaceID)),
 		)
 
 	if req.From != nil && *req.From != "" {
@@ -362,7 +362,7 @@ func (r TransactionRepository) Search(ctx context.Context, req model.SearchTrans
 
 	q = q.Order(ent.Desc(transaction.FieldDate), ent.Desc(transaction.FieldID)).
 		Limit(limit + 1).
-		WithUnit().
+		WithWorkspace().
 		WithEntries(func(eq *ent.EntryQuery) {
 			eq.WithPostings().WithReverses()
 		})

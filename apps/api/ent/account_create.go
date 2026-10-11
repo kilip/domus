@@ -16,8 +16,8 @@ import (
 	"github.com/paroki/domus/api/ent/account"
 	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/posting"
-	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
+	"github.com/paroki/domus/api/ent/workspace"
 )
 
 // AccountCreate is the builder for creating a Account entity.
@@ -195,15 +195,15 @@ func (_c *AccountCreate) SetParish(v *Parish) *AccountCreate {
 	return _c.SetParishID(v.ID)
 }
 
-// SetUnitID sets the "unit" edge to the Unit entity by ID.
-func (_c *AccountCreate) SetUnitID(id int) *AccountCreate {
-	_c.mutation.SetUnitID(id)
+// SetWorkspaceID sets the "workspace" edge to the Workspace entity by ID.
+func (_c *AccountCreate) SetWorkspaceID(id int) *AccountCreate {
+	_c.mutation.SetWorkspaceID(id)
 	return _c
 }
 
-// SetUnit sets the "unit" edge to the Unit entity.
-func (_c *AccountCreate) SetUnit(v *Unit) *AccountCreate {
-	return _c.SetUnitID(v.ID)
+// SetWorkspace sets the "workspace" edge to the Workspace entity.
+func (_c *AccountCreate) SetWorkspace(v *Workspace) *AccountCreate {
+	return _c.SetWorkspaceID(v.ID)
 }
 
 // SetParentID sets the "parent" edge to the Account entity by ID.
@@ -378,8 +378,8 @@ func (_c *AccountCreate) check() error {
 	if len(_c.mutation.ParishIDs()) == 0 {
 		return &ValidationError{Name: "parish", err: errors.New(`ent: missing required edge "Account.parish"`)}
 	}
-	if len(_c.mutation.UnitIDs()) == 0 {
-		return &ValidationError{Name: "unit", err: errors.New(`ent: missing required edge "Account.unit"`)}
+	if len(_c.mutation.WorkspaceIDs()) == 0 {
+		return &ValidationError{Name: "workspace", err: errors.New(`ent: missing required edge "Account.workspace"`)}
 	}
 	return nil
 }
@@ -512,22 +512,22 @@ func (_c *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 		_node.account_parish = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.UnitIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.WorkspaceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   account.UnitTable,
-			Columns: []string{account.UnitColumn},
+			Table:   account.WorkspaceTable,
+			Columns: []string{account.WorkspaceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workspace.FieldID, field.TypeInt),
 			},
 		}
 		edge.Schema = _c.schemaConfig.Account
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.account_unit = &nodes[0]
+		_node.account_workspace = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.ParentIDs(); len(nodes) > 0 {

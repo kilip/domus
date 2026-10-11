@@ -51,7 +51,7 @@ func (s *InvariantsSuite) createAccountWithUnit(parishID int, unitID int, code, 
 		SetPostable(postable).
 		SetStatus(account.StatusActive).
 		SetParishID(parishID).
-		SetUnitID(unitID).
+		SetWorkspaceID(unitID).
 		Save(ctx)
 	require.NoError(s.T(), err)
 	return acc

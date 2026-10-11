@@ -26,8 +26,8 @@ var (
 	ErrAccountCycleDetected         = errors.New("ACCOUNT_CYCLE_DETECTED")
 
 	// Activate
-	ErrParishNotFound = errors.New("PARISH_NOT_FOUND")
-	ErrUnitNotFound   = errors.New("UNIT_NOT_FOUND")
+	ErrParishNotFound    = errors.New("PARISH_NOT_FOUND")
+	ErrWorkspaceNotFound = errors.New("WORKSPACE_NOT_FOUND")
 
 	// Report
 	ErrAccountIdRequired           = errors.New("ACCOUNT_ID_REQUIRED")
@@ -46,18 +46,18 @@ var (
 	ErrInvalidParentAccountIDParam = errors.New("INVALID_PARENT_ACCOUNT_ID_PARAM")
 
 	// Transaction
-	ErrInvalidDateFormat        = errors.New("INVALID_DATE_FORMAT")
-	ErrInvalidTxNumberFormat    = errors.New("INVALID_TX_NUMBER_FORMAT")
-	ErrInvalidPostingSide       = errors.New("INVALID_POSTING_SIDE")
-	ErrTxMissingPostings        = errors.New("TX_MISSING_POSTINGS")
-	ErrTxUnbalanced             = errors.New("TX_UNBALANCED")
-	ErrAccountsNotFound         = errors.New("ACCOUNTS_NOT_FOUND")
-	ErrAccountNotActive         = errors.New("ACCOUNT_NOT_ACTIVE")
-	ErrAccountIsHeader          = errors.New("ACCOUNT_IS_HEADER")
-	ErrTransactionHasNoUnit     = errors.New("TRANSACTION_HAS_NO_UNIT")
-	ErrTxNumberExists           = errors.New("TX_NUMBER_EXISTS")
-	ErrTxNumberAllocationFailed = errors.New("TX_NUMBER_ALLOCATION_FAILED")
-	ErrTxNotPosted              = errors.New("TX_NOT_POSTED")
+	ErrInvalidDateFormat         = errors.New("INVALID_DATE_FORMAT")
+	ErrInvalidTxNumberFormat     = errors.New("INVALID_TX_NUMBER_FORMAT")
+	ErrInvalidPostingSide        = errors.New("INVALID_POSTING_SIDE")
+	ErrTxMissingPostings         = errors.New("TX_MISSING_POSTINGS")
+	ErrTxUnbalanced              = errors.New("TX_UNBALANCED")
+	ErrAccountsNotFound          = errors.New("ACCOUNTS_NOT_FOUND")
+	ErrAccountNotActive          = errors.New("ACCOUNT_NOT_ACTIVE")
+	ErrAccountIsHeader           = errors.New("ACCOUNT_IS_HEADER")
+	ErrTransactionHasNoWorkspace = errors.New("TRANSACTION_HAS_NO_WORKSPACE")
+	ErrTxNumberExists            = errors.New("TX_NUMBER_EXISTS")
+	ErrTxNumberAllocationFailed  = errors.New("TX_NUMBER_ALLOCATION_FAILED")
+	ErrTxNotPosted               = errors.New("TX_NOT_POSTED")
 )
 
 func init() {
@@ -80,7 +80,7 @@ func init() {
 
 	// Activate
 	core.RegisterError(ErrParishNotFound, fiber.StatusBadRequest, "parish not found")
-	core.RegisterError(ErrUnitNotFound, fiber.StatusBadRequest, "unit not found or does not belong to specified parish")
+	core.RegisterError(ErrWorkspaceNotFound, fiber.StatusBadRequest, "workspace not found or does not belong to specified parish")
 
 	// Report
 	core.RegisterError(ErrAccountIdRequired, fiber.StatusBadRequest, "accountId is required")
@@ -107,7 +107,7 @@ func init() {
 	core.RegisterError(ErrAccountsNotFound, fiber.StatusBadRequest, "one or more accounts not found in this parish")
 	core.RegisterError(ErrAccountNotActive, fiber.StatusBadRequest, "account is not active")
 	core.RegisterError(ErrAccountIsHeader, fiber.StatusBadRequest, "account is a header account and cannot accept postings")
-	core.RegisterError(ErrTransactionHasNoUnit, fiber.StatusUnprocessableEntity, "transaction has no unit; attachments require a unit")
+	core.RegisterError(ErrTransactionHasNoWorkspace, fiber.StatusUnprocessableEntity, "transaction has no workspace; attachments require a workspace")
 	core.RegisterError(ErrTxNumberExists, fiber.StatusConflict, "transaction number already exists in this parish")
 	core.RegisterError(ErrTxNumberAllocationFailed, fiber.StatusConflict, "could not allocate transaction number after retries")
 	core.RegisterError(ErrTxNotPosted, fiber.StatusConflict, "transaction is not in posted status")

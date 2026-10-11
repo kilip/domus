@@ -27,7 +27,7 @@ components:
           type: string
         size:
           type: integer
-        unitId:
+        workspaceId:
           type: integer
       type: object
     core.AuthenticatedUser:
@@ -138,11 +138,11 @@ components:
         meta:
           $ref: '#/components/schemas/httpx.Meta'
       type: object
-    httpx.WebResponse-array_model_FinanceUnitResponse:
+    httpx.WebResponse-array_model_FinanceWorkspaceResponse:
       properties:
         data:
           items:
-            $ref: '#/components/schemas/model.FinanceUnitResponse'
+            $ref: '#/components/schemas/model.FinanceWorkspaceResponse'
           type: array
           uniqueItems: false
         meta:
@@ -178,11 +178,11 @@ components:
         meta:
           $ref: '#/components/schemas/httpx.Meta'
       type: object
-    httpx.WebResponse-array_model_UnitResponse:
+    httpx.WebResponse-array_model_WorkspaceResponse:
       properties:
         data:
           items:
-            $ref: '#/components/schemas/model.UnitResponse'
+            $ref: '#/components/schemas/model.WorkspaceResponse'
           type: array
           uniqueItems: false
         meta:
@@ -272,10 +272,10 @@ components:
         meta:
           $ref: '#/components/schemas/httpx.Meta'
       type: object
-    httpx.WebResponse-model_UnitResponse:
+    httpx.WebResponse-model_WorkspaceResponse:
       properties:
         data:
-          $ref: '#/components/schemas/model.UnitResponse'
+          $ref: '#/components/schemas/model.WorkspaceResponse'
         meta:
           $ref: '#/components/schemas/httpx.Meta'
       type: object
@@ -303,28 +303,28 @@ components:
           type: string
         type:
           type: string
-        unitId:
-          type: integer
         updatedAt:
           type: string
+        workspaceId:
+          type: integer
       type: object
     model.ActivateFinanceRequest:
       properties:
         parishId:
           minimum: 1
           type: integer
-        unitId:
+        workspaceId:
           minimum: 1
           type: integer
       required:
       - parishId
-      - unitId
+      - workspaceId
       type: object
     model.ActivateFinanceResponse:
       properties:
         activeParishId:
           type: integer
-        activeUnitId:
+        activeWorkspaceId:
           type: integer
       type: object
     model.CollectionsResponse:
@@ -463,24 +463,12 @@ components:
       - kind
       - postings
       type: object
-    model.CreateUnitRequest:
+    model.CreateWorkspaceRequest:
       properties:
-        code:
-          type: string
         description:
-          type: string
-        kind:
-          enum:
-          - council
-          - territorial
-          - category
-          - section
-          - committee
           type: string
         name:
           type: string
-        parentId:
-          type: integer
         parishId:
           type: integer
         status:
@@ -488,10 +476,7 @@ components:
           - active
           - inactive
           type: string
-        territoryId:
-          type: integer
       required:
-      - kind
       - name
       - parishId
       type: object
@@ -528,14 +513,10 @@ components:
         reversesId:
           type: string
       type: object
-    model.FinanceUnitResponse:
+    model.FinanceWorkspaceResponse:
       properties:
-        code:
-          type: string
         id:
           type: integer
-        kind:
-          type: string
         name:
           type: string
         parishId:
@@ -693,22 +674,16 @@ components:
         to:
           type: string
       type: object
-    model.SearchUnitRequest:
+    model.SearchWorkspaceRequest:
       properties:
         cursor:
           type: string
-        kind:
-          type: string
         limit:
-          type: integer
-        parentId:
           type: integer
         parishId:
           type: integer
         status:
           type: string
-        territoryId:
-          type: integer
       type: object
     model.TerritoryResponse:
       properties:
@@ -732,8 +707,6 @@ components:
           type: integer
         status:
           type: string
-        unitId:
-          type: integer
       type: object
     model.TransactionResponse:
       properties:
@@ -763,7 +736,7 @@ components:
           type: string
         status:
           type: string
-        unitId:
+        workspaceId:
           type: integer
       type: object
     model.TransactionSummary:
@@ -782,7 +755,7 @@ components:
           type: string
         totalAmount:
           type: integer
-        unitId:
+        workspaceId:
           type: integer
       type: object
     model.TrialBalanceResponse:
@@ -819,33 +792,6 @@ components:
         credit:
           type: integer
         debit:
-          type: integer
-      type: object
-    model.UnitResponse:
-      properties:
-        code:
-          type: string
-        description:
-          type: string
-        id:
-          type: integer
-        kind:
-          type: string
-        name:
-          type: string
-        parent:
-          $ref: '#/components/schemas/model.UnitResponse'
-        parentId:
-          type: integer
-        parish:
-          $ref: '#/components/schemas/model.ParishResponse'
-        parishId:
-          type: integer
-        status:
-          type: string
-        territory:
-          $ref: '#/components/schemas/model.TerritoryResponse'
-        territoryId:
           type: integer
       type: object
     model.UpdateAccountRequest:
@@ -932,24 +878,12 @@ components:
       - name
       - parishId
       type: object
-    model.UpdateUnitRequest:
+    model.UpdateWorkspaceRequest:
       properties:
-        code:
-          type: string
         description:
-          type: string
-        kind:
-          enum:
-          - council
-          - territorial
-          - category
-          - section
-          - committee
           type: string
         name:
           type: string
-        parentId:
-          type: integer
         parishId:
           type: integer
         status:
@@ -957,10 +891,7 @@ components:
           - active
           - inactive
           type: string
-        territoryId:
-          type: integer
       required:
-      - kind
       - name
       - parishId
       type: object
@@ -970,6 +901,21 @@ components:
           type: string
         reason:
           maxLength: 500
+          type: string
+      type: object
+    model.WorkspaceResponse:
+      properties:
+        description:
+          type: string
+        id:
+          type: integer
+        name:
+          type: string
+        parish:
+          $ref: '#/components/schemas/model.ParishResponse'
+        parishId:
+          type: integer
+        status:
           type: string
       type: object
   securitySchemes:
@@ -1493,7 +1439,7 @@ paths:
       - Finance Account
   /fin/activate:
     post:
-      description: Set active parish and unit for finance module in user cookie
+      description: Set active parish and workspace for finance module in user cookie
       requestBody:
         content:
           application/json:
@@ -1949,9 +1895,10 @@ paths:
       summary: Search transactions
       tags:
       - Finance Transaction
-  /fin/units:
+  /fin/workspaces:
     get:
-      description: Get list of units accessible to the current user for finance module
+      description: Get list of workspaces accessible to the current user for finance
+        module
       requestBody:
         content:
           application/json:
@@ -1962,7 +1909,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/httpx.WebResponse-array_model_FinanceUnitResponse'
+                $ref: '#/components/schemas/httpx.WebResponse-array_model_FinanceWorkspaceResponse'
           description: OK
         "401":
           content:
@@ -1972,7 +1919,7 @@ paths:
           description: Unauthorized
       security:
       - BearerAuth: []
-      summary: Get accessible finance units
+      summary: Get accessible finance workspaces
       tags:
       - Finance
   /parishes:
@@ -2255,7 +2202,7 @@ paths:
       - Attachment
     post:
       description: Upload a file (PDF, JPEG, PNG, max 10 MiB) attached to an owner
-        record, e.g. a finance transaction. Permission is checked at the owner's unit
+        record, e.g. a finance transaction. Permission is checked at the owner's workspace
         scope.
       parameters:
       - description: Parish ID
@@ -2665,24 +2612,24 @@ paths:
       summary: Search territories
       tags:
       - Territory
-  /units:
+  /workspaces:
     post:
-      description: Create a new unit
+      description: Create a new workspace
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/model.CreateUnitRequest'
-              description: Create unit request
+              $ref: '#/components/schemas/model.CreateWorkspaceRequest'
+              description: Create workspace request
               summary: request
-        description: Create unit request
+        description: Create workspace request
         required: true
       responses:
         "201":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/httpx.WebResponse-model_UnitResponse'
+                $ref: '#/components/schemas/httpx.WebResponse-model_WorkspaceResponse'
           description: Created
         "400":
           content:
@@ -2710,14 +2657,14 @@ paths:
           description: Unprocessable Entity
       security:
       - BearerAuth: []
-      summary: Create unit
+      summary: Create workspace
       tags:
-      - Unit
-  /units/{id}:
+      - Workspace
+  /workspaces/{id}:
     delete:
-      description: Delete unit by ID
+      description: Delete workspace by ID
       parameters:
-      - description: Unit ID
+      - description: Workspace ID
         in: path
         name: id
         required: true
@@ -2752,13 +2699,13 @@ paths:
           description: Not Found
       security:
       - BearerAuth: []
-      summary: Delete unit
+      summary: Delete workspace
       tags:
-      - Unit
+      - Workspace
     get:
-      description: Get unit details by ID
+      description: Get workspace details by ID
       parameters:
-      - description: Unit ID
+      - description: Workspace ID
         in: path
         name: id
         required: true
@@ -2769,7 +2716,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/httpx.WebResponse-model_UnitResponse'
+                $ref: '#/components/schemas/httpx.WebResponse-model_WorkspaceResponse'
           description: OK
         "400":
           content:
@@ -2797,13 +2744,13 @@ paths:
           description: Not Found
       security:
       - BearerAuth: []
-      summary: Get unit by ID
+      summary: Get workspace by ID
       tags:
-      - Unit
+      - Workspace
     put:
-      description: Update unit by ID
+      description: Update workspace by ID
       parameters:
-      - description: Unit ID
+      - description: Workspace ID
         in: path
         name: id
         required: true
@@ -2813,17 +2760,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/model.UpdateUnitRequest'
-              description: Update unit request
+              $ref: '#/components/schemas/model.UpdateWorkspaceRequest'
+              description: Update workspace request
               summary: request
-        description: Update unit request
+        description: Update workspace request
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/httpx.WebResponse-model_UnitResponse'
+                $ref: '#/components/schemas/httpx.WebResponse-model_WorkspaceResponse'
           description: OK
         "400":
           content:
@@ -2857,27 +2804,27 @@ paths:
           description: Unprocessable Entity
       security:
       - BearerAuth: []
-      summary: Update unit
+      summary: Update workspace
       tags:
-      - Unit
-  /units/search:
+      - Workspace
+  /workspaces/search:
     post:
-      description: Search units with filters and cursor pagination
+      description: Search workspaces with filters and cursor pagination
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/model.SearchUnitRequest'
-              description: Search unit request
+              $ref: '#/components/schemas/model.SearchWorkspaceRequest'
+              description: Search workspace request
               summary: request
-        description: Search unit request
+        description: Search workspace request
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/httpx.WebResponse-array_model_UnitResponse'
+                $ref: '#/components/schemas/httpx.WebResponse-array_model_WorkspaceResponse'
           description: OK
         "400":
           content:
@@ -2905,8 +2852,8 @@ paths:
           description: Unprocessable Entity
       security:
       - BearerAuth: []
-      summary: Search units
+      summary: Search workspaces
       tags:
-      - Unit
+      - Workspace
 servers:
 - url: https://api.pkrbt.id/

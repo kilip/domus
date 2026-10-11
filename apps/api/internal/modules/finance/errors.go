@@ -21,8 +21,8 @@ var (
 	ErrAccountCycleDetected         = model.ErrAccountCycleDetected
 
 	// Activate
-	ErrParishNotFound = model.ErrParishNotFound
-	ErrUnitNotFound   = model.ErrUnitNotFound
+	ErrParishNotFound    = model.ErrParishNotFound
+	ErrWorkspaceNotFound = model.ErrWorkspaceNotFound
 
 	// Report
 	ErrAccountIdRequired           = model.ErrAccountIdRequired
@@ -41,16 +41,16 @@ var (
 	ErrInvalidParentAccountIDParam = model.ErrInvalidParentAccountIDParam
 
 	// Transaction
-	ErrInvalidDateFormat        = model.ErrInvalidDateFormat
-	ErrInvalidTxNumberFormat    = model.ErrInvalidTxNumberFormat
-	ErrInvalidPostingSide       = model.ErrInvalidPostingSide
-	ErrTxMissingPostings        = model.ErrTxMissingPostings
-	ErrTxUnbalanced             = model.ErrTxUnbalanced
-	ErrAccountsNotFound         = model.ErrAccountsNotFound
-	ErrAccountNotActive         = model.ErrAccountNotActive
-	ErrAccountIsHeader          = model.ErrAccountIsHeader
-	ErrTransactionHasNoUnit     = model.ErrTransactionHasNoUnit
-	ErrTxNumberExists           = model.ErrTxNumberExists
-	ErrTxNumberAllocationFailed = model.ErrTxNumberAllocationFailed
-	ErrTxNotPosted              = model.ErrTxNotPosted
+	ErrInvalidDateFormat         = model.ErrInvalidDateFormat
+	ErrInvalidTxNumberFormat     = model.ErrInvalidTxNumberFormat
+	ErrInvalidPostingSide        = model.ErrInvalidPostingSide
+	ErrTxMissingPostings         = model.ErrTxMissingPostings
+	ErrTxUnbalanced              = model.ErrTxUnbalanced
+	ErrAccountsNotFound          = model.ErrAccountsNotFound
+	ErrAccountNotActive          = model.ErrAccountNotActive
+	ErrAccountIsHeader           = model.ErrAccountIsHeader
+	ErrTransactionHasNoWorkspace = model.ErrTransactionHasNoWorkspace
+	ErrTxNumberExists            = model.ErrTxNumberExists
+	ErrTxNumberAllocationFailed  = model.ErrTxNumberAllocationFailed
+	ErrTxNotPosted               = model.ErrTxNotPosted
 )

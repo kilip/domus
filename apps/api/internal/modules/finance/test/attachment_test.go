@@ -34,17 +34,17 @@ func (s *AttachmentSuite) grantRole(parishID int, role string) {
 }
 
 func (s *AttachmentSuite) grantUnitRole(unitID int, role string) {
-	s.GrantRole(role, authz.Scope{Type: authz.ScopeUnit, ID: int64(unitID)})
+	s.GrantRole(role, authz.Scope{Type: authz.ScopeWorkspace, ID: int64(unitID)})
 }
 
 func (s *AttachmentSuite) activate(parishID, unitID int) {
 	SetFinanceCookie(&s.ApiTestSuite, parishID, unitID)
 }
 
-// setupTx creates a parish, a unit and a posted transaction in that unit.
+// setupTx creates a parish, a workspace and a posted transaction in that workspace.
 // The user can write finance at parish scope (to create the transaction)
-// and at unit scope (attachments are authorized per unit).
-func (s *AttachmentSuite) setupTx() (*ent.Parish, *ent.Unit, model.TransactionResponse) {
+// and at workspace scope (attachments are authorized per workspace).
+func (s *AttachmentSuite) setupTx() (*ent.Parish, *ent.Workspace, model.TransactionResponse) {
 	parish := CreateTestParish(s.T())
 	writer := authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter)
 	s.grantRole(parish.ID, writer)
@@ -69,7 +69,7 @@ func (s *AttachmentSuite) createAccount(parishID int, unitID int, code string, a
 		SetPostable(postable).
 		SetStatus(account.Status(status)).
 		SetParishID(parishID).
-		SetUnitID(unitID).
+		SetWorkspaceID(unitID).
 		Save(ctx)
 	require.NoError(s.T(), err)
 	return acc
@@ -105,7 +105,7 @@ func (s *AttachmentSuite) TestUpload_PDF_Success() {
 	resp := s.GetResponse().Data
 	s.Equal(tx.ID, resp.OwnerID)
 	s.Equal("transaction", resp.OwnerType)
-	s.Equal(unit.ID, resp.UnitID)
+	s.Equal(unit.ID, resp.WorkspaceID)
 	s.Equal("receipt.pdf", resp.Filename)
 	s.Equal("application/pdf", resp.MimeType)
 	s.Equal(int64(len(validPDFBytes)), resp.Size)
@@ -225,7 +225,7 @@ func (s *AttachmentSuite) TestIsolation_CrossParishReturns404() {
 	s.AssertStatus(fiber.StatusNotFound)
 
 	// Switch back to parish A: try download with mismatched transaction ID -> 404
-	s.activate(parishA.ID, *txA.UnitID)
+	s.activate(parishA.ID, *txA.WorkspaceID)
 	randomTxID := core.GenerateID()
 	dlURL_MismatchedTx := fmt.Sprintf("/fin/transactions/%s/attachments/%s/download", randomTxID, attA.ID)
 	s.Request(dlURL_MismatchedTx, fiber.MethodGet, nil)

@@ -5,11 +5,11 @@ import { sql } from "drizzle-orm";
 import type { DomusWorld } from "../../support/world";
 
 Given(
-  "I have finance access to unit {string} in parish {string}",
-  async function (this: DomusWorld, unitName: string, parishName: string) {
+  "I have finance access to workspace {string} in parish {string}",
+  async function (this: DomusWorld, workspaceName: string, parishName: string) {
     const userId = this.userIds[0];
     if (!userId) {
-      throw new Error("No active user to associate with created unit");
+      throw new Error("No active user to associate with created workspace");
     }
 
     const dioceseRes = await authDB.execute(
@@ -42,24 +42,24 @@ Given(
       parishId = (parishRes.rows[0] as { id: number }).id;
     }
 
-    const unitRes = await authDB.execute(
-      sql`SELECT id FROM public.units WHERE name = ${unitName} LIMIT 1`,
+    const workspaceRes = await authDB.execute(
+      sql`SELECT id FROM public.workspaces WHERE name = ${workspaceName} LIMIT 1`,
     );
-    let unitId: number;
-    if (unitRes.rows.length === 0) {
-      const insertUnit = await authDB.execute(
-        sql`INSERT INTO public.units (name, kind, status, parish_units, created_at, updated_at, created_by, updated_by)
-            VALUES (${unitName}, 'category', 'active', ${parishId}, NOW(), NOW(), ${userId}, ${userId})
+    let workspaceId: number;
+    if (workspaceRes.rows.length === 0) {
+      const insertWorkspace = await authDB.execute(
+        sql`INSERT INTO public.workspaces (name, status, parish_workspaces, created_at, updated_at, created_by, updated_by)
+            VALUES (${workspaceName}, 'active', ${parishId}, NOW(), NOW(), ${userId}, ${userId})
             RETURNING id`,
       );
-      unitId = (insertUnit.rows[0] as { id: number }).id;
+      workspaceId = (insertWorkspace.rows[0] as { id: number }).id;
     } else {
-      unitId = (unitRes.rows[0] as { id: number }).id;
+      workspaceId = (workspaceRes.rows[0] as { id: number }).id;
     }
 
     await authDB.execute(
       sql`INSERT INTO public.memberships (user_id, scope_type, scope_id, role, created_at)
-          VALUES (${userId}, 'unit', ${unitId}, 'finance-writer', NOW())
+          VALUES (${userId}, 'workspace', ${workspaceId}, 'finance-writer', NOW())
           ON CONFLICT DO NOTHING`,
     );
   },
@@ -67,40 +67,40 @@ Given(
 
 When("I clear finance local storage", async function (this: DomusWorld) {
   await this.page.addInitScript(() => {
-    localStorage.removeItem("activeFinanceUnitId");
-    localStorage.removeItem("financeUnits");
+    localStorage.removeItem("activeFinanceWorkspaceId");
+    localStorage.removeItem("financeWorkspaces");
   });
   if (this.page.url() !== "about:blank") {
     await this.page.evaluate(() => {
-      localStorage.removeItem("activeFinanceUnitId");
-      localStorage.removeItem("financeUnits");
+      localStorage.removeItem("activeFinanceWorkspaceId");
+      localStorage.removeItem("financeWorkspaces");
     });
   }
 });
 
 Then(
-  "I should see active finance unit {string}",
+  "I should see active finance workspace {string}",
   async function (this: DomusWorld, name: string) {
-    await this.financePage.expectSelectedUnit(name);
+    await this.financePage.expectSelectedWorkspace(name);
   },
 );
 
 When(
-  "I switch active finance unit to {string}",
+  "I switch active finance workspace to {string}",
   async function (this: DomusWorld, name: string) {
-    await this.financePage.selectUnit(name);
+    await this.financePage.selectWorkspace(name);
   },
 );
 
 Then(
-  "localStorage activeFinanceUnitId should be set for unit {string}",
-  async function (this: DomusWorld, unitName: string) {
-    const unitRes = await authDB.execute(
-      sql`SELECT id FROM public.units WHERE name = ${unitName} LIMIT 1`,
+  "localStorage activeFinanceWorkspaceId should be set for workspace {string}",
+  async function (this: DomusWorld, workspaceName: string) {
+    const workspaceRes = await authDB.execute(
+      sql`SELECT id FROM public.workspaces WHERE name = ${workspaceName} LIMIT 1`,
     );
-    const expectedId = String((unitRes.rows[0] as { id: number }).id);
+    const expectedId = String((workspaceRes.rows[0] as { id: number }).id);
     const storedId = await this.page.evaluate(() =>
-      localStorage.getItem("activeFinanceUnitId"),
+      localStorage.getItem("activeFinanceWorkspaceId"),
     );
     expect(storedId).toBe(expectedId);
   },

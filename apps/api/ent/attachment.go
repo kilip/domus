@@ -12,8 +12,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent/attachment"
 	"github.com/paroki/domus/api/ent/parish"
-	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
+	"github.com/paroki/domus/api/ent/workspace"
 )
 
 // Attachment is the model entity for the Attachment schema.
@@ -47,10 +47,10 @@ type Attachment struct {
 	Checksum string `json:"checksum,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AttachmentQuery when eager-loading is set.
-	Edges             AttachmentEdges `json:"edges"`
-	attachment_parish *int
-	attachment_unit   *int
-	selectValues      sql.SelectValues
+	Edges                AttachmentEdges `json:"edges"`
+	attachment_parish    *int
+	attachment_workspace *int
+	selectValues         sql.SelectValues
 }
 
 // AttachmentEdges holds the relations/edges for other nodes in the graph.
@@ -61,8 +61,8 @@ type AttachmentEdges struct {
 	Updater *User `json:"updater,omitempty"`
 	// Parish holds the value of the parish edge.
 	Parish *Parish `json:"parish,omitempty"`
-	// Unit holds the value of the unit edge.
-	Unit *Unit `json:"unit,omitempty"`
+	// Workspace holds the value of the workspace edge.
+	Workspace *Workspace `json:"workspace,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [4]bool
@@ -101,15 +101,15 @@ func (e AttachmentEdges) ParishOrErr() (*Parish, error) {
 	return nil, &NotLoadedError{edge: "parish"}
 }
 
-// UnitOrErr returns the Unit value or an error if the edge
+// WorkspaceOrErr returns the Workspace value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e AttachmentEdges) UnitOrErr() (*Unit, error) {
-	if e.Unit != nil {
-		return e.Unit, nil
+func (e AttachmentEdges) WorkspaceOrErr() (*Workspace, error) {
+	if e.Workspace != nil {
+		return e.Workspace, nil
 	} else if e.loadedTypes[3] {
-		return nil, &NotFoundError{label: unit.Label}
+		return nil, &NotFoundError{label: workspace.Label}
 	}
-	return nil, &NotLoadedError{edge: "unit"}
+	return nil, &NotLoadedError{edge: "workspace"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -127,7 +127,7 @@ func (*Attachment) scanValues(columns []string) ([]any, error) {
 			values[i] = new(uuid.UUID)
 		case attachment.ForeignKeys[0]: // attachment_parish
 			values[i] = new(sql.NullInt64)
-		case attachment.ForeignKeys[1]: // attachment_unit
+		case attachment.ForeignKeys[1]: // attachment_workspace
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -231,10 +231,10 @@ func (_m *Attachment) assignValues(columns []string, values []any) error {
 			}
 		case attachment.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field attachment_unit", value)
+				return fmt.Errorf("unexpected type %T for edge-field attachment_workspace", value)
 			} else if value.Valid {
-				_m.attachment_unit = new(int)
-				*_m.attachment_unit = int(value.Int64)
+				_m.attachment_workspace = new(int)
+				*_m.attachment_workspace = int(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -264,9 +264,9 @@ func (_m *Attachment) QueryParish() *ParishQuery {
 	return NewAttachmentClient(_m.config).QueryParish(_m)
 }
 
-// QueryUnit queries the "unit" edge of the Attachment entity.
-func (_m *Attachment) QueryUnit() *UnitQuery {
-	return NewAttachmentClient(_m.config).QueryUnit(_m)
+// QueryWorkspace queries the "workspace" edge of the Attachment entity.
+func (_m *Attachment) QueryWorkspace() *WorkspaceQuery {
+	return NewAttachmentClient(_m.config).QueryWorkspace(_m)
 }
 
 // Update returns a builder for updating this Attachment.

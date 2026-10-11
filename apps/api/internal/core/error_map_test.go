@@ -119,4 +119,3 @@ func TestErrorMap_ConcurrentAccess(t *testing.T) {
 	}
 	wg.Wait()
 }
-

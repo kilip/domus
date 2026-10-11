@@ -12,7 +12,7 @@ import (
 
 type ActivateRepository interface {
 	ParishExists(ctx context.Context, parishID int) (bool, error)
-	UnitExistsInParish(ctx context.Context, unitID int, parishID int) (bool, error)
+	WorkspaceExistsInParish(ctx context.Context, workspaceID int, parishID int) (bool, error)
 }
 
 type ActivateService struct {
@@ -39,17 +39,17 @@ func (s ActivateService) Activate(ctx context.Context, userID uuid.UUID, req mod
 		return nil, model.ErrParishNotFound
 	}
 
-	// 2. Verify unit exists and belongs to the parish
-	unitExists, err := s.repo.UnitExistsInParish(ctx, req.UnitID, req.ParishID)
+	// 2. Verify workspace exists and belongs to the parish
+	workspaceExists, err := s.repo.WorkspaceExistsInParish(ctx, req.WorkspaceID, req.ParishID)
 	if err != nil {
 		return nil, err
 	}
-	if !unitExists {
-		return nil, model.ErrUnitNotFound
+	if !workspaceExists {
+		return nil, model.ErrWorkspaceNotFound
 	}
 
-	// 3. Verify user has finance permission in this unit
-	scope := authz.Scope{Type: authz.ScopeUnit, ID: int64(req.UnitID)}
+	// 3. Verify user has finance permission in this workspace
+	scope := authz.Scope{Type: authz.ScopeWorkspace, ID: int64(req.WorkspaceID)}
 	can, err := s.authz.Can(ctx, userID.String(), scope, authz.ResourceFinance, authz.ActionRead)
 	if err != nil {
 		return nil, err
@@ -59,7 +59,7 @@ func (s ActivateService) Activate(ctx context.Context, userID uuid.UUID, req mod
 	}
 
 	return &model.ActivateFinanceResponse{
-		ActiveParishID: req.ParishID,
-		ActiveUnitID:   req.UnitID,
+		ActiveParishID:    req.ParishID,
+		ActiveWorkspaceID: req.WorkspaceID,
 	}, nil
 }

@@ -16,8 +16,8 @@ import (
 const AttachmentOwnerTransaction = "transaction"
 
 // NewTransactionOwnerResolver resolves a transaction (scoped to its parish)
-// into an attachment Owner. A transaction without a unit cannot have
-// attachments because attachment permission is checked at unit scope.
+// into an attachment Owner. A transaction without a workspace cannot have
+// attachments because attachment permission is checked at workspace scope.
 func NewTransactionOwnerResolver(cli *ent.Client) attachment.OwnerResolver {
 	return func(ctx context.Context, parishID int, id uuid.UUID) (*attachment.Owner, error) {
 		tx, err := cli.Transaction.Query().
@@ -25,7 +25,7 @@ func NewTransactionOwnerResolver(cli *ent.Client) attachment.OwnerResolver {
 				transaction.IDEQ(id),
 				transaction.HasParishWith(parish.IDEQ(parishID)),
 			).
-			WithUnit().
+			WithWorkspace().
 			Only(ctx)
 		if err != nil {
 			if ent.IsNotFound(err) {
@@ -33,10 +33,10 @@ func NewTransactionOwnerResolver(cli *ent.Client) attachment.OwnerResolver {
 			}
 			return nil, err
 		}
-		if tx.Edges.Unit == nil {
-			return nil, model.ErrTransactionHasNoUnit
+		if tx.Edges.Workspace == nil {
+			return nil, model.ErrTransactionHasNoWorkspace
 		}
-		return &attachment.Owner{ID: tx.ID, ParishID: parishID, UnitID: tx.Edges.Unit.ID}, nil
+		return &attachment.Owner{ID: tx.ID, ParishID: parishID, WorkspaceID: tx.Edges.Workspace.ID}, nil
 	}
 }
 

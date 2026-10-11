@@ -51,7 +51,7 @@ func (s *TransactionSuite) createAccountWithUnit(parishID int, unitID int, code 
 		SetPostable(postable).
 		SetStatus(account.Status(status)).
 		SetParishID(parishID).
-		SetUnitID(unitID).
+		SetWorkspaceID(unitID).
 		Save(ctx)
 	require.NoError(s.T(), err)
 	return acc
@@ -338,7 +338,7 @@ func (s *TransactionSuite) TestCreate_AtomicityRollback() {
 	fakeAccountID := uuid.New()
 
 	ctx := core.ContextWithUser(context.Background(), core.AuthenticatedUser{ID: s.User.ID})
-	ctx = model.WithFinanceContext(ctx, model.FinanceContext{ParishID: parish.ID, UnitID: unit.ID})
+	ctx = model.WithFinanceContext(ctx, model.FinanceContext{ParishID: parish.ID, WorkspaceID: unit.ID})
 	txDate, err := model.ParseDate("2026-10-15")
 	require.NoError(s.T(), err)
 

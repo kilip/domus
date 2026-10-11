@@ -4,28 +4,28 @@ import { BasePage } from "../BasePage";
 export class FinancePage extends BasePage {
   readonly path = "/fin";
 
-  get unitSelector(): Locator {
-    return this.page.locator("[data-testid='finance-unit-selector']");
+  get workspaceSelector(): Locator {
+    return this.page.locator("[data-testid='finance-workspace-selector']");
   }
 
-  get unitSelectInput(): Locator {
-    return this.unitSelector.locator(".ant-select");
+  get workspaceSelectInput(): Locator {
+    return this.workspaceSelector.locator(".ant-select");
   }
 
   get noAccessAlert(): Locator {
     return this.page.locator("[data-testid='finance-no-access']");
   }
 
-  async expectUnitSelectorVisible() {
-    await expect(this.unitSelector).toBeVisible();
+  async expectWorkspaceSelectorVisible() {
+    await expect(this.workspaceSelector).toBeVisible();
   }
 
-  async expectSelectedUnit(name: string) {
-    await expect(this.unitSelectInput).toContainText(name);
+  async expectSelectedWorkspace(name: string) {
+    await expect(this.workspaceSelectInput).toContainText(name);
   }
 
-  async selectUnit(name: string) {
-    await this.unitSelectInput.click();
+  async selectWorkspace(name: string) {
+    await this.workspaceSelectInput.click();
     const dropdown = this.page.locator(
       ".ant-select-dropdown:not(.ant-select-dropdown-hidden)",
     );

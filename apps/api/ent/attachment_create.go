@@ -15,8 +15,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent/attachment"
 	"github.com/paroki/domus/api/ent/parish"
-	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
+	"github.com/paroki/domus/api/ent/workspace"
 )
 
 // AttachmentCreate is the builder for creating a Attachment entity.
@@ -162,15 +162,15 @@ func (_c *AttachmentCreate) SetParish(v *Parish) *AttachmentCreate {
 	return _c.SetParishID(v.ID)
 }
 
-// SetUnitID sets the "unit" edge to the Unit entity by ID.
-func (_c *AttachmentCreate) SetUnitID(id int) *AttachmentCreate {
-	_c.mutation.SetUnitID(id)
+// SetWorkspaceID sets the "workspace" edge to the Workspace entity by ID.
+func (_c *AttachmentCreate) SetWorkspaceID(id int) *AttachmentCreate {
+	_c.mutation.SetWorkspaceID(id)
 	return _c
 }
 
-// SetUnit sets the "unit" edge to the Unit entity.
-func (_c *AttachmentCreate) SetUnit(v *Unit) *AttachmentCreate {
-	return _c.SetUnitID(v.ID)
+// SetWorkspace sets the "workspace" edge to the Workspace entity.
+func (_c *AttachmentCreate) SetWorkspace(v *Workspace) *AttachmentCreate {
+	return _c.SetWorkspaceID(v.ID)
 }
 
 // Mutation returns the AttachmentMutation object of the builder.
@@ -304,8 +304,8 @@ func (_c *AttachmentCreate) check() error {
 	if len(_c.mutation.ParishIDs()) == 0 {
 		return &ValidationError{Name: "parish", err: errors.New(`ent: missing required edge "Attachment.parish"`)}
 	}
-	if len(_c.mutation.UnitIDs()) == 0 {
-		return &ValidationError{Name: "unit", err: errors.New(`ent: missing required edge "Attachment.unit"`)}
+	if len(_c.mutation.WorkspaceIDs()) == 0 {
+		return &ValidationError{Name: "workspace", err: errors.New(`ent: missing required edge "Attachment.workspace"`)}
 	}
 	return nil
 }
@@ -438,22 +438,22 @@ func (_c *AttachmentCreate) createSpec() (*Attachment, *sqlgraph.CreateSpec) {
 		_node.attachment_parish = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.UnitIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.WorkspaceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   attachment.UnitTable,
-			Columns: []string{attachment.UnitColumn},
+			Table:   attachment.WorkspaceTable,
+			Columns: []string{attachment.WorkspaceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workspace.FieldID, field.TypeInt),
 			},
 		}
 		edge.Schema = _c.schemaConfig.Attachment
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.attachment_unit = &nodes[0]
+		_node.attachment_workspace = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

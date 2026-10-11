@@ -39,7 +39,7 @@ func (r attachmentRepository) Create(ctx context.Context, ownerType string, owne
 		SetOwnerType(ownerType).
 		SetOwnerID(owner.ID).
 		SetParishID(owner.ParishID).
-		SetUnitID(owner.UnitID).
+		SetWorkspaceID(owner.WorkspaceID).
 		SetBucket(in.Bucket).
 		SetObjectKey(in.ObjectKey).
 		SetFilename(in.Filename).
@@ -54,7 +54,7 @@ func (r attachmentRepository) Create(ctx context.Context, ownerType string, owne
 	loaded, err := r.entcli.Attachment.Query().
 		Where(entattachment.IDEQ(created.ID)).
 		WithCreator().
-		WithUnit().
+		WithWorkspace().
 		Only(ctx)
 	if err != nil {
 		return nil, err
@@ -105,7 +105,7 @@ func LoadByOwners(ctx context.Context, cli *ent.Client, ownerType string, ownerI
 			entattachment.OwnerIDIn(ownerIDs...),
 		).
 		WithCreator().
-		WithUnit().
+		WithWorkspace().
 		Order(ent.Asc(entattachment.FieldCreatedAt), ent.Asc(entattachment.FieldID)).
 		All(ctx)
 	if err != nil {
@@ -128,8 +128,8 @@ func toResponse(a *ent.Attachment) Response {
 		Checksum:  a.Checksum,
 		CreatedAt: a.CreatedAt,
 	}
-	if a.Edges.Unit != nil {
-		resp.UnitID = a.Edges.Unit.ID
+	if a.Edges.Workspace != nil {
+		resp.WorkspaceID = a.Edges.Workspace.ID
 	}
 	if a.Edges.Creator != nil {
 		resp.CreatedBy = core.User{

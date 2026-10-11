@@ -398,8 +398,8 @@ func (_u *AccountUpdate) check() error {
 	if _u.mutation.ParishCleared() && len(_u.mutation.ParishIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Account.parish"`)
 	}
-	if _u.mutation.UnitCleared() && len(_u.mutation.UnitIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Account.unit"`)
+	if _u.mutation.WorkspaceCleared() && len(_u.mutation.WorkspaceIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Account.workspace"`)
 	}
 	return nil
 }
@@ -1039,8 +1039,8 @@ func (_u *AccountUpdateOne) check() error {
 	if _u.mutation.ParishCleared() && len(_u.mutation.ParishIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Account.parish"`)
 	}
-	if _u.mutation.UnitCleared() && len(_u.mutation.UnitIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Account.unit"`)
+	if _u.mutation.WorkspaceCleared() && len(_u.mutation.WorkspaceIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Account.workspace"`)
 	}
 	return nil
 }

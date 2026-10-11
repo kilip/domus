@@ -45,8 +45,8 @@ const (
 	EdgeUpdater = "updater"
 	// EdgeParish holds the string denoting the parish edge name in mutations.
 	EdgeParish = "parish"
-	// EdgeUnit holds the string denoting the unit edge name in mutations.
-	EdgeUnit = "unit"
+	// EdgeWorkspace holds the string denoting the workspace edge name in mutations.
+	EdgeWorkspace = "workspace"
 	// Table holds the table name of the attachment in the database.
 	Table = "attachments"
 	// CreatorTable is the table that holds the creator relation/edge.
@@ -70,13 +70,13 @@ const (
 	ParishInverseTable = "parishes"
 	// ParishColumn is the table column denoting the parish relation/edge.
 	ParishColumn = "attachment_parish"
-	// UnitTable is the table that holds the unit relation/edge.
-	UnitTable = "attachments"
-	// UnitInverseTable is the table name for the Unit entity.
-	// It exists in this package in order to avoid circular dependency with the "unit" package.
-	UnitInverseTable = "units"
-	// UnitColumn is the table column denoting the unit relation/edge.
-	UnitColumn = "attachment_unit"
+	// WorkspaceTable is the table that holds the workspace relation/edge.
+	WorkspaceTable = "attachments"
+	// WorkspaceInverseTable is the table name for the Workspace entity.
+	// It exists in this package in order to avoid circular dependency with the "workspace" package.
+	WorkspaceInverseTable = "workspaces"
+	// WorkspaceColumn is the table column denoting the workspace relation/edge.
+	WorkspaceColumn = "attachment_workspace"
 )
 
 // Columns holds all SQL columns for attachment fields.
@@ -100,7 +100,7 @@ var Columns = []string{
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"attachment_parish",
-	"attachment_unit",
+	"attachment_workspace",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -232,10 +232,10 @@ func ByParishField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
-// ByUnitField orders the results by unit field.
-func ByUnitField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByWorkspaceField orders the results by workspace field.
+func ByWorkspaceField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newUnitStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newWorkspaceStep(), sql.OrderByField(field, opts...))
 	}
 }
 func newCreatorStep() *sqlgraph.Step {
@@ -259,10 +259,10 @@ func newParishStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2O, false, ParishTable, ParishColumn),
 	)
 }
-func newUnitStep() *sqlgraph.Step {
+func newWorkspaceStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(UnitInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, false, UnitTable, UnitColumn),
+		sqlgraph.To(WorkspaceInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, WorkspaceTable, WorkspaceColumn),
 	)
 }

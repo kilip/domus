@@ -24,13 +24,13 @@ func (s *ActivateSuite) SetupTest() {
 
 func (s *ActivateSuite) TestActivate_SuccessAndCookie() {
 	parish := CreateTestParish(s.T())
-	unit := CreateTestUnit(s.T(), parish.ID, s.User.ID)
-	scope := authz.Scope{Type: authz.ScopeUnit, ID: int64(unit.ID)}
+	workspace := CreateTestWorkspace(s.T(), parish.ID, s.User.ID)
+	scope := authz.Scope{Type: authz.ScopeWorkspace, ID: int64(workspace.ID)}
 	s.GrantRole(authz.ModuleRole(authz.ResourceFinance, authz.LevelReader), scope)
 
 	req := model.ActivateFinanceRequest{
-		ParishID: parish.ID,
-		UnitID:   unit.ID,
+		ParishID:    parish.ID,
+		WorkspaceID: workspace.ID,
 	}
 
 	s.Request("/fin/activate", fiber.MethodPost, req)
@@ -38,7 +38,7 @@ func (s *ActivateSuite) TestActivate_SuccessAndCookie() {
 
 	res := s.GetResponse()
 	assert.Equal(s.T(), parish.ID, res.Data.ActiveParishID)
-	assert.Equal(s.T(), unit.ID, res.Data.ActiveUnitID)
+	assert.Equal(s.T(), workspace.ID, res.Data.ActiveWorkspaceID)
 
 	// Verify Set-Cookie header
 	rawCookies := s.GetHttpResponse().Header["Set-Cookie"]
@@ -56,31 +56,31 @@ func (s *ActivateSuite) TestActivate_SuccessAndCookie() {
 
 	unescapedCookie, err := url.QueryUnescape(finCookie)
 	assert.NoError(s.T(), err)
-	expectedJSON := fmt.Sprintf(`{"activeParishId":%d,"activeUnitId":%d}`, parish.ID, unit.ID)
+	expectedJSON := fmt.Sprintf(`{"activeParishId":%d,"activeWorkspaceId":%d}`, parish.ID, workspace.ID)
 	assert.JSONEq(s.T(), expectedJSON, unescapedCookie)
 }
 
 func (s *ActivateSuite) TestActivate_ParishNotFound() {
 	req := model.ActivateFinanceRequest{
-		ParishID: 999999,
-		UnitID:   1,
+		ParishID:    999999,
+		WorkspaceID: 1,
 	}
 
 	s.Request("/fin/activate", fiber.MethodPost, req)
 	s.AssertStatus(fiber.StatusBadRequest)
 }
 
-func (s *ActivateSuite) TestActivate_UnitBelongsToDifferentParish() {
+func (s *ActivateSuite) TestActivate_WorkspaceBelongsToDifferentParish() {
 	parish1 := CreateTestParish(s.T())
 	parish2 := CreateTestParish(s.T())
-	unit2 := CreateTestUnit(s.T(), parish2.ID, s.User.ID)
+	workspace2 := CreateTestWorkspace(s.T(), parish2.ID, s.User.ID)
 
-	scope := authz.Scope{Type: authz.ScopeUnit, ID: int64(unit2.ID)}
+	scope := authz.Scope{Type: authz.ScopeWorkspace, ID: int64(workspace2.ID)}
 	s.GrantRole(authz.ModuleRole(authz.ResourceFinance, authz.LevelReader), scope)
 
 	req := model.ActivateFinanceRequest{
-		ParishID: parish1.ID,
-		UnitID:   unit2.ID,
+		ParishID:    parish1.ID,
+		WorkspaceID: workspace2.ID,
 	}
 
 	s.Request("/fin/activate", fiber.MethodPost, req)
@@ -89,11 +89,11 @@ func (s *ActivateSuite) TestActivate_UnitBelongsToDifferentParish() {
 
 func (s *ActivateSuite) TestActivate_ForbiddenIfNoRole() {
 	parish := CreateTestParish(s.T())
-	unit := CreateTestUnit(s.T(), parish.ID, s.User.ID)
+	workspace := CreateTestWorkspace(s.T(), parish.ID, s.User.ID)
 
 	req := model.ActivateFinanceRequest{
-		ParishID: parish.ID,
-		UnitID:   unit.ID,
+		ParishID:    parish.ID,
+		WorkspaceID: workspace.ID,
 	}
 
 	s.Request("/fin/activate", fiber.MethodPost, req)
@@ -102,8 +102,8 @@ func (s *ActivateSuite) TestActivate_ForbiddenIfNoRole() {
 
 func (s *ActivateSuite) TestRequireFinanceContext_MissingCookie() {
 	parish := CreateTestParish(s.T())
-	unit := CreateTestUnit(s.T(), parish.ID, s.User.ID)
-	scope := authz.Scope{Type: authz.ScopeUnit, ID: int64(unit.ID)}
+	workspace := CreateTestWorkspace(s.T(), parish.ID, s.User.ID)
+	scope := authz.Scope{Type: authz.ScopeWorkspace, ID: int64(workspace.ID)}
 	s.GrantRole(authz.ModuleRole(authz.ResourceFinance, authz.LevelReader), scope)
 
 	// Call /fin/accounts without setting cookie

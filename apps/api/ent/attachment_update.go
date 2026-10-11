@@ -272,8 +272,8 @@ func (_u *AttachmentUpdate) check() error {
 	if _u.mutation.ParishCleared() && len(_u.mutation.ParishIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Attachment.parish"`)
 	}
-	if _u.mutation.UnitCleared() && len(_u.mutation.UnitIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Attachment.unit"`)
+	if _u.mutation.WorkspaceCleared() && len(_u.mutation.WorkspaceIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Attachment.workspace"`)
 	}
 	return nil
 }
@@ -652,8 +652,8 @@ func (_u *AttachmentUpdateOne) check() error {
 	if _u.mutation.ParishCleared() && len(_u.mutation.ParishIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Attachment.parish"`)
 	}
-	if _u.mutation.UnitCleared() && len(_u.mutation.UnitIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Attachment.unit"`)
+	if _u.mutation.WorkspaceCleared() && len(_u.mutation.WorkspaceIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Attachment.workspace"`)
 	}
 	return nil
 }

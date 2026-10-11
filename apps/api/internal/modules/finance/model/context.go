@@ -5,8 +5,8 @@ import "context"
 const FinanceContextKey = "financeContext"
 
 type FinanceContext struct {
-	ParishID int `json:"activeParishId"`
-	UnitID   int `json:"activeUnitId"`
+	ParishID    int `json:"activeParishId"`
+	WorkspaceID int `json:"activeWorkspaceId"`
 }
 
 type localGetter interface {

@@ -46,7 +46,7 @@ func (s *ReportSuite) createAccount(parishID int, code string, accType string, p
 		SetPostable(postable).
 		SetStatus(account.StatusActive).
 		SetParishID(parishID).
-		SetUnitID(unitID)
+		SetWorkspaceID(unitID)
 	if parentID != nil {
 		b.SetParentID(*parentID)
 	}

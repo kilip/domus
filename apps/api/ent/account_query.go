@@ -18,25 +18,25 @@ import (
 	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/posting"
 	"github.com/paroki/domus/api/ent/predicate"
-	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
+	"github.com/paroki/domus/api/ent/workspace"
 )
 
 // AccountQuery is the builder for querying Account entities.
 type AccountQuery struct {
 	config
-	ctx          *QueryContext
-	order        []account.OrderOption
-	inters       []Interceptor
-	predicates   []predicate.Account
-	withCreator  *UserQuery
-	withUpdater  *UserQuery
-	withParish   *ParishQuery
-	withUnit     *UnitQuery
-	withParent   *AccountQuery
-	withChildren *AccountQuery
-	withPostings *PostingQuery
-	withFKs      bool
+	ctx           *QueryContext
+	order         []account.OrderOption
+	inters        []Interceptor
+	predicates    []predicate.Account
+	withCreator   *UserQuery
+	withUpdater   *UserQuery
+	withParish    *ParishQuery
+	withWorkspace *WorkspaceQuery
+	withParent    *AccountQuery
+	withChildren  *AccountQuery
+	withPostings  *PostingQuery
+	withFKs       bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -148,9 +148,9 @@ func (_q *AccountQuery) QueryParish() *ParishQuery {
 	return query
 }
 
-// QueryUnit chains the current query on the "unit" edge.
-func (_q *AccountQuery) QueryUnit() *UnitQuery {
-	query := (&UnitClient{config: _q.config}).Query()
+// QueryWorkspace chains the current query on the "workspace" edge.
+func (_q *AccountQuery) QueryWorkspace() *WorkspaceQuery {
+	query := (&WorkspaceClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -161,11 +161,11 @@ func (_q *AccountQuery) QueryUnit() *UnitQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(account.Table, account.FieldID, selector),
-			sqlgraph.To(unit.Table, unit.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, account.UnitTable, account.UnitColumn),
+			sqlgraph.To(workspace.Table, workspace.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, account.WorkspaceTable, account.WorkspaceColumn),
 		)
 		schemaConfig := _q.schemaConfig
-		step.To.Schema = schemaConfig.Unit
+		step.To.Schema = schemaConfig.Workspace
 		step.Edge.Schema = schemaConfig.Account
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -435,18 +435,18 @@ func (_q *AccountQuery) Clone() *AccountQuery {
 		return nil
 	}
 	return &AccountQuery{
-		config:       _q.config,
-		ctx:          _q.ctx.Clone(),
-		order:        append([]account.OrderOption{}, _q.order...),
-		inters:       append([]Interceptor{}, _q.inters...),
-		predicates:   append([]predicate.Account{}, _q.predicates...),
-		withCreator:  _q.withCreator.Clone(),
-		withUpdater:  _q.withUpdater.Clone(),
-		withParish:   _q.withParish.Clone(),
-		withUnit:     _q.withUnit.Clone(),
-		withParent:   _q.withParent.Clone(),
-		withChildren: _q.withChildren.Clone(),
-		withPostings: _q.withPostings.Clone(),
+		config:        _q.config,
+		ctx:           _q.ctx.Clone(),
+		order:         append([]account.OrderOption{}, _q.order...),
+		inters:        append([]Interceptor{}, _q.inters...),
+		predicates:    append([]predicate.Account{}, _q.predicates...),
+		withCreator:   _q.withCreator.Clone(),
+		withUpdater:   _q.withUpdater.Clone(),
+		withParish:    _q.withParish.Clone(),
+		withWorkspace: _q.withWorkspace.Clone(),
+		withParent:    _q.withParent.Clone(),
+		withChildren:  _q.withChildren.Clone(),
+		withPostings:  _q.withPostings.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -486,14 +486,14 @@ func (_q *AccountQuery) WithParish(opts ...func(*ParishQuery)) *AccountQuery {
 	return _q
 }
 
-// WithUnit tells the query-builder to eager-load the nodes that are connected to
-// the "unit" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *AccountQuery) WithUnit(opts ...func(*UnitQuery)) *AccountQuery {
-	query := (&UnitClient{config: _q.config}).Query()
+// WithWorkspace tells the query-builder to eager-load the nodes that are connected to
+// the "workspace" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *AccountQuery) WithWorkspace(opts ...func(*WorkspaceQuery)) *AccountQuery {
+	query := (&WorkspaceClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withUnit = query
+	_q.withWorkspace = query
 	return _q
 }
 
@@ -613,13 +613,13 @@ func (_q *AccountQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Acco
 			_q.withCreator != nil,
 			_q.withUpdater != nil,
 			_q.withParish != nil,
-			_q.withUnit != nil,
+			_q.withWorkspace != nil,
 			_q.withParent != nil,
 			_q.withChildren != nil,
 			_q.withPostings != nil,
 		}
 	)
-	if _q.withParish != nil || _q.withUnit != nil || _q.withParent != nil {
+	if _q.withParish != nil || _q.withWorkspace != nil || _q.withParent != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -663,9 +663,9 @@ func (_q *AccountQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Acco
 			return nil, err
 		}
 	}
-	if query := _q.withUnit; query != nil {
-		if err := _q.loadUnit(ctx, query, nodes, nil,
-			func(n *Account, e *Unit) { n.Edges.Unit = e }); err != nil {
+	if query := _q.withWorkspace; query != nil {
+		if err := _q.loadWorkspace(ctx, query, nodes, nil,
+			func(n *Account, e *Workspace) { n.Edges.Workspace = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -782,14 +782,14 @@ func (_q *AccountQuery) loadParish(ctx context.Context, query *ParishQuery, node
 	}
 	return nil
 }
-func (_q *AccountQuery) loadUnit(ctx context.Context, query *UnitQuery, nodes []*Account, init func(*Account), assign func(*Account, *Unit)) error {
+func (_q *AccountQuery) loadWorkspace(ctx context.Context, query *WorkspaceQuery, nodes []*Account, init func(*Account), assign func(*Account, *Workspace)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Account)
 	for i := range nodes {
-		if nodes[i].account_unit == nil {
+		if nodes[i].account_workspace == nil {
 			continue
 		}
-		fk := *nodes[i].account_unit
+		fk := *nodes[i].account_workspace
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -798,7 +798,7 @@ func (_q *AccountQuery) loadUnit(ctx context.Context, query *UnitQuery, nodes []
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(unit.IDIn(ids...))
+	query.Where(workspace.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -806,7 +806,7 @@ func (_q *AccountQuery) loadUnit(ctx context.Context, query *UnitQuery, nodes []
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "account_unit" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "account_workspace" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

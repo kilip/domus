@@ -12,8 +12,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent/account"
 	"github.com/paroki/domus/api/ent/parish"
-	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
+	"github.com/paroki/domus/api/ent/workspace"
 )
 
 // Account is the model entity for the Account schema.
@@ -47,11 +47,11 @@ type Account struct {
 	Status account.Status `json:"status,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AccountQuery when eager-loading is set.
-	Edges            AccountEdges `json:"edges"`
-	account_parish   *int
-	account_unit     *int
-	account_children *uuid.UUID
-	selectValues     sql.SelectValues
+	Edges             AccountEdges `json:"edges"`
+	account_parish    *int
+	account_workspace *int
+	account_children  *uuid.UUID
+	selectValues      sql.SelectValues
 }
 
 // AccountEdges holds the relations/edges for other nodes in the graph.
@@ -62,8 +62,8 @@ type AccountEdges struct {
 	Updater *User `json:"updater,omitempty"`
 	// Parish holds the value of the parish edge.
 	Parish *Parish `json:"parish,omitempty"`
-	// Unit holds the value of the unit edge.
-	Unit *Unit `json:"unit,omitempty"`
+	// Workspace holds the value of the workspace edge.
+	Workspace *Workspace `json:"workspace,omitempty"`
 	// Parent holds the value of the parent edge.
 	Parent *Account `json:"parent,omitempty"`
 	// Children holds the value of the children edge.
@@ -108,15 +108,15 @@ func (e AccountEdges) ParishOrErr() (*Parish, error) {
 	return nil, &NotLoadedError{edge: "parish"}
 }
 
-// UnitOrErr returns the Unit value or an error if the edge
+// WorkspaceOrErr returns the Workspace value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e AccountEdges) UnitOrErr() (*Unit, error) {
-	if e.Unit != nil {
-		return e.Unit, nil
+func (e AccountEdges) WorkspaceOrErr() (*Workspace, error) {
+	if e.Workspace != nil {
+		return e.Workspace, nil
 	} else if e.loadedTypes[3] {
-		return nil, &NotFoundError{label: unit.Label}
+		return nil, &NotFoundError{label: workspace.Label}
 	}
-	return nil, &NotLoadedError{edge: "unit"}
+	return nil, &NotLoadedError{edge: "workspace"}
 }
 
 // ParentOrErr returns the Parent value or an error if the edge
@@ -163,7 +163,7 @@ func (*Account) scanValues(columns []string) ([]any, error) {
 			values[i] = new(uuid.UUID)
 		case account.ForeignKeys[0]: // account_parish
 			values[i] = new(sql.NullInt64)
-		case account.ForeignKeys[1]: // account_unit
+		case account.ForeignKeys[1]: // account_workspace
 			values[i] = new(sql.NullInt64)
 		case account.ForeignKeys[2]: // account_children
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
@@ -271,10 +271,10 @@ func (_m *Account) assignValues(columns []string, values []any) error {
 			}
 		case account.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field account_unit", value)
+				return fmt.Errorf("unexpected type %T for edge-field account_workspace", value)
 			} else if value.Valid {
-				_m.account_unit = new(int)
-				*_m.account_unit = int(value.Int64)
+				_m.account_workspace = new(int)
+				*_m.account_workspace = int(value.Int64)
 			}
 		case account.ForeignKeys[2]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
@@ -311,9 +311,9 @@ func (_m *Account) QueryParish() *ParishQuery {
 	return NewAccountClient(_m.config).QueryParish(_m)
 }
 
-// QueryUnit queries the "unit" edge of the Account entity.
-func (_m *Account) QueryUnit() *UnitQuery {
-	return NewAccountClient(_m.config).QueryUnit(_m)
+// QueryWorkspace queries the "workspace" edge of the Account entity.
+func (_m *Account) QueryWorkspace() *WorkspaceQuery {
+	return NewAccountClient(_m.config).QueryWorkspace(_m)
 }
 
 // QueryParent queries the "parent" edge of the Account entity.
