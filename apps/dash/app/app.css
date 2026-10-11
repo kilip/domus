@@ -255,3 +255,19 @@ body {
     transition: none;
   }
 }
+
+/* ---- tables ---- */
+.ant-table-wrapper th,
+.ant-table-wrapper td {
+  /* biome-ignore lint/complexity/noImportantStyles: needed to override antd inline alignment style */
+  text-align: center !important;
+}
+
+.ant-table-wrapper .ant-table-thead th .ant-table-column-sorters {
+  justify-content: center;
+}
+
+.ant-table-wrapper .ant-table-thead th .ant-table-column-title {
+  flex: initial;
+  text-align: center;
+}
