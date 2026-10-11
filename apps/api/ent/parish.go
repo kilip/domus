@@ -40,9 +40,13 @@ type Parish struct {
 type ParishEdges struct {
 	// Diocese holds the value of the diocese edge.
 	Diocese *Diocese `json:"diocese,omitempty"`
+	// Territories holds the value of the territories edge.
+	Territories []*Territory `json:"territories,omitempty"`
+	// Units holds the value of the units edge.
+	Units []*Unit `json:"units,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [3]bool
 }
 
 // DioceseOrErr returns the Diocese value or an error if the edge
@@ -54,6 +58,24 @@ func (e ParishEdges) DioceseOrErr() (*Diocese, error) {
 		return nil, &NotFoundError{label: diocese.Label}
 	}
 	return nil, &NotLoadedError{edge: "diocese"}
+}
+
+// TerritoriesOrErr returns the Territories value or an error if the edge
+// was not loaded in eager-loading.
+func (e ParishEdges) TerritoriesOrErr() ([]*Territory, error) {
+	if e.loadedTypes[1] {
+		return e.Territories, nil
+	}
+	return nil, &NotLoadedError{edge: "territories"}
+}
+
+// UnitsOrErr returns the Units value or an error if the edge
+// was not loaded in eager-loading.
+func (e ParishEdges) UnitsOrErr() ([]*Unit, error) {
+	if e.loadedTypes[2] {
+		return e.Units, nil
+	}
+	return nil, &NotLoadedError{edge: "units"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -153,6 +175,16 @@ func (_m *Parish) Value(name string) (ent.Value, error) {
 // QueryDiocese queries the "diocese" edge of the Parish entity.
 func (_m *Parish) QueryDiocese() *DioceseQuery {
 	return NewParishClient(_m.config).QueryDiocese(_m)
+}
+
+// QueryTerritories queries the "territories" edge of the Parish entity.
+func (_m *Parish) QueryTerritories() *TerritoryQuery {
+	return NewParishClient(_m.config).QueryTerritories(_m)
+}
+
+// QueryUnits queries the "units" edge of the Parish entity.
+func (_m *Parish) QueryUnits() *UnitQuery {
+	return NewParishClient(_m.config).QueryUnits(_m)
 }
 
 // Update returns a builder for updating this Parish.

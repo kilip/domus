@@ -82,6 +82,11 @@ func Name(v string) predicate.Unit {
 	return predicate.Unit(sql.FieldEQ(FieldName, v))
 }
 
+// Code applies equality check predicate on the "code" field. It's identical to CodeEQ.
+func Code(v string) predicate.Unit {
+	return predicate.Unit(sql.FieldEQ(FieldCode, v))
+}
+
 // Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
 func Description(v string) predicate.Unit {
 	return predicate.Unit(sql.FieldEQ(FieldDescription, v))
@@ -272,6 +277,101 @@ func NameContainsFold(v string) predicate.Unit {
 	return predicate.Unit(sql.FieldContainsFold(FieldName, v))
 }
 
+// CodeEQ applies the EQ predicate on the "code" field.
+func CodeEQ(v string) predicate.Unit {
+	return predicate.Unit(sql.FieldEQ(FieldCode, v))
+}
+
+// CodeNEQ applies the NEQ predicate on the "code" field.
+func CodeNEQ(v string) predicate.Unit {
+	return predicate.Unit(sql.FieldNEQ(FieldCode, v))
+}
+
+// CodeIn applies the In predicate on the "code" field.
+func CodeIn(vs ...string) predicate.Unit {
+	return predicate.Unit(sql.FieldIn(FieldCode, vs...))
+}
+
+// CodeNotIn applies the NotIn predicate on the "code" field.
+func CodeNotIn(vs ...string) predicate.Unit {
+	return predicate.Unit(sql.FieldNotIn(FieldCode, vs...))
+}
+
+// CodeGT applies the GT predicate on the "code" field.
+func CodeGT(v string) predicate.Unit {
+	return predicate.Unit(sql.FieldGT(FieldCode, v))
+}
+
+// CodeGTE applies the GTE predicate on the "code" field.
+func CodeGTE(v string) predicate.Unit {
+	return predicate.Unit(sql.FieldGTE(FieldCode, v))
+}
+
+// CodeLT applies the LT predicate on the "code" field.
+func CodeLT(v string) predicate.Unit {
+	return predicate.Unit(sql.FieldLT(FieldCode, v))
+}
+
+// CodeLTE applies the LTE predicate on the "code" field.
+func CodeLTE(v string) predicate.Unit {
+	return predicate.Unit(sql.FieldLTE(FieldCode, v))
+}
+
+// CodeContains applies the Contains predicate on the "code" field.
+func CodeContains(v string) predicate.Unit {
+	return predicate.Unit(sql.FieldContains(FieldCode, v))
+}
+
+// CodeHasPrefix applies the HasPrefix predicate on the "code" field.
+func CodeHasPrefix(v string) predicate.Unit {
+	return predicate.Unit(sql.FieldHasPrefix(FieldCode, v))
+}
+
+// CodeHasSuffix applies the HasSuffix predicate on the "code" field.
+func CodeHasSuffix(v string) predicate.Unit {
+	return predicate.Unit(sql.FieldHasSuffix(FieldCode, v))
+}
+
+// CodeIsNil applies the IsNil predicate on the "code" field.
+func CodeIsNil() predicate.Unit {
+	return predicate.Unit(sql.FieldIsNull(FieldCode))
+}
+
+// CodeNotNil applies the NotNil predicate on the "code" field.
+func CodeNotNil() predicate.Unit {
+	return predicate.Unit(sql.FieldNotNull(FieldCode))
+}
+
+// CodeEqualFold applies the EqualFold predicate on the "code" field.
+func CodeEqualFold(v string) predicate.Unit {
+	return predicate.Unit(sql.FieldEqualFold(FieldCode, v))
+}
+
+// CodeContainsFold applies the ContainsFold predicate on the "code" field.
+func CodeContainsFold(v string) predicate.Unit {
+	return predicate.Unit(sql.FieldContainsFold(FieldCode, v))
+}
+
+// KindEQ applies the EQ predicate on the "kind" field.
+func KindEQ(v Kind) predicate.Unit {
+	return predicate.Unit(sql.FieldEQ(FieldKind, v))
+}
+
+// KindNEQ applies the NEQ predicate on the "kind" field.
+func KindNEQ(v Kind) predicate.Unit {
+	return predicate.Unit(sql.FieldNEQ(FieldKind, v))
+}
+
+// KindIn applies the In predicate on the "kind" field.
+func KindIn(vs ...Kind) predicate.Unit {
+	return predicate.Unit(sql.FieldIn(FieldKind, vs...))
+}
+
+// KindNotIn applies the NotIn predicate on the "kind" field.
+func KindNotIn(vs ...Kind) predicate.Unit {
+	return predicate.Unit(sql.FieldNotIn(FieldKind, vs...))
+}
+
 // DescriptionEQ applies the EQ predicate on the "description" field.
 func DescriptionEQ(v string) predicate.Unit {
 	return predicate.Unit(sql.FieldEQ(FieldDescription, v))
@@ -327,6 +427,16 @@ func DescriptionHasSuffix(v string) predicate.Unit {
 	return predicate.Unit(sql.FieldHasSuffix(FieldDescription, v))
 }
 
+// DescriptionIsNil applies the IsNil predicate on the "description" field.
+func DescriptionIsNil() predicate.Unit {
+	return predicate.Unit(sql.FieldIsNull(FieldDescription))
+}
+
+// DescriptionNotNil applies the NotNil predicate on the "description" field.
+func DescriptionNotNil() predicate.Unit {
+	return predicate.Unit(sql.FieldNotNull(FieldDescription))
+}
+
 // DescriptionEqualFold applies the EqualFold predicate on the "description" field.
 func DescriptionEqualFold(v string) predicate.Unit {
 	return predicate.Unit(sql.FieldEqualFold(FieldDescription, v))
@@ -335,6 +445,26 @@ func DescriptionEqualFold(v string) predicate.Unit {
 // DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
 func DescriptionContainsFold(v string) predicate.Unit {
 	return predicate.Unit(sql.FieldContainsFold(FieldDescription, v))
+}
+
+// StatusEQ applies the EQ predicate on the "status" field.
+func StatusEQ(v Status) predicate.Unit {
+	return predicate.Unit(sql.FieldEQ(FieldStatus, v))
+}
+
+// StatusNEQ applies the NEQ predicate on the "status" field.
+func StatusNEQ(v Status) predicate.Unit {
+	return predicate.Unit(sql.FieldNEQ(FieldStatus, v))
+}
+
+// StatusIn applies the In predicate on the "status" field.
+func StatusIn(vs ...Status) predicate.Unit {
+	return predicate.Unit(sql.FieldIn(FieldStatus, vs...))
+}
+
+// StatusNotIn applies the NotIn predicate on the "status" field.
+func StatusNotIn(vs ...Status) predicate.Unit {
+	return predicate.Unit(sql.FieldNotIn(FieldStatus, vs...))
 }
 
 // HasCreator applies the HasEdge predicate on the "creator" edge.
@@ -395,6 +525,35 @@ func HasUpdaterWith(preds ...predicate.User) predicate.Unit {
 	})
 }
 
+// HasParish applies the HasEdge predicate on the "parish" edge.
+func HasParish() predicate.Unit {
+	return predicate.Unit(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ParishTable, ParishColumn),
+		)
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.Parish
+		step.Edge.Schema = schemaConfig.Unit
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasParishWith applies the HasEdge predicate on the "parish" edge with a given conditions (other predicates).
+func HasParishWith(preds ...predicate.Parish) predicate.Unit {
+	return predicate.Unit(func(s *sql.Selector) {
+		step := newParishStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.Parish
+		step.Edge.Schema = schemaConfig.Unit
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasParent applies the HasEdge predicate on the "parent" edge.
 func HasParent() predicate.Unit {
 	return predicate.Unit(func(s *sql.Selector) {
@@ -445,6 +604,35 @@ func HasChildrenWith(preds ...predicate.Unit) predicate.Unit {
 		schemaConfig := internal.SchemaConfigFromContext(s.Context())
 		step.To.Schema = schemaConfig.Unit
 		step.Edge.Schema = schemaConfig.Unit
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasTerritory applies the HasEdge predicate on the "territory" edge.
+func HasTerritory() predicate.Unit {
+	return predicate.Unit(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, TerritoryTable, TerritoryColumn),
+		)
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.Territory
+		step.Edge.Schema = schemaConfig.Territory
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasTerritoryWith applies the HasEdge predicate on the "territory" edge with a given conditions (other predicates).
+func HasTerritoryWith(preds ...predicate.Territory) predicate.Unit {
+	return predicate.Unit(func(s *sql.Selector) {
+		step := newTerritoryStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.Territory
+		step.Edge.Schema = schemaConfig.Territory
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

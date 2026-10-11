@@ -726,6 +726,754 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/territories": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Create territory
+     * @description Create a new territory
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      /** @description Create territory request */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["model.CreateTerritoryRequest"];
+        };
+      };
+      responses: {
+        /** @description Created */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.WebResponse-model_TerritoryResponse"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unprocessable Entity */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/territories/search": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Search territories
+     * @description Search territories with filters and cursor pagination
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      /** @description Search territory request */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["model.SearchTerritoryRequest"];
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.WebResponse-array_model_TerritoryResponse"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unprocessable Entity */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/territories/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get territory by ID
+     * @description Get territory details by ID
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Territory ID */
+          id: number;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.WebResponse-model_TerritoryResponse"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+      };
+    };
+    /**
+     * Update territory
+     * @description Update territory by ID
+     */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Territory ID */
+          id: number;
+        };
+        cookie?: never;
+      };
+      /** @description Update territory request */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["model.UpdateTerritoryRequest"];
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.WebResponse-model_TerritoryResponse"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unprocessable Entity */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+      };
+    };
+    post?: never;
+    /**
+     * Delete territory
+     * @description Delete territory by ID
+     */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Territory ID */
+          id: number;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description No Content */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/units": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Create unit
+     * @description Create a new unit
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      /** @description Create unit request */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["model.CreateUnitRequest"];
+        };
+      };
+      responses: {
+        /** @description Created */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.WebResponse-model_UnitResponse"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unprocessable Entity */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/units/search": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Search units
+     * @description Search units with filters and cursor pagination
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      /** @description Search unit request */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["model.SearchUnitRequest"];
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.WebResponse-array_model_UnitResponse"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unprocessable Entity */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/units/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get unit by ID
+     * @description Get unit details by ID
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Unit ID */
+          id: number;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.WebResponse-model_UnitResponse"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+      };
+    };
+    /**
+     * Update unit
+     * @description Update unit by ID
+     */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Unit ID */
+          id: number;
+        };
+        cookie?: never;
+      };
+      /** @description Update unit request */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["model.UpdateUnitRequest"];
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.WebResponse-model_UnitResponse"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unprocessable Entity */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+      };
+    };
+    post?: never;
+    /**
+     * Delete unit
+     * @description Delete unit by ID
+     */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Unit ID */
+          id: number;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description No Content */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -774,6 +1522,14 @@ export interface components {
       data?: components["schemas"]["model.ParishResponse"][];
       meta?: components["schemas"]["httpx.Meta"];
     };
+    "httpx.WebResponse-array_model_TerritoryResponse": {
+      data?: components["schemas"]["model.TerritoryResponse"][];
+      meta?: components["schemas"]["httpx.Meta"];
+    };
+    "httpx.WebResponse-array_model_UnitResponse": {
+      data?: components["schemas"]["model.UnitResponse"][];
+      meta?: components["schemas"]["httpx.Meta"];
+    };
     "httpx.WebResponse-core_AuthenticatedUser": {
       data?: components["schemas"]["core.AuthenticatedUser"];
       meta?: components["schemas"]["httpx.Meta"];
@@ -784,6 +1540,14 @@ export interface components {
     };
     "httpx.WebResponse-model_ParishResponse": {
       data?: components["schemas"]["model.ParishResponse"];
+      meta?: components["schemas"]["httpx.Meta"];
+    };
+    "httpx.WebResponse-model_TerritoryResponse": {
+      data?: components["schemas"]["model.TerritoryResponse"];
+      meta?: components["schemas"]["httpx.Meta"];
+    };
+    "httpx.WebResponse-model_UnitResponse": {
+      data?: components["schemas"]["model.UnitResponse"];
       meta?: components["schemas"]["httpx.Meta"];
     };
     "model.CreateDioceseRequest": {
@@ -798,6 +1562,28 @@ export interface components {
       email?: string;
       name: string;
       phone?: string;
+    };
+    "model.CreateTerritoryRequest": {
+      code?: string;
+      description?: string;
+      kind: string;
+      name: string;
+      parentId?: number;
+      parishId: number;
+      /** @enum {string} */
+      status?: "active" | "inactive";
+    };
+    "model.CreateUnitRequest": {
+      code?: string;
+      description?: string;
+      /** @enum {string} */
+      kind: "council" | "territorial" | "category" | "section" | "committee";
+      name: string;
+      parentId?: number;
+      parishId: number;
+      /** @enum {string} */
+      status?: "active" | "inactive";
+      territoryId?: number;
     };
     "model.DioceseResponse": {
       active?: boolean;
@@ -818,6 +1604,50 @@ export interface components {
       name?: string;
       phone?: string;
     };
+    "model.SearchTerritoryRequest": {
+      cursor?: string;
+      kind?: string;
+      limit?: number;
+      parentId?: number;
+      parishId?: number;
+      status?: string;
+    };
+    "model.SearchUnitRequest": {
+      cursor?: string;
+      kind?: string;
+      limit?: number;
+      parentId?: number;
+      parishId?: number;
+      status?: string;
+      territoryId?: number;
+    };
+    "model.TerritoryResponse": {
+      code?: string;
+      description?: string;
+      id?: number;
+      kind?: string;
+      name?: string;
+      parent?: components["schemas"]["model.TerritoryResponse"];
+      parentId?: number;
+      parish?: components["schemas"]["model.ParishResponse"];
+      parishId?: number;
+      status?: string;
+      unitId?: number;
+    };
+    "model.UnitResponse": {
+      code?: string;
+      description?: string;
+      id?: number;
+      kind?: string;
+      name?: string;
+      parent?: components["schemas"]["model.UnitResponse"];
+      parentId?: number;
+      parish?: components["schemas"]["model.ParishResponse"];
+      parishId?: number;
+      status?: string;
+      territory?: components["schemas"]["model.TerritoryResponse"];
+      territoryId?: number;
+    };
     "model.UpdateDioceseRequest": {
       active?: boolean;
       name: string;
@@ -830,6 +1660,28 @@ export interface components {
       email?: string;
       name: string;
       phone?: string;
+    };
+    "model.UpdateTerritoryRequest": {
+      code?: string;
+      description?: string;
+      kind: string;
+      name: string;
+      parentId?: number;
+      parishId: number;
+      /** @enum {string} */
+      status?: "active" | "inactive";
+    };
+    "model.UpdateUnitRequest": {
+      code?: string;
+      description?: string;
+      /** @enum {string} */
+      kind: "council" | "territorial" | "category" | "section" | "committee";
+      name: string;
+      parentId?: number;
+      parishId: number;
+      /** @enum {string} */
+      status?: "active" | "inactive";
+      territoryId?: number;
     };
   };
   responses: never;

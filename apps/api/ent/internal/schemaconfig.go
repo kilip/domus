@@ -11,6 +11,7 @@ type SchemaConfig struct {
 	Membership  string // Membership table.
 	Parish      string // Parish table.
 	Parishioner string // Parishioner table.
+	Territory   string // Territory table.
 	Unit        string // Unit table.
 	User        string // User table.
 }

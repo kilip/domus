@@ -12,6 +12,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/paroki/domus/api/ent/diocese"
 	"github.com/paroki/domus/api/ent/parish"
+	"github.com/paroki/domus/api/ent/territory"
+	"github.com/paroki/domus/api/ent/unit"
 )
 
 // ParishCreate is the builder for creating a Parish entity.
@@ -121,6 +123,36 @@ func (_c *ParishCreate) SetNillableDioceseID(id *int) *ParishCreate {
 // SetDiocese sets the "diocese" edge to the Diocese entity.
 func (_c *ParishCreate) SetDiocese(v *Diocese) *ParishCreate {
 	return _c.SetDioceseID(v.ID)
+}
+
+// AddTerritoryIDs adds the "territories" edge to the Territory entity by IDs.
+func (_c *ParishCreate) AddTerritoryIDs(ids ...int) *ParishCreate {
+	_c.mutation.AddTerritoryIDs(ids...)
+	return _c
+}
+
+// AddTerritories adds the "territories" edges to the Territory entity.
+func (_c *ParishCreate) AddTerritories(v ...*Territory) *ParishCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddTerritoryIDs(ids...)
+}
+
+// AddUnitIDs adds the "units" edge to the Unit entity by IDs.
+func (_c *ParishCreate) AddUnitIDs(ids ...int) *ParishCreate {
+	_c.mutation.AddUnitIDs(ids...)
+	return _c
+}
+
+// AddUnits adds the "units" edges to the Unit entity.
+func (_c *ParishCreate) AddUnits(v ...*Unit) *ParishCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddUnitIDs(ids...)
 }
 
 // Mutation returns the ParishMutation object of the builder.
@@ -246,6 +278,40 @@ func (_c *ParishCreate) createSpec() (*Parish, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.diocese_parishes = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.TerritoriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   parish.TerritoriesTable,
+			Columns: []string{parish.TerritoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(territory.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _c.schemaConfig.Territory
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.UnitsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   parish.UnitsTable,
+			Columns: []string{parish.UnitsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _c.schemaConfig.Unit
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

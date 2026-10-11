@@ -57,6 +57,18 @@ func (f ParishionerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ParishionerMutation", m)
 }
 
+// The TerritoryFunc type is an adapter to allow the use of ordinary
+// function as Territory mutator.
+type TerritoryFunc func(context.Context, *ent.TerritoryMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TerritoryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.TerritoryMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TerritoryMutation", m)
+}
+
 // The UnitFunc type is an adapter to allow the use of ordinary
 // function as Unit mutator.
 type UnitFunc func(context.Context, *ent.UnitMutation) (ent.Value, error)

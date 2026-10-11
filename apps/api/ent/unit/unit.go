@@ -3,6 +3,7 @@
 package unit
 
 import (
+	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -24,16 +25,26 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldCode holds the string denoting the code field in the database.
+	FieldCode = "code"
+	// FieldKind holds the string denoting the kind field in the database.
+	FieldKind = "kind"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
 	// EdgeCreator holds the string denoting the creator edge name in mutations.
 	EdgeCreator = "creator"
 	// EdgeUpdater holds the string denoting the updater edge name in mutations.
 	EdgeUpdater = "updater"
+	// EdgeParish holds the string denoting the parish edge name in mutations.
+	EdgeParish = "parish"
 	// EdgeParent holds the string denoting the parent edge name in mutations.
 	EdgeParent = "parent"
 	// EdgeChildren holds the string denoting the children edge name in mutations.
 	EdgeChildren = "children"
+	// EdgeTerritory holds the string denoting the territory edge name in mutations.
+	EdgeTerritory = "territory"
 	// Table holds the table name of the unit in the database.
 	Table = "units"
 	// CreatorTable is the table that holds the creator relation/edge.
@@ -50,6 +61,13 @@ const (
 	UpdaterInverseTable = "users"
 	// UpdaterColumn is the table column denoting the updater relation/edge.
 	UpdaterColumn = "updated_by"
+	// ParishTable is the table that holds the parish relation/edge.
+	ParishTable = "units"
+	// ParishInverseTable is the table name for the Parish entity.
+	// It exists in this package in order to avoid circular dependency with the "parish" package.
+	ParishInverseTable = "parishes"
+	// ParishColumn is the table column denoting the parish relation/edge.
+	ParishColumn = "parish_units"
 	// ParentTable is the table that holds the parent relation/edge.
 	ParentTable = "units"
 	// ParentColumn is the table column denoting the parent relation/edge.
@@ -58,6 +76,13 @@ const (
 	ChildrenTable = "units"
 	// ChildrenColumn is the table column denoting the children relation/edge.
 	ChildrenColumn = "unit_children"
+	// TerritoryTable is the table that holds the territory relation/edge.
+	TerritoryTable = "territories"
+	// TerritoryInverseTable is the table name for the Territory entity.
+	// It exists in this package in order to avoid circular dependency with the "territory" package.
+	TerritoryInverseTable = "territories"
+	// TerritoryColumn is the table column denoting the territory relation/edge.
+	TerritoryColumn = "unit_territory"
 )
 
 // Columns holds all SQL columns for unit fields.
@@ -68,12 +93,16 @@ var Columns = []string{
 	FieldUpdatedBy,
 	FieldUpdatedAt,
 	FieldName,
+	FieldCode,
+	FieldKind,
 	FieldDescription,
+	FieldStatus,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "units"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
+	"parish_units",
 	"unit_children",
 }
 
@@ -102,6 +131,58 @@ var (
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
 )
+
+// Kind defines the type for the "kind" enum field.
+type Kind string
+
+// Kind values.
+const (
+	KindCouncil     Kind = "council"
+	KindTerritorial Kind = "territorial"
+	KindCategory    Kind = "category"
+	KindSection     Kind = "section"
+	KindCommittee   Kind = "committee"
+)
+
+func (k Kind) String() string {
+	return string(k)
+}
+
+// KindValidator is a validator for the "kind" field enum values. It is called by the builders before save.
+func KindValidator(k Kind) error {
+	switch k {
+	case KindCouncil, KindTerritorial, KindCategory, KindSection, KindCommittee:
+		return nil
+	default:
+		return fmt.Errorf("unit: invalid enum value for kind field: %q", k)
+	}
+}
+
+// Status defines the type for the "status" enum field.
+type Status string
+
+// StatusActive is the default value of the Status enum.
+const DefaultStatus = StatusActive
+
+// Status values.
+const (
+	StatusActive   Status = "active"
+	StatusInactive Status = "inactive"
+)
+
+func (s Status) String() string {
+	return string(s)
+}
+
+// StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
+func StatusValidator(s Status) error {
+	switch s {
+	case StatusActive, StatusInactive:
+		return nil
+	default:
+		return fmt.Errorf("unit: invalid enum value for status field: %q", s)
+	}
+}
 
 // OrderOption defines the ordering options for the Unit queries.
 type OrderOption func(*sql.Selector)
@@ -136,9 +217,24 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
+// ByCode orders the results by the code field.
+func ByCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCode, opts...).ToFunc()
+}
+
+// ByKind orders the results by the kind field.
+func ByKind(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldKind, opts...).ToFunc()
+}
+
 // ByDescription orders the results by the description field.
 func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
+}
+
+// ByStatus orders the results by the status field.
+func ByStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStatus, opts...).ToFunc()
 }
 
 // ByCreatorField orders the results by creator field.
@@ -152,6 +248,13 @@ func ByCreatorField(field string, opts ...sql.OrderTermOption) OrderOption {
 func ByUpdaterField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newUpdaterStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByParishField orders the results by parish field.
+func ByParishField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newParishStep(), sql.OrderByField(field, opts...))
 	}
 }
 
@@ -175,6 +278,13 @@ func ByChildren(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newChildrenStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByTerritoryField orders the results by territory field.
+func ByTerritoryField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTerritoryStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newCreatorStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -189,6 +299,13 @@ func newUpdaterStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2O, false, UpdaterTable, UpdaterColumn),
 	)
 }
+func newParishStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ParishInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, ParishTable, ParishColumn),
+	)
+}
 func newParentStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -201,5 +318,12 @@ func newChildrenStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(Table, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, ChildrenTable, ChildrenColumn),
+	)
+}
+func newTerritoryStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TerritoryInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, TerritoryTable, TerritoryColumn),
 	)
 }

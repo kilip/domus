@@ -12,6 +12,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/paroki/domus/api/ent/parish"
+	"github.com/paroki/domus/api/ent/territory"
 	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
 )
@@ -70,9 +72,51 @@ func (_c *UnitCreate) SetName(v string) *UnitCreate {
 	return _c
 }
 
+// SetCode sets the "code" field.
+func (_c *UnitCreate) SetCode(v string) *UnitCreate {
+	_c.mutation.SetCode(v)
+	return _c
+}
+
+// SetNillableCode sets the "code" field if the given value is not nil.
+func (_c *UnitCreate) SetNillableCode(v *string) *UnitCreate {
+	if v != nil {
+		_c.SetCode(*v)
+	}
+	return _c
+}
+
+// SetKind sets the "kind" field.
+func (_c *UnitCreate) SetKind(v unit.Kind) *UnitCreate {
+	_c.mutation.SetKind(v)
+	return _c
+}
+
 // SetDescription sets the "description" field.
 func (_c *UnitCreate) SetDescription(v string) *UnitCreate {
 	_c.mutation.SetDescription(v)
+	return _c
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_c *UnitCreate) SetNillableDescription(v *string) *UnitCreate {
+	if v != nil {
+		_c.SetDescription(*v)
+	}
+	return _c
+}
+
+// SetStatus sets the "status" field.
+func (_c *UnitCreate) SetStatus(v unit.Status) *UnitCreate {
+	_c.mutation.SetStatus(v)
+	return _c
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_c *UnitCreate) SetNillableStatus(v *unit.Status) *UnitCreate {
+	if v != nil {
+		_c.SetStatus(*v)
+	}
 	return _c
 }
 
@@ -102,6 +146,17 @@ func (_c *UnitCreate) SetUpdaterID(id uuid.UUID) *UnitCreate {
 // SetUpdater sets the "updater" edge to the User entity.
 func (_c *UnitCreate) SetUpdater(v *User) *UnitCreate {
 	return _c.SetUpdaterID(v.ID)
+}
+
+// SetParishID sets the "parish" edge to the Parish entity by ID.
+func (_c *UnitCreate) SetParishID(id int) *UnitCreate {
+	_c.mutation.SetParishID(id)
+	return _c
+}
+
+// SetParish sets the "parish" edge to the Parish entity.
+func (_c *UnitCreate) SetParish(v *Parish) *UnitCreate {
+	return _c.SetParishID(v.ID)
 }
 
 // SetParentID sets the "parent" edge to the Unit entity by ID.
@@ -136,6 +191,25 @@ func (_c *UnitCreate) AddChildren(v ...*Unit) *UnitCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddChildIDs(ids...)
+}
+
+// SetTerritoryID sets the "territory" edge to the Territory entity by ID.
+func (_c *UnitCreate) SetTerritoryID(id int) *UnitCreate {
+	_c.mutation.SetTerritoryID(id)
+	return _c
+}
+
+// SetNillableTerritoryID sets the "territory" edge to the Territory entity by ID if the given value is not nil.
+func (_c *UnitCreate) SetNillableTerritoryID(id *int) *UnitCreate {
+	if id != nil {
+		_c = _c.SetTerritoryID(*id)
+	}
+	return _c
+}
+
+// SetTerritory sets the "territory" edge to the Territory entity.
+func (_c *UnitCreate) SetTerritory(v *Territory) *UnitCreate {
+	return _c.SetTerritoryID(v.ID)
 }
 
 // Mutation returns the UnitMutation object of the builder.
@@ -181,6 +255,10 @@ func (_c *UnitCreate) defaults() {
 		v := unit.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.Status(); !ok {
+		v := unit.DefaultStatus
+		_c.mutation.SetStatus(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -205,14 +283,30 @@ func (_c *UnitCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Unit.name": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Description(); !ok {
-		return &ValidationError{Name: "description", err: errors.New(`ent: missing required field "Unit.description"`)}
+	if _, ok := _c.mutation.Kind(); !ok {
+		return &ValidationError{Name: "kind", err: errors.New(`ent: missing required field "Unit.kind"`)}
+	}
+	if v, ok := _c.mutation.Kind(); ok {
+		if err := unit.KindValidator(v); err != nil {
+			return &ValidationError{Name: "kind", err: fmt.Errorf(`ent: validator failed for field "Unit.kind": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Status(); !ok {
+		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "Unit.status"`)}
+	}
+	if v, ok := _c.mutation.Status(); ok {
+		if err := unit.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Unit.status": %w`, err)}
+		}
 	}
 	if len(_c.mutation.CreatorIDs()) == 0 {
 		return &ValidationError{Name: "creator", err: errors.New(`ent: missing required edge "Unit.creator"`)}
 	}
 	if len(_c.mutation.UpdaterIDs()) == 0 {
 		return &ValidationError{Name: "updater", err: errors.New(`ent: missing required edge "Unit.updater"`)}
+	}
+	if len(_c.mutation.ParishIDs()) == 0 {
+		return &ValidationError{Name: "parish", err: errors.New(`ent: missing required edge "Unit.parish"`)}
 	}
 	return nil
 }
@@ -260,9 +354,21 @@ func (_c *UnitCreate) createSpec() (*Unit, *sqlgraph.CreateSpec) {
 		_spec.SetField(unit.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
+	if value, ok := _c.mutation.Code(); ok {
+		_spec.SetField(unit.FieldCode, field.TypeString, value)
+		_node.Code = &value
+	}
+	if value, ok := _c.mutation.Kind(); ok {
+		_spec.SetField(unit.FieldKind, field.TypeEnum, value)
+		_node.Kind = value
+	}
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(unit.FieldDescription, field.TypeString, value)
 		_node.Description = &value
+	}
+	if value, ok := _c.mutation.Status(); ok {
+		_spec.SetField(unit.FieldStatus, field.TypeEnum, value)
+		_node.Status = value
 	}
 	if nodes := _c.mutation.CreatorIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -300,6 +406,24 @@ func (_c *UnitCreate) createSpec() (*Unit, *sqlgraph.CreateSpec) {
 		_node.UpdatedBy = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := _c.mutation.ParishIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   unit.ParishTable,
+			Columns: []string{unit.ParishColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(parish.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _c.schemaConfig.Unit
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.parish_units = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if nodes := _c.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -330,6 +454,23 @@ func (_c *UnitCreate) createSpec() (*Unit, *sqlgraph.CreateSpec) {
 			},
 		}
 		edge.Schema = _c.schemaConfig.Unit
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.TerritoryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   unit.TerritoryTable,
+			Columns: []string{unit.TerritoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(territory.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _c.schemaConfig.Territory
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
@@ -435,6 +576,36 @@ func (u *UnitUpsert) UpdateName() *UnitUpsert {
 	return u
 }
 
+// SetCode sets the "code" field.
+func (u *UnitUpsert) SetCode(v string) *UnitUpsert {
+	u.Set(unit.FieldCode, v)
+	return u
+}
+
+// UpdateCode sets the "code" field to the value that was provided on create.
+func (u *UnitUpsert) UpdateCode() *UnitUpsert {
+	u.SetExcluded(unit.FieldCode)
+	return u
+}
+
+// ClearCode clears the value of the "code" field.
+func (u *UnitUpsert) ClearCode() *UnitUpsert {
+	u.SetNull(unit.FieldCode)
+	return u
+}
+
+// SetKind sets the "kind" field.
+func (u *UnitUpsert) SetKind(v unit.Kind) *UnitUpsert {
+	u.Set(unit.FieldKind, v)
+	return u
+}
+
+// UpdateKind sets the "kind" field to the value that was provided on create.
+func (u *UnitUpsert) UpdateKind() *UnitUpsert {
+	u.SetExcluded(unit.FieldKind)
+	return u
+}
+
 // SetDescription sets the "description" field.
 func (u *UnitUpsert) SetDescription(v string) *UnitUpsert {
 	u.Set(unit.FieldDescription, v)
@@ -444,6 +615,24 @@ func (u *UnitUpsert) SetDescription(v string) *UnitUpsert {
 // UpdateDescription sets the "description" field to the value that was provided on create.
 func (u *UnitUpsert) UpdateDescription() *UnitUpsert {
 	u.SetExcluded(unit.FieldDescription)
+	return u
+}
+
+// ClearDescription clears the value of the "description" field.
+func (u *UnitUpsert) ClearDescription() *UnitUpsert {
+	u.SetNull(unit.FieldDescription)
+	return u
+}
+
+// SetStatus sets the "status" field.
+func (u *UnitUpsert) SetStatus(v unit.Status) *UnitUpsert {
+	u.Set(unit.FieldStatus, v)
+	return u
+}
+
+// UpdateStatus sets the "status" field to the value that was provided on create.
+func (u *UnitUpsert) UpdateStatus() *UnitUpsert {
+	u.SetExcluded(unit.FieldStatus)
 	return u
 }
 
@@ -554,6 +743,41 @@ func (u *UnitUpsertOne) UpdateName() *UnitUpsertOne {
 	})
 }
 
+// SetCode sets the "code" field.
+func (u *UnitUpsertOne) SetCode(v string) *UnitUpsertOne {
+	return u.Update(func(s *UnitUpsert) {
+		s.SetCode(v)
+	})
+}
+
+// UpdateCode sets the "code" field to the value that was provided on create.
+func (u *UnitUpsertOne) UpdateCode() *UnitUpsertOne {
+	return u.Update(func(s *UnitUpsert) {
+		s.UpdateCode()
+	})
+}
+
+// ClearCode clears the value of the "code" field.
+func (u *UnitUpsertOne) ClearCode() *UnitUpsertOne {
+	return u.Update(func(s *UnitUpsert) {
+		s.ClearCode()
+	})
+}
+
+// SetKind sets the "kind" field.
+func (u *UnitUpsertOne) SetKind(v unit.Kind) *UnitUpsertOne {
+	return u.Update(func(s *UnitUpsert) {
+		s.SetKind(v)
+	})
+}
+
+// UpdateKind sets the "kind" field to the value that was provided on create.
+func (u *UnitUpsertOne) UpdateKind() *UnitUpsertOne {
+	return u.Update(func(s *UnitUpsert) {
+		s.UpdateKind()
+	})
+}
+
 // SetDescription sets the "description" field.
 func (u *UnitUpsertOne) SetDescription(v string) *UnitUpsertOne {
 	return u.Update(func(s *UnitUpsert) {
@@ -565,6 +789,27 @@ func (u *UnitUpsertOne) SetDescription(v string) *UnitUpsertOne {
 func (u *UnitUpsertOne) UpdateDescription() *UnitUpsertOne {
 	return u.Update(func(s *UnitUpsert) {
 		s.UpdateDescription()
+	})
+}
+
+// ClearDescription clears the value of the "description" field.
+func (u *UnitUpsertOne) ClearDescription() *UnitUpsertOne {
+	return u.Update(func(s *UnitUpsert) {
+		s.ClearDescription()
+	})
+}
+
+// SetStatus sets the "status" field.
+func (u *UnitUpsertOne) SetStatus(v unit.Status) *UnitUpsertOne {
+	return u.Update(func(s *UnitUpsert) {
+		s.SetStatus(v)
+	})
+}
+
+// UpdateStatus sets the "status" field to the value that was provided on create.
+func (u *UnitUpsertOne) UpdateStatus() *UnitUpsertOne {
+	return u.Update(func(s *UnitUpsert) {
+		s.UpdateStatus()
 	})
 }
 
@@ -841,6 +1086,41 @@ func (u *UnitUpsertBulk) UpdateName() *UnitUpsertBulk {
 	})
 }
 
+// SetCode sets the "code" field.
+func (u *UnitUpsertBulk) SetCode(v string) *UnitUpsertBulk {
+	return u.Update(func(s *UnitUpsert) {
+		s.SetCode(v)
+	})
+}
+
+// UpdateCode sets the "code" field to the value that was provided on create.
+func (u *UnitUpsertBulk) UpdateCode() *UnitUpsertBulk {
+	return u.Update(func(s *UnitUpsert) {
+		s.UpdateCode()
+	})
+}
+
+// ClearCode clears the value of the "code" field.
+func (u *UnitUpsertBulk) ClearCode() *UnitUpsertBulk {
+	return u.Update(func(s *UnitUpsert) {
+		s.ClearCode()
+	})
+}
+
+// SetKind sets the "kind" field.
+func (u *UnitUpsertBulk) SetKind(v unit.Kind) *UnitUpsertBulk {
+	return u.Update(func(s *UnitUpsert) {
+		s.SetKind(v)
+	})
+}
+
+// UpdateKind sets the "kind" field to the value that was provided on create.
+func (u *UnitUpsertBulk) UpdateKind() *UnitUpsertBulk {
+	return u.Update(func(s *UnitUpsert) {
+		s.UpdateKind()
+	})
+}
+
 // SetDescription sets the "description" field.
 func (u *UnitUpsertBulk) SetDescription(v string) *UnitUpsertBulk {
 	return u.Update(func(s *UnitUpsert) {
@@ -852,6 +1132,27 @@ func (u *UnitUpsertBulk) SetDescription(v string) *UnitUpsertBulk {
 func (u *UnitUpsertBulk) UpdateDescription() *UnitUpsertBulk {
 	return u.Update(func(s *UnitUpsert) {
 		s.UpdateDescription()
+	})
+}
+
+// ClearDescription clears the value of the "description" field.
+func (u *UnitUpsertBulk) ClearDescription() *UnitUpsertBulk {
+	return u.Update(func(s *UnitUpsert) {
+		s.ClearDescription()
+	})
+}
+
+// SetStatus sets the "status" field.
+func (u *UnitUpsertBulk) SetStatus(v unit.Status) *UnitUpsertBulk {
+	return u.Update(func(s *UnitUpsert) {
+		s.SetStatus(v)
+	})
+}
+
+// UpdateStatus sets the "status" field to the value that was provided on create.
+func (u *UnitUpsertBulk) UpdateStatus() *UnitUpsertBulk {
+	return u.Update(func(s *UnitUpsert) {
+		s.UpdateStatus()
 	})
 }
 

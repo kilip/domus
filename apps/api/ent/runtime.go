@@ -10,6 +10,7 @@ import (
 	"github.com/paroki/domus/api/ent/membership"
 	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/schema"
+	"github.com/paroki/domus/api/ent/territory"
 	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
 )
@@ -65,6 +66,29 @@ func init() {
 	parishDescActive := parishFields[6].Descriptor()
 	// parish.DefaultActive holds the default value on creation for the active field.
 	parish.DefaultActive = parishDescActive.Default.(bool)
+	territoryMixin := schema.Territory{}.Mixin()
+	territoryMixinFields0 := territoryMixin[0].Fields()
+	_ = territoryMixinFields0
+	territoryFields := schema.Territory{}.Fields()
+	_ = territoryFields
+	// territoryDescCreatedAt is the schema descriptor for createdAt field.
+	territoryDescCreatedAt := territoryMixinFields0[1].Descriptor()
+	// territory.DefaultCreatedAt holds the default value on creation for the createdAt field.
+	territory.DefaultCreatedAt = territoryDescCreatedAt.Default.(func() time.Time)
+	// territoryDescUpdatedAt is the schema descriptor for updatedAt field.
+	territoryDescUpdatedAt := territoryMixinFields0[3].Descriptor()
+	// territory.DefaultUpdatedAt holds the default value on creation for the updatedAt field.
+	territory.DefaultUpdatedAt = territoryDescUpdatedAt.Default.(func() time.Time)
+	// territory.UpdateDefaultUpdatedAt holds the default value on update for the updatedAt field.
+	territory.UpdateDefaultUpdatedAt = territoryDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// territoryDescName is the schema descriptor for name field.
+	territoryDescName := territoryFields[1].Descriptor()
+	// territory.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	territory.NameValidator = territoryDescName.Validators[0].(func(string) error)
+	// territoryDescKind is the schema descriptor for kind field.
+	territoryDescKind := territoryFields[3].Descriptor()
+	// territory.KindValidator is a validator for the "kind" field. It is called by the builders before save.
+	territory.KindValidator = territoryDescKind.Validators[0].(func(string) error)
 	unitMixin := schema.Unit{}.Mixin()
 	unitMixinFields0 := unitMixin[0].Fields()
 	_ = unitMixinFields0

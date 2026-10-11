@@ -20,6 +20,7 @@ import (
 	"github.com/paroki/domus/api/ent/membership"
 	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/parishioner"
+	"github.com/paroki/domus/api/ent/territory"
 	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
 
@@ -39,6 +40,8 @@ type Client struct {
 	Parish *ParishClient
 	// Parishioner is the client for interacting with the Parishioner builders.
 	Parishioner *ParishionerClient
+	// Territory is the client for interacting with the Territory builders.
+	Territory *TerritoryClient
 	// Unit is the client for interacting with the Unit builders.
 	Unit *UnitClient
 	// User is the client for interacting with the User builders.
@@ -58,6 +61,7 @@ func (c *Client) init() {
 	c.Membership = NewMembershipClient(c.config)
 	c.Parish = NewParishClient(c.config)
 	c.Parishioner = NewParishionerClient(c.config)
+	c.Territory = NewTerritoryClient(c.config)
 	c.Unit = NewUnitClient(c.config)
 	c.User = NewUserClient(c.config)
 }
@@ -158,6 +162,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Membership:  NewMembershipClient(cfg),
 		Parish:      NewParishClient(cfg),
 		Parishioner: NewParishionerClient(cfg),
+		Territory:   NewTerritoryClient(cfg),
 		Unit:        NewUnitClient(cfg),
 		User:        NewUserClient(cfg),
 	}, nil
@@ -183,6 +188,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Membership:  NewMembershipClient(cfg),
 		Parish:      NewParishClient(cfg),
 		Parishioner: NewParishionerClient(cfg),
+		Territory:   NewTerritoryClient(cfg),
 		Unit:        NewUnitClient(cfg),
 		User:        NewUserClient(cfg),
 	}, nil
@@ -214,7 +220,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Diocese, c.Membership, c.Parish, c.Parishioner, c.Unit, c.User,
+		c.Diocese, c.Membership, c.Parish, c.Parishioner, c.Territory, c.Unit, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -224,7 +230,7 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Diocese, c.Membership, c.Parish, c.Parishioner, c.Unit, c.User,
+		c.Diocese, c.Membership, c.Parish, c.Parishioner, c.Territory, c.Unit, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -241,6 +247,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Parish.mutate(ctx, m)
 	case *ParishionerMutation:
 		return c.Parishioner.mutate(ctx, m)
+	case *TerritoryMutation:
+		return c.Territory.mutate(ctx, m)
 	case *UnitMutation:
 		return c.Unit.mutate(ctx, m)
 	case *UserMutation:
@@ -700,6 +708,44 @@ func (c *ParishClient) QueryDiocese(_m *Parish) *DioceseQuery {
 	return query
 }
 
+// QueryTerritories queries the territories edge of a Parish.
+func (c *ParishClient) QueryTerritories(_m *Parish) *TerritoryQuery {
+	query := (&TerritoryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(parish.Table, parish.FieldID, id),
+			sqlgraph.To(territory.Table, territory.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, parish.TerritoriesTable, parish.TerritoriesColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Territory
+		step.Edge.Schema = schemaConfig.Territory
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUnits queries the units edge of a Parish.
+func (c *ParishClient) QueryUnits(_m *Parish) *UnitQuery {
+	query := (&UnitClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(parish.Table, parish.FieldID, id),
+			sqlgraph.To(unit.Table, unit.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, parish.UnitsTable, parish.UnitsColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Unit
+		step.Edge.Schema = schemaConfig.Unit
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ParishClient) Hooks() []Hook {
 	return c.hooks.Parish
@@ -858,6 +904,253 @@ func (c *ParishionerClient) mutate(ctx context.Context, m *ParishionerMutation) 
 	}
 }
 
+// TerritoryClient is a client for the Territory schema.
+type TerritoryClient struct {
+	config
+}
+
+// NewTerritoryClient returns a client for the Territory from the given config.
+func NewTerritoryClient(c config) *TerritoryClient {
+	return &TerritoryClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `territory.Hooks(f(g(h())))`.
+func (c *TerritoryClient) Use(hooks ...Hook) {
+	c.hooks.Territory = append(c.hooks.Territory, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `territory.Intercept(f(g(h())))`.
+func (c *TerritoryClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Territory = append(c.inters.Territory, interceptors...)
+}
+
+// Create returns a builder for creating a Territory entity.
+func (c *TerritoryClient) Create() *TerritoryCreate {
+	mutation := newTerritoryMutation(c.config, OpCreate)
+	return &TerritoryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Territory entities.
+func (c *TerritoryClient) CreateBulk(builders ...*TerritoryCreate) *TerritoryCreateBulk {
+	return &TerritoryCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *TerritoryClient) MapCreateBulk(slice any, setFunc func(*TerritoryCreate, int)) *TerritoryCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &TerritoryCreateBulk{err: fmt.Errorf("calling to TerritoryClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*TerritoryCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &TerritoryCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Territory.
+func (c *TerritoryClient) Update() *TerritoryUpdate {
+	mutation := newTerritoryMutation(c.config, OpUpdate)
+	return &TerritoryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TerritoryClient) UpdateOne(_m *Territory) *TerritoryUpdateOne {
+	mutation := newTerritoryMutation(c.config, OpUpdateOne, withTerritory(_m))
+	return &TerritoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TerritoryClient) UpdateOneID(id int) *TerritoryUpdateOne {
+	mutation := newTerritoryMutation(c.config, OpUpdateOne, withTerritoryID(id))
+	return &TerritoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Territory.
+func (c *TerritoryClient) Delete() *TerritoryDelete {
+	mutation := newTerritoryMutation(c.config, OpDelete)
+	return &TerritoryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TerritoryClient) DeleteOne(_m *Territory) *TerritoryDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TerritoryClient) DeleteOneID(id int) *TerritoryDeleteOne {
+	builder := c.Delete().Where(territory.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TerritoryDeleteOne{builder}
+}
+
+// Query returns a query builder for Territory.
+func (c *TerritoryClient) Query() *TerritoryQuery {
+	return &TerritoryQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTerritory},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Territory entity by its id.
+func (c *TerritoryClient) Get(ctx context.Context, id int) (*Territory, error) {
+	return c.Query().Where(territory.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TerritoryClient) GetX(ctx context.Context, id int) *Territory {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCreator queries the creator edge of a Territory.
+func (c *TerritoryClient) QueryCreator(_m *Territory) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(territory.Table, territory.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, territory.CreatorTable, territory.CreatorColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Territory
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUpdater queries the updater edge of a Territory.
+func (c *TerritoryClient) QueryUpdater(_m *Territory) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(territory.Table, territory.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, territory.UpdaterTable, territory.UpdaterColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Territory
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryParish queries the parish edge of a Territory.
+func (c *TerritoryClient) QueryParish(_m *Territory) *ParishQuery {
+	query := (&ParishClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(territory.Table, territory.FieldID, id),
+			sqlgraph.To(parish.Table, parish.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, territory.ParishTable, territory.ParishColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Parish
+		step.Edge.Schema = schemaConfig.Territory
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryParent queries the parent edge of a Territory.
+func (c *TerritoryClient) QueryParent(_m *Territory) *TerritoryQuery {
+	query := (&TerritoryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(territory.Table, territory.FieldID, id),
+			sqlgraph.To(territory.Table, territory.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, territory.ParentTable, territory.ParentColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Territory
+		step.Edge.Schema = schemaConfig.Territory
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryChildren queries the children edge of a Territory.
+func (c *TerritoryClient) QueryChildren(_m *Territory) *TerritoryQuery {
+	query := (&TerritoryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(territory.Table, territory.FieldID, id),
+			sqlgraph.To(territory.Table, territory.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, territory.ChildrenTable, territory.ChildrenColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Territory
+		step.Edge.Schema = schemaConfig.Territory
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUnit queries the unit edge of a Territory.
+func (c *TerritoryClient) QueryUnit(_m *Territory) *UnitQuery {
+	query := (&UnitClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(territory.Table, territory.FieldID, id),
+			sqlgraph.To(unit.Table, unit.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, territory.UnitTable, territory.UnitColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Unit
+		step.Edge.Schema = schemaConfig.Territory
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TerritoryClient) Hooks() []Hook {
+	return c.hooks.Territory
+}
+
+// Interceptors returns the client interceptors.
+func (c *TerritoryClient) Interceptors() []Interceptor {
+	return c.inters.Territory
+}
+
+func (c *TerritoryClient) mutate(ctx context.Context, m *TerritoryMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TerritoryCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TerritoryUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TerritoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TerritoryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Territory mutation op: %q", m.Op())
+	}
+}
+
 // UnitClient is a client for the Unit schema.
 type UnitClient struct {
 	config
@@ -1004,6 +1297,25 @@ func (c *UnitClient) QueryUpdater(_m *Unit) *UserQuery {
 	return query
 }
 
+// QueryParish queries the parish edge of a Unit.
+func (c *UnitClient) QueryParish(_m *Unit) *ParishQuery {
+	query := (&ParishClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(unit.Table, unit.FieldID, id),
+			sqlgraph.To(parish.Table, parish.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, unit.ParishTable, unit.ParishColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Parish
+		step.Edge.Schema = schemaConfig.Unit
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryParent queries the parent edge of a Unit.
 func (c *UnitClient) QueryParent(_m *Unit) *UnitQuery {
 	query := (&UnitClient{config: c.config}).Query()
@@ -1036,6 +1348,25 @@ func (c *UnitClient) QueryChildren(_m *Unit) *UnitQuery {
 		schemaConfig := _m.schemaConfig
 		step.To.Schema = schemaConfig.Unit
 		step.Edge.Schema = schemaConfig.Unit
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTerritory queries the territory edge of a Unit.
+func (c *UnitClient) QueryTerritory(_m *Unit) *TerritoryQuery {
+	query := (&TerritoryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(unit.Table, unit.FieldID, id),
+			sqlgraph.To(territory.Table, territory.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, unit.TerritoryTable, unit.TerritoryColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Territory
+		step.Edge.Schema = schemaConfig.Territory
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
@@ -1203,10 +1534,11 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Diocese, Membership, Parish, Parishioner, Unit, User []ent.Hook
+		Diocese, Membership, Parish, Parishioner, Territory, Unit, User []ent.Hook
 	}
 	inters struct {
-		Diocese, Membership, Parish, Parishioner, Unit, User []ent.Interceptor
+		Diocese, Membership, Parish, Parishioner, Territory, Unit,
+		User []ent.Interceptor
 	}
 )
 

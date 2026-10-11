@@ -488,6 +488,64 @@ func HasDioceseWith(preds ...predicate.Diocese) predicate.Parish {
 	})
 }
 
+// HasTerritories applies the HasEdge predicate on the "territories" edge.
+func HasTerritories() predicate.Parish {
+	return predicate.Parish(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, TerritoriesTable, TerritoriesColumn),
+		)
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.Territory
+		step.Edge.Schema = schemaConfig.Territory
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasTerritoriesWith applies the HasEdge predicate on the "territories" edge with a given conditions (other predicates).
+func HasTerritoriesWith(preds ...predicate.Territory) predicate.Parish {
+	return predicate.Parish(func(s *sql.Selector) {
+		step := newTerritoriesStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.Territory
+		step.Edge.Schema = schemaConfig.Territory
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasUnits applies the HasEdge predicate on the "units" edge.
+func HasUnits() predicate.Parish {
+	return predicate.Parish(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, UnitsTable, UnitsColumn),
+		)
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.Unit
+		step.Edge.Schema = schemaConfig.Unit
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasUnitsWith applies the HasEdge predicate on the "units" edge with a given conditions (other predicates).
+func HasUnitsWith(preds ...predicate.Unit) predicate.Parish {
+	return predicate.Parish(func(s *sql.Selector) {
+		step := newUnitsStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.Unit
+		step.Edge.Schema = schemaConfig.Unit
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Parish) predicate.Parish {
 	return predicate.Parish(sql.AndPredicates(predicates...))

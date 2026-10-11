@@ -10,6 +10,8 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
+	"github.com/paroki/domus/api/ent/parish"
+	"github.com/paroki/domus/api/ent/territory"
 	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
 )
@@ -29,11 +31,18 @@ type Unit struct {
 	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Code holds the value of the "code" field.
+	Code *string `json:"code,omitempty"`
+	// Kind holds the value of the "kind" field.
+	Kind unit.Kind `json:"kind,omitempty"`
 	// Description holds the value of the "description" field.
 	Description *string `json:"description,omitempty"`
+	// Status holds the value of the "status" field.
+	Status unit.Status `json:"status,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UnitQuery when eager-loading is set.
 	Edges         UnitEdges `json:"edges"`
+	parish_units  *int
 	unit_children *int
 	selectValues  sql.SelectValues
 }
@@ -44,13 +53,17 @@ type UnitEdges struct {
 	Creator *User `json:"creator,omitempty"`
 	// Updater holds the value of the updater edge.
 	Updater *User `json:"updater,omitempty"`
+	// Parish holds the value of the parish edge.
+	Parish *Parish `json:"parish,omitempty"`
 	// Parent holds the value of the parent edge.
 	Parent *Unit `json:"parent,omitempty"`
 	// Children holds the value of the children edge.
 	Children []*Unit `json:"children,omitempty"`
+	// Territory holds the value of the territory edge.
+	Territory *Territory `json:"territory,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [6]bool
 }
 
 // CreatorOrErr returns the Creator value or an error if the edge
@@ -75,12 +88,23 @@ func (e UnitEdges) UpdaterOrErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "updater"}
 }
 
+// ParishOrErr returns the Parish value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UnitEdges) ParishOrErr() (*Parish, error) {
+	if e.Parish != nil {
+		return e.Parish, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: parish.Label}
+	}
+	return nil, &NotLoadedError{edge: "parish"}
+}
+
 // ParentOrErr returns the Parent value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e UnitEdges) ParentOrErr() (*Unit, error) {
 	if e.Parent != nil {
 		return e.Parent, nil
-	} else if e.loadedTypes[2] {
+	} else if e.loadedTypes[3] {
 		return nil, &NotFoundError{label: unit.Label}
 	}
 	return nil, &NotLoadedError{edge: "parent"}
@@ -89,10 +113,21 @@ func (e UnitEdges) ParentOrErr() (*Unit, error) {
 // ChildrenOrErr returns the Children value or an error if the edge
 // was not loaded in eager-loading.
 func (e UnitEdges) ChildrenOrErr() ([]*Unit, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[4] {
 		return e.Children, nil
 	}
 	return nil, &NotLoadedError{edge: "children"}
+}
+
+// TerritoryOrErr returns the Territory value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UnitEdges) TerritoryOrErr() (*Territory, error) {
+	if e.Territory != nil {
+		return e.Territory, nil
+	} else if e.loadedTypes[5] {
+		return nil, &NotFoundError{label: territory.Label}
+	}
+	return nil, &NotLoadedError{edge: "territory"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -102,13 +137,15 @@ func (*Unit) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case unit.FieldID:
 			values[i] = new(sql.NullInt64)
-		case unit.FieldName, unit.FieldDescription:
+		case unit.FieldName, unit.FieldCode, unit.FieldKind, unit.FieldDescription, unit.FieldStatus:
 			values[i] = new(sql.NullString)
 		case unit.FieldCreatedAt, unit.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case unit.FieldCreatedBy, unit.FieldUpdatedBy:
 			values[i] = new(uuid.UUID)
-		case unit.ForeignKeys[0]: // unit_children
+		case unit.ForeignKeys[0]: // parish_units
+			values[i] = new(sql.NullInt64)
+		case unit.ForeignKeys[1]: // unit_children
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -161,6 +198,19 @@ func (_m *Unit) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Name = value.String
 			}
+		case unit.FieldCode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field code", values[i])
+			} else if value.Valid {
+				_m.Code = new(string)
+				*_m.Code = value.String
+			}
+		case unit.FieldKind:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field kind", values[i])
+			} else if value.Valid {
+				_m.Kind = unit.Kind(value.String)
+			}
 		case unit.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
@@ -168,7 +218,20 @@ func (_m *Unit) assignValues(columns []string, values []any) error {
 				_m.Description = new(string)
 				*_m.Description = value.String
 			}
+		case unit.FieldStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field status", values[i])
+			} else if value.Valid {
+				_m.Status = unit.Status(value.String)
+			}
 		case unit.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field parish_units", value)
+			} else if value.Valid {
+				_m.parish_units = new(int)
+				*_m.parish_units = int(value.Int64)
+			}
+		case unit.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field unit_children", value)
 			} else if value.Valid {
@@ -198,6 +261,11 @@ func (_m *Unit) QueryUpdater() *UserQuery {
 	return NewUnitClient(_m.config).QueryUpdater(_m)
 }
 
+// QueryParish queries the "parish" edge of the Unit entity.
+func (_m *Unit) QueryParish() *ParishQuery {
+	return NewUnitClient(_m.config).QueryParish(_m)
+}
+
 // QueryParent queries the "parent" edge of the Unit entity.
 func (_m *Unit) QueryParent() *UnitQuery {
 	return NewUnitClient(_m.config).QueryParent(_m)
@@ -206,6 +274,11 @@ func (_m *Unit) QueryParent() *UnitQuery {
 // QueryChildren queries the "children" edge of the Unit entity.
 func (_m *Unit) QueryChildren() *UnitQuery {
 	return NewUnitClient(_m.config).QueryChildren(_m)
+}
+
+// QueryTerritory queries the "territory" edge of the Unit entity.
+func (_m *Unit) QueryTerritory() *TerritoryQuery {
+	return NewUnitClient(_m.config).QueryTerritory(_m)
 }
 
 // Update returns a builder for updating this Unit.
@@ -246,10 +319,21 @@ func (_m *Unit) String() string {
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
+	if v := _m.Code; v != nil {
+		builder.WriteString("code=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	builder.WriteString("kind=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Kind))
+	builder.WriteString(", ")
 	if v := _m.Description; v != nil {
 		builder.WriteString("description=")
 		builder.WriteString(*v)
 	}
+	builder.WriteString(", ")
+	builder.WriteString("status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Status))
 	builder.WriteByte(')')
 	return builder.String()
 }

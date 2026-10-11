@@ -25,7 +25,7 @@ func TestSuperadmin(t *testing.T) {
 	e := newEnforcer(t)
 	require.NoError(t, e.AddMembership("u1", RoleSuperadmin, System))
 
-	for _, obj := range []Resource{ResourceDiocese, ResourceParish} {
+	for _, obj := range []Resource{ResourceDiocese, ResourceParish, ResourceTerritory, ResourceUnit} {
 		require.True(t, mustCan(t, e, "u1", System, obj, ActionRead))
 		require.True(t, mustCan(t, e, "u1", System, obj, ActionWrite))
 	}

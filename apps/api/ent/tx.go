@@ -20,6 +20,8 @@ type Tx struct {
 	Parish *ParishClient
 	// Parishioner is the client for interacting with the Parishioner builders.
 	Parishioner *ParishionerClient
+	// Territory is the client for interacting with the Territory builders.
+	Territory *TerritoryClient
 	// Unit is the client for interacting with the Unit builders.
 	Unit *UnitClient
 	// User is the client for interacting with the User builders.
@@ -159,6 +161,7 @@ func (tx *Tx) init() {
 	tx.Membership = NewMembershipClient(tx.config)
 	tx.Parish = NewParishClient(tx.config)
 	tx.Parishioner = NewParishionerClient(tx.config)
+	tx.Territory = NewTerritoryClient(tx.config)
 	tx.Unit = NewUnitClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }

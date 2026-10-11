@@ -13,7 +13,9 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent/internal"
+	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/predicate"
+	"github.com/paroki/domus/api/ent/territory"
 	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
 )
@@ -79,6 +81,40 @@ func (_u *UnitUpdate) SetNillableName(v *string) *UnitUpdate {
 	return _u
 }
 
+// SetCode sets the "code" field.
+func (_u *UnitUpdate) SetCode(v string) *UnitUpdate {
+	_u.mutation.SetCode(v)
+	return _u
+}
+
+// SetNillableCode sets the "code" field if the given value is not nil.
+func (_u *UnitUpdate) SetNillableCode(v *string) *UnitUpdate {
+	if v != nil {
+		_u.SetCode(*v)
+	}
+	return _u
+}
+
+// ClearCode clears the value of the "code" field.
+func (_u *UnitUpdate) ClearCode() *UnitUpdate {
+	_u.mutation.ClearCode()
+	return _u
+}
+
+// SetKind sets the "kind" field.
+func (_u *UnitUpdate) SetKind(v unit.Kind) *UnitUpdate {
+	_u.mutation.SetKind(v)
+	return _u
+}
+
+// SetNillableKind sets the "kind" field if the given value is not nil.
+func (_u *UnitUpdate) SetNillableKind(v *unit.Kind) *UnitUpdate {
+	if v != nil {
+		_u.SetKind(*v)
+	}
+	return _u
+}
+
 // SetDescription sets the "description" field.
 func (_u *UnitUpdate) SetDescription(v string) *UnitUpdate {
 	_u.mutation.SetDescription(v)
@@ -89,6 +125,26 @@ func (_u *UnitUpdate) SetDescription(v string) *UnitUpdate {
 func (_u *UnitUpdate) SetNillableDescription(v *string) *UnitUpdate {
 	if v != nil {
 		_u.SetDescription(*v)
+	}
+	return _u
+}
+
+// ClearDescription clears the value of the "description" field.
+func (_u *UnitUpdate) ClearDescription() *UnitUpdate {
+	_u.mutation.ClearDescription()
+	return _u
+}
+
+// SetStatus sets the "status" field.
+func (_u *UnitUpdate) SetStatus(v unit.Status) *UnitUpdate {
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *UnitUpdate) SetNillableStatus(v *unit.Status) *UnitUpdate {
+	if v != nil {
+		_u.SetStatus(*v)
 	}
 	return _u
 }
@@ -113,6 +169,17 @@ func (_u *UnitUpdate) SetUpdaterID(id uuid.UUID) *UnitUpdate {
 // SetUpdater sets the "updater" edge to the User entity.
 func (_u *UnitUpdate) SetUpdater(v *User) *UnitUpdate {
 	return _u.SetUpdaterID(v.ID)
+}
+
+// SetParishID sets the "parish" edge to the Parish entity by ID.
+func (_u *UnitUpdate) SetParishID(id int) *UnitUpdate {
+	_u.mutation.SetParishID(id)
+	return _u
+}
+
+// SetParish sets the "parish" edge to the Parish entity.
+func (_u *UnitUpdate) SetParish(v *Parish) *UnitUpdate {
+	return _u.SetParishID(v.ID)
 }
 
 // SetParentID sets the "parent" edge to the Unit entity by ID.
@@ -149,6 +216,25 @@ func (_u *UnitUpdate) AddChildren(v ...*Unit) *UnitUpdate {
 	return _u.AddChildIDs(ids...)
 }
 
+// SetTerritoryID sets the "territory" edge to the Territory entity by ID.
+func (_u *UnitUpdate) SetTerritoryID(id int) *UnitUpdate {
+	_u.mutation.SetTerritoryID(id)
+	return _u
+}
+
+// SetNillableTerritoryID sets the "territory" edge to the Territory entity by ID if the given value is not nil.
+func (_u *UnitUpdate) SetNillableTerritoryID(id *int) *UnitUpdate {
+	if id != nil {
+		_u = _u.SetTerritoryID(*id)
+	}
+	return _u
+}
+
+// SetTerritory sets the "territory" edge to the Territory entity.
+func (_u *UnitUpdate) SetTerritory(v *Territory) *UnitUpdate {
+	return _u.SetTerritoryID(v.ID)
+}
+
 // Mutation returns the UnitMutation object of the builder.
 func (_u *UnitUpdate) Mutation() *UnitMutation {
 	return _u.mutation
@@ -163,6 +249,12 @@ func (_u *UnitUpdate) ClearCreator() *UnitUpdate {
 // ClearUpdater clears the "updater" edge to the User entity.
 func (_u *UnitUpdate) ClearUpdater() *UnitUpdate {
 	_u.mutation.ClearUpdater()
+	return _u
+}
+
+// ClearParish clears the "parish" edge to the Parish entity.
+func (_u *UnitUpdate) ClearParish() *UnitUpdate {
+	_u.mutation.ClearParish()
 	return _u
 }
 
@@ -191,6 +283,12 @@ func (_u *UnitUpdate) RemoveChildren(v ...*Unit) *UnitUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveChildIDs(ids...)
+}
+
+// ClearTerritory clears the "territory" edge to the Territory entity.
+func (_u *UnitUpdate) ClearTerritory() *UnitUpdate {
+	_u.mutation.ClearTerritory()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -236,11 +334,24 @@ func (_u *UnitUpdate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Unit.name": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Kind(); ok {
+		if err := unit.KindValidator(v); err != nil {
+			return &ValidationError{Name: "kind", err: fmt.Errorf(`ent: validator failed for field "Unit.kind": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Status(); ok {
+		if err := unit.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Unit.status": %w`, err)}
+		}
+	}
 	if _u.mutation.CreatorCleared() && len(_u.mutation.CreatorIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Unit.creator"`)
 	}
 	if _u.mutation.UpdaterCleared() && len(_u.mutation.UpdaterIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Unit.updater"`)
+	}
+	if _u.mutation.ParishCleared() && len(_u.mutation.ParishIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Unit.parish"`)
 	}
 	return nil
 }
@@ -263,8 +374,23 @@ func (_u *UnitUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(unit.FieldName, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.Code(); ok {
+		_spec.SetField(unit.FieldCode, field.TypeString, value)
+	}
+	if _u.mutation.CodeCleared() {
+		_spec.ClearField(unit.FieldCode, field.TypeString)
+	}
+	if value, ok := _u.mutation.Kind(); ok {
+		_spec.SetField(unit.FieldKind, field.TypeEnum, value)
+	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(unit.FieldDescription, field.TypeString, value)
+	}
+	if _u.mutation.DescriptionCleared() {
+		_spec.ClearField(unit.FieldDescription, field.TypeString)
+	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(unit.FieldStatus, field.TypeEnum, value)
 	}
 	if _u.mutation.CreatorCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -320,6 +446,37 @@ func (_u *UnitUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Unit
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ParishCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   unit.ParishTable,
+			Columns: []string{unit.ParishColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(parish.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Unit
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ParishIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   unit.ParishTable,
+			Columns: []string{unit.ParishColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(parish.FieldID, field.TypeInt),
 			},
 		}
 		edge.Schema = _u.schemaConfig.Unit
@@ -402,6 +559,37 @@ func (_u *UnitUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			},
 		}
 		edge.Schema = _u.schemaConfig.Unit
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.TerritoryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   unit.TerritoryTable,
+			Columns: []string{unit.TerritoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(territory.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Territory
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TerritoryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   unit.TerritoryTable,
+			Columns: []string{unit.TerritoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(territory.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Territory
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
@@ -477,6 +665,40 @@ func (_u *UnitUpdateOne) SetNillableName(v *string) *UnitUpdateOne {
 	return _u
 }
 
+// SetCode sets the "code" field.
+func (_u *UnitUpdateOne) SetCode(v string) *UnitUpdateOne {
+	_u.mutation.SetCode(v)
+	return _u
+}
+
+// SetNillableCode sets the "code" field if the given value is not nil.
+func (_u *UnitUpdateOne) SetNillableCode(v *string) *UnitUpdateOne {
+	if v != nil {
+		_u.SetCode(*v)
+	}
+	return _u
+}
+
+// ClearCode clears the value of the "code" field.
+func (_u *UnitUpdateOne) ClearCode() *UnitUpdateOne {
+	_u.mutation.ClearCode()
+	return _u
+}
+
+// SetKind sets the "kind" field.
+func (_u *UnitUpdateOne) SetKind(v unit.Kind) *UnitUpdateOne {
+	_u.mutation.SetKind(v)
+	return _u
+}
+
+// SetNillableKind sets the "kind" field if the given value is not nil.
+func (_u *UnitUpdateOne) SetNillableKind(v *unit.Kind) *UnitUpdateOne {
+	if v != nil {
+		_u.SetKind(*v)
+	}
+	return _u
+}
+
 // SetDescription sets the "description" field.
 func (_u *UnitUpdateOne) SetDescription(v string) *UnitUpdateOne {
 	_u.mutation.SetDescription(v)
@@ -487,6 +709,26 @@ func (_u *UnitUpdateOne) SetDescription(v string) *UnitUpdateOne {
 func (_u *UnitUpdateOne) SetNillableDescription(v *string) *UnitUpdateOne {
 	if v != nil {
 		_u.SetDescription(*v)
+	}
+	return _u
+}
+
+// ClearDescription clears the value of the "description" field.
+func (_u *UnitUpdateOne) ClearDescription() *UnitUpdateOne {
+	_u.mutation.ClearDescription()
+	return _u
+}
+
+// SetStatus sets the "status" field.
+func (_u *UnitUpdateOne) SetStatus(v unit.Status) *UnitUpdateOne {
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *UnitUpdateOne) SetNillableStatus(v *unit.Status) *UnitUpdateOne {
+	if v != nil {
+		_u.SetStatus(*v)
 	}
 	return _u
 }
@@ -511,6 +753,17 @@ func (_u *UnitUpdateOne) SetUpdaterID(id uuid.UUID) *UnitUpdateOne {
 // SetUpdater sets the "updater" edge to the User entity.
 func (_u *UnitUpdateOne) SetUpdater(v *User) *UnitUpdateOne {
 	return _u.SetUpdaterID(v.ID)
+}
+
+// SetParishID sets the "parish" edge to the Parish entity by ID.
+func (_u *UnitUpdateOne) SetParishID(id int) *UnitUpdateOne {
+	_u.mutation.SetParishID(id)
+	return _u
+}
+
+// SetParish sets the "parish" edge to the Parish entity.
+func (_u *UnitUpdateOne) SetParish(v *Parish) *UnitUpdateOne {
+	return _u.SetParishID(v.ID)
 }
 
 // SetParentID sets the "parent" edge to the Unit entity by ID.
@@ -547,6 +800,25 @@ func (_u *UnitUpdateOne) AddChildren(v ...*Unit) *UnitUpdateOne {
 	return _u.AddChildIDs(ids...)
 }
 
+// SetTerritoryID sets the "territory" edge to the Territory entity by ID.
+func (_u *UnitUpdateOne) SetTerritoryID(id int) *UnitUpdateOne {
+	_u.mutation.SetTerritoryID(id)
+	return _u
+}
+
+// SetNillableTerritoryID sets the "territory" edge to the Territory entity by ID if the given value is not nil.
+func (_u *UnitUpdateOne) SetNillableTerritoryID(id *int) *UnitUpdateOne {
+	if id != nil {
+		_u = _u.SetTerritoryID(*id)
+	}
+	return _u
+}
+
+// SetTerritory sets the "territory" edge to the Territory entity.
+func (_u *UnitUpdateOne) SetTerritory(v *Territory) *UnitUpdateOne {
+	return _u.SetTerritoryID(v.ID)
+}
+
 // Mutation returns the UnitMutation object of the builder.
 func (_u *UnitUpdateOne) Mutation() *UnitMutation {
 	return _u.mutation
@@ -561,6 +833,12 @@ func (_u *UnitUpdateOne) ClearCreator() *UnitUpdateOne {
 // ClearUpdater clears the "updater" edge to the User entity.
 func (_u *UnitUpdateOne) ClearUpdater() *UnitUpdateOne {
 	_u.mutation.ClearUpdater()
+	return _u
+}
+
+// ClearParish clears the "parish" edge to the Parish entity.
+func (_u *UnitUpdateOne) ClearParish() *UnitUpdateOne {
+	_u.mutation.ClearParish()
 	return _u
 }
 
@@ -589,6 +867,12 @@ func (_u *UnitUpdateOne) RemoveChildren(v ...*Unit) *UnitUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveChildIDs(ids...)
+}
+
+// ClearTerritory clears the "territory" edge to the Territory entity.
+func (_u *UnitUpdateOne) ClearTerritory() *UnitUpdateOne {
+	_u.mutation.ClearTerritory()
+	return _u
 }
 
 // Where appends a list predicates to the UnitUpdate builder.
@@ -647,11 +931,24 @@ func (_u *UnitUpdateOne) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Unit.name": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Kind(); ok {
+		if err := unit.KindValidator(v); err != nil {
+			return &ValidationError{Name: "kind", err: fmt.Errorf(`ent: validator failed for field "Unit.kind": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Status(); ok {
+		if err := unit.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Unit.status": %w`, err)}
+		}
+	}
 	if _u.mutation.CreatorCleared() && len(_u.mutation.CreatorIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Unit.creator"`)
 	}
 	if _u.mutation.UpdaterCleared() && len(_u.mutation.UpdaterIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Unit.updater"`)
+	}
+	if _u.mutation.ParishCleared() && len(_u.mutation.ParishIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Unit.parish"`)
 	}
 	return nil
 }
@@ -691,8 +988,23 @@ func (_u *UnitUpdateOne) sqlSave(ctx context.Context) (_node *Unit, err error) {
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(unit.FieldName, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.Code(); ok {
+		_spec.SetField(unit.FieldCode, field.TypeString, value)
+	}
+	if _u.mutation.CodeCleared() {
+		_spec.ClearField(unit.FieldCode, field.TypeString)
+	}
+	if value, ok := _u.mutation.Kind(); ok {
+		_spec.SetField(unit.FieldKind, field.TypeEnum, value)
+	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(unit.FieldDescription, field.TypeString, value)
+	}
+	if _u.mutation.DescriptionCleared() {
+		_spec.ClearField(unit.FieldDescription, field.TypeString)
+	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(unit.FieldStatus, field.TypeEnum, value)
 	}
 	if _u.mutation.CreatorCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -748,6 +1060,37 @@ func (_u *UnitUpdateOne) sqlSave(ctx context.Context) (_node *Unit, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Unit
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ParishCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   unit.ParishTable,
+			Columns: []string{unit.ParishColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(parish.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Unit
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ParishIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   unit.ParishTable,
+			Columns: []string{unit.ParishColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(parish.FieldID, field.TypeInt),
 			},
 		}
 		edge.Schema = _u.schemaConfig.Unit
@@ -830,6 +1173,37 @@ func (_u *UnitUpdateOne) sqlSave(ctx context.Context) (_node *Unit, err error) {
 			},
 		}
 		edge.Schema = _u.schemaConfig.Unit
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.TerritoryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   unit.TerritoryTable,
+			Columns: []string{unit.TerritoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(territory.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Territory
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TerritoryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   unit.TerritoryTable,
+			Columns: []string{unit.TerritoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(territory.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Territory
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
