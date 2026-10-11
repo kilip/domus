@@ -27,6 +27,7 @@ type Config struct {
 
 type Module struct {
 	config       Config
+	unitCtrl     controller.FinanceUnitController
 	activateCtrl controller.ActivateController
 	accountCtrl  controller.AccountController
 	txCtrl       controller.TransactionController
@@ -41,6 +42,9 @@ func New(config Config) Module {
 	if config.CookieName == "" {
 		config.CookieName = DefaultCookieName
 	}
+
+	unitSvc := service.NewFinanceUnitService(config.EntCli, config.Log)
+	unitCtrl := controller.NewFinanceUnitController(unitSvc)
 
 	activateSvc := service.NewActivateService(config.EntCli, config.Authz, config.Log)
 	activateCtrl := controller.NewActivateController(activateSvc, config.CookieName)
@@ -67,6 +71,7 @@ func New(config Config) Module {
 
 	return Module{
 		config:       config,
+		unitCtrl:     unitCtrl,
 		activateCtrl: activateCtrl,
 		accountCtrl:  accountCtrl,
 		txCtrl:       txCtrl,
@@ -78,7 +83,8 @@ func New(config Config) Module {
 func (m Module) InitRoutes(r fiber.Router) {
 	fin := r.Group("/fin")
 
-	// Activation does not require active context cookie
+	// Activation and unit listing do not require active context cookie
+	fin.Get("/units", m.unitCtrl.GetAccessibleUnits)
 	fin.Post("/activate", m.activateCtrl.Activate)
 
 	// All other /fin routes require active finance context cookie
@@ -86,7 +92,7 @@ func (m Module) InitRoutes(r fiber.Router) {
 
 	az := m.config.Authz
 	perm := func(act authz.Action) fiber.Handler {
-		return httpx.RequirePermission(az, FinanceParishScope, authz.ResourceFinance, act)
+		return httpx.RequirePermission(az, FinanceUnitScope, authz.ResourceFinance, act)
 	}
 
 	read := perm(authz.ActionRead)

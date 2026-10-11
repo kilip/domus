@@ -10,6 +10,8 @@ import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent"
+	"github.com/paroki/domus/api/ent/parish"
+	entunit "github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/internal/core"
 	"github.com/paroki/domus/api/internal/platform/authz"
 	"github.com/paroki/domus/api/testutil"
@@ -17,6 +19,17 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
+
+// GrantFinanceRole grants the finance role to all units belonging to the parish, as well as the unit scope.
+func GrantFinanceRole[T any](s *testutil.ApiTestSuite[T], parishID int, role string) {
+	s.T().Helper()
+	st := testutil.GetState()
+	units, _ := st.Ent.Unit.Query().Where(entunit.HasParishWith(parish.IDEQ(parishID))).All(context.Background())
+	for _, u := range units {
+		s.GrantRole(role, authz.Scope{Type: authz.ScopeUnit, ID: int64(u.ID)})
+	}
+	s.GrantRole(role, authz.Scope{Type: authz.ScopeParish, ID: int64(parishID)})
+}
 
 // SetFinanceCookie sets the domus.fin cookie in the test suite for active parish and unit.
 func SetFinanceCookie[T any](s *testutil.ApiTestSuite[T], parishID int, unitID int) {

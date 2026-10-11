@@ -28,8 +28,7 @@ func (s *ReportSuite) SetupTest() {
 }
 
 func (s *ReportSuite) grantRole(parishID int, role string) {
-	scope := authz.Scope{Type: authz.ScopeParish, ID: int64(parishID)}
-	s.GrantRole(role, scope)
+	GrantFinanceRole(&s.ApiTestSuite, parishID, role)
 }
 
 func (s *ReportSuite) activate(parishID, unitID int) {

@@ -1445,6 +1445,58 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/fin/units": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get accessible finance units
+     * @description Get list of units accessible to the current user for finance module
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: {
+        content: {
+          "application/json": Record<string, never>;
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.WebResponse-array_model_FinanceUnitResponse"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/parishes": {
     parameters: {
       query?: never;
@@ -2911,6 +2963,10 @@ export interface components {
       data?: components["schemas"]["model.DioceseResponse"][];
       meta?: components["schemas"]["httpx.Meta"];
     };
+    "httpx.WebResponse-array_model_FinanceUnitResponse": {
+      data?: components["schemas"]["model.FinanceUnitResponse"][];
+      meta?: components["schemas"]["httpx.Meta"];
+    };
     "httpx.WebResponse-array_model_ParishResponse": {
       data?: components["schemas"]["model.ParishResponse"][];
       meta?: components["schemas"]["httpx.Meta"];
@@ -3083,6 +3139,13 @@ export interface components {
       id?: string;
       postings?: components["schemas"]["model.PostingResponse"][];
       reversesId?: string;
+    };
+    "model.FinanceUnitResponse": {
+      code?: string;
+      id?: number;
+      kind?: string;
+      name?: string;
+      parishId?: number;
     };
     "model.LedgerAccount": {
       code?: string;

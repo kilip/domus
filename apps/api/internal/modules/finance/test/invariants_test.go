@@ -33,8 +33,7 @@ func (s *InvariantsSuite) SetupTest() {
 }
 
 func (s *InvariantsSuite) grantRole(parishID int, role string) {
-	scope := authz.Scope{Type: authz.ScopeParish, ID: int64(parishID)}
-	s.GrantRole(role, scope)
+	GrantFinanceRole(&s.ApiTestSuite, parishID, role)
 }
 
 func (s *InvariantsSuite) activate(parishID, unitID int) {

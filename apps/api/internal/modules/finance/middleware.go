@@ -44,6 +44,17 @@ func RequireFinanceContext(cookieName string) fiber.Handler {
 	}
 }
 
+func FinanceUnitScope(c fiber.Ctx) authz.Scope {
+	fc, ok := model.FinanceContextFromContext(c)
+	if !ok || fc.UnitID <= 0 {
+		return authz.Scope{Type: authz.ScopeUnit, ID: 0}
+	}
+	return authz.Scope{
+		Type: authz.ScopeUnit,
+		ID:   int64(fc.UnitID),
+	}
+}
+
 func FinanceParishScope(c fiber.Ctx) authz.Scope {
 	fc, ok := model.FinanceContextFromContext(c)
 	if !ok || fc.ParishID <= 0 {

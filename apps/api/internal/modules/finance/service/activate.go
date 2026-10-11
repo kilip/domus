@@ -53,8 +53,8 @@ func (s ActivateService) Activate(ctx context.Context, userID uuid.UUID, req mod
 		return nil, model.ErrUnitNotFound
 	}
 
-	// 3. Verify user has finance permission in this parish
-	scope := authz.Scope{Type: authz.ScopeParish, ID: int64(req.ParishID)}
+	// 3. Verify user has finance permission in this unit
+	scope := authz.Scope{Type: authz.ScopeUnit, ID: int64(req.UnitID)}
 	can, err := s.authz.Can(ctx, userID.String(), scope, authz.ResourceFinance, authz.ActionRead)
 	if err != nil {
 		return nil, err

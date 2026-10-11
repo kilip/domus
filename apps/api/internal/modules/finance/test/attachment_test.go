@@ -30,8 +30,7 @@ func (s *AttachmentSuite) SetupTest() {
 }
 
 func (s *AttachmentSuite) grantRole(parishID int, role string) {
-	scope := authz.Scope{Type: authz.ScopeParish, ID: int64(parishID)}
-	s.GrantRole(role, scope)
+	GrantFinanceRole(&s.ApiTestSuite, parishID, role)
 }
 
 func (s *AttachmentSuite) grantUnitRole(unitID int, role string) {
@@ -305,7 +304,7 @@ func (s *AttachmentSuite) TestAuthz_ParishRoleOnlyIsForbidden() {
 
 	other := core.AuthenticatedUser{ID: core.GenerateID(), Email: "parish-only@example.com", Name: "Parish Only", Roles: []core.UserRole{core.UserRoleAdmin}}
 	s.User = &other
-	s.grantRole(parish.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter))
+	s.GrantRole(authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter), authz.Scope{Type: authz.ScopeParish, ID: int64(parish.ID)})
 	s.activate(parish.ID, unit.ID)
 
 	uploadURL := fmt.Sprintf("/fin/transactions/%s/attachments", tx.ID)

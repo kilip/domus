@@ -33,8 +33,7 @@ func (s *TransactionSuite) SetupTest() {
 }
 
 func (s *TransactionSuite) grantRole(parishID int, role string) {
-	scope := authz.Scope{Type: authz.ScopeParish, ID: int64(parishID)}
-	s.GrantRole(role, scope)
+	GrantFinanceRole(&s.ApiTestSuite, parishID, role)
 }
 
 func (s *TransactionSuite) activate(parishID, unitID int) {

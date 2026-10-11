@@ -35,8 +35,9 @@ func initMiddlewares(cfg Config, app *fiber.App, logger *slog.Logger) error {
 
 	// cors config
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: cfg.TrustedOrigins,
-		AllowHeaders: []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		AllowOrigins:     cfg.TrustedOrigins,
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		AllowCredentials: true,
 	}))
 
 	// jwks config

@@ -25,7 +25,7 @@ func (s *ActivateSuite) SetupTest() {
 func (s *ActivateSuite) TestActivate_SuccessAndCookie() {
 	parish := CreateTestParish(s.T())
 	unit := CreateTestUnit(s.T(), parish.ID, s.User.ID)
-	scope := authz.Scope{Type: authz.ScopeParish, ID: int64(parish.ID)}
+	scope := authz.Scope{Type: authz.ScopeUnit, ID: int64(unit.ID)}
 	s.GrantRole(authz.ModuleRole(authz.ResourceFinance, authz.LevelReader), scope)
 
 	req := model.ActivateFinanceRequest{
@@ -75,7 +75,7 @@ func (s *ActivateSuite) TestActivate_UnitBelongsToDifferentParish() {
 	parish2 := CreateTestParish(s.T())
 	unit2 := CreateTestUnit(s.T(), parish2.ID, s.User.ID)
 
-	scope := authz.Scope{Type: authz.ScopeParish, ID: int64(parish1.ID)}
+	scope := authz.Scope{Type: authz.ScopeUnit, ID: int64(unit2.ID)}
 	s.GrantRole(authz.ModuleRole(authz.ResourceFinance, authz.LevelReader), scope)
 
 	req := model.ActivateFinanceRequest{
@@ -102,7 +102,8 @@ func (s *ActivateSuite) TestActivate_ForbiddenIfNoRole() {
 
 func (s *ActivateSuite) TestRequireFinanceContext_MissingCookie() {
 	parish := CreateTestParish(s.T())
-	scope := authz.Scope{Type: authz.ScopeParish, ID: int64(parish.ID)}
+	unit := CreateTestUnit(s.T(), parish.ID, s.User.ID)
+	scope := authz.Scope{Type: authz.ScopeUnit, ID: int64(unit.ID)}
 	s.GrantRole(authz.ModuleRole(authz.ResourceFinance, authz.LevelReader), scope)
 
 	// Call /fin/accounts without setting cookie
