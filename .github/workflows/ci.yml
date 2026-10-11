@@ -37,6 +37,12 @@ jobs:
   test-better-auth:
     name: Test Better Auth
     runs-on: ubuntu-latest
+    env:
+      AUTH_URL: http://localhost:8001
+      AUTH_HOST: 0.0.0.0
+      AUTH_PATH: ""
+      AUTH_DB_URL: postgres://domus:domus@localhost:5432/domus
+      AUTH_SECRET: 6171ce314c622f9a4cdb542c810d40b91edde2f659bcd5224c6aeee7d7ea4925
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
