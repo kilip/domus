@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/turbo/schema.json",
   "ui": "tui",
-  "globalEnv": ["AUTH_*", "KAFKA_*", "API_*"],
+  "globalEnv": ["AUTH_*", "KAFKA_*", "API_*", "SUPERADMIN_*"],
   "tasks": {
     "@domus/better-auth#auth:schema": {
       "inputs": ["src/auth.ts"],
@@ -37,6 +37,7 @@
     },
     "e2e": {
       "cache": false
-    }
+    },
+    "typecheck": {}
   }
 }

@@ -25,6 +25,8 @@ export const authEnvConfig = () => {
       AUTH_GOOGLE_SECRET: z.string().optional(),
       AUTH_GITHUB_ID: z.string().optional(),
       AUTH_GITHUB_SECRET: z.string().optional(),
+      SUPERADMIN_EMAIL: z.string().email().optional(),
+      SUPERADMIN_NAME: z.string().optional().default("Super Admin"),
     },
     runtimeEnv: process.env,
     isServer: typeof window === "undefined",

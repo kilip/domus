@@ -8,6 +8,7 @@
   },
   "scripts": {
     "test": "vitest run",
+    "typecheck": "tsc --noEmit",
     "auth:schema": "bunx auth@latest generate --output ./src/drizzle/schema/better-auth.ts --yes",
     "db:push": "drizzle-kit push --force",
     "db:studio": "drizzle-kit studio"

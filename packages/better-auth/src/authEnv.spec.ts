@@ -129,4 +129,23 @@ describe("authEnvConfig", () => {
     expect(authEnv.AUTH_PORT).toBe(3000);
     expect(authEnv.AUTH_HOST).toBe("localhost");
   });
+
+  it("should parse SUPERADMIN_EMAIL and default SUPERADMIN_NAME", () => {
+    process.env.AUTH_URL = "http://localhost:3000";
+    process.env.AUTH_PATH = "/api/auth";
+    process.env.AUTH_DB_URL = "postgres://user:pass@localhost:5432/db";
+    delete process.env.SUPERADMIN_EMAIL;
+    delete process.env.SUPERADMIN_NAME;
+
+    const envDefault = authEnvConfig();
+    expect(envDefault.SUPERADMIN_EMAIL).toBeUndefined();
+    expect(envDefault.SUPERADMIN_NAME).toBe("Super Admin");
+
+    process.env.SUPERADMIN_EMAIL = "admin@example.com";
+    process.env.SUPERADMIN_NAME = "Root Admin";
+
+    const envCustom = authEnvConfig();
+    expect(envCustom.SUPERADMIN_EMAIL).toBe("admin@example.com");
+    expect(envCustom.SUPERADMIN_NAME).toBe("Root Admin");
+  });
 });

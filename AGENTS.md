@@ -46,9 +46,9 @@ Tooling: Bun `1.4.2` (workspaces), Node `>=22`, Turborepo, Biome 2, Husky + Comm
 
 ## Environment
 
-The devcontainer (`.devcontainer/compose.yaml`) sets everything for local dev; CI sets its own copy in `.github/workflows/ci.yml`. No `.env.example` exists in the repo. `.env*` files are git-ignored. `globalEnv` in `turbo.json` covers `AUTH_*`, `KAFKA_*`, `API_*`.
+The devcontainer (`.devcontainer/compose.yaml`) sets everything for local dev; CI sets its own copy in `.github/workflows/ci.yml`. No `.env.example` exists in the repo. `.env*` files are git-ignored. `globalEnv` in `turbo.json` covers `AUTH_*`, `KAFKA_*`, `API_*`, `SUPERADMIN_*`.
 
-- auth / better-auth: `AUTH_URL`, `AUTH_HOST?`, `AUTH_PORT?`, `AUTH_PATH`, `AUTH_DB_URL`, `AUTH_SECRET`, `AUTH_TRUSTED_ORIGINS` (comma separated), optional `AUTH_GOOGLE_*` / `AUTH_GITHUB_*`
+- auth / better-auth: `AUTH_URL`, `AUTH_HOST?`, `AUTH_PORT?`, `AUTH_PATH`, `AUTH_DB_URL`, `AUTH_SECRET`, `AUTH_TRUSTED_ORIGINS` (comma separated), optional `AUTH_GOOGLE_*` / `AUTH_GITHUB_*`, optional `SUPERADMIN_EMAIL`, `SUPERADMIN_NAME`
 - api: `API_DB_URL`, `API_PORT` (default 8002), `AUTH_URL`, `AUTH_JWKS_URL`, `AUTH_TRUSTED_ORIGINS`
 - dash: `VITE_AUTH_URL`, `VITE_PUBLIC_URL`, `VITE_API_URL` (default `http://localhost:8002`)
 - provisioned but not used by app code yet: `REDIS_URL`, `S3_*`, `KAFKA_BROKERS`

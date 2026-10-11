@@ -1,10 +1,17 @@
-import { defineRelationsPart } from "drizzle-orm";
-import { boolean, index, pgSchema, text, timestamp } from "drizzle-orm/pg-core";
+import { defineRelationsPart, sql } from "drizzle-orm";
+import {
+  boolean,
+  index,
+  pgSchema,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 
 export const authSchema = pgSchema("auth");
 
 export const user = authSchema.table("user", {
-  id: text("id").primaryKey(),
+  id: uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
@@ -23,7 +30,7 @@ export const user = authSchema.table("user", {
 export const session = authSchema.table(
   "session",
   {
-    id: text("id").primaryKey(),
+    id: uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
     expiresAt: timestamp("expires_at").notNull(),
     token: text("token").notNull().unique(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -32,7 +39,7 @@ export const session = authSchema.table(
       .notNull(),
     ipAddress: text("ip_address"),
     userAgent: text("user_agent"),
-    userId: text("user_id")
+    userId: uuid("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     impersonatedBy: text("impersonated_by"),
@@ -43,10 +50,10 @@ export const session = authSchema.table(
 export const account = authSchema.table(
   "account",
   {
-    id: text("id").primaryKey(),
+    id: uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
     accountId: text("account_id").notNull(),
     providerId: text("provider_id").notNull(),
-    userId: text("user_id")
+    userId: uuid("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     accessToken: text("access_token"),
@@ -67,7 +74,7 @@ export const account = authSchema.table(
 export const verification = authSchema.table(
   "verification",
   {
-    id: text("id").primaryKey(),
+    id: uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
     identifier: text("identifier").notNull(),
     value: text("value").notNull(),
     expiresAt: timestamp("expires_at").notNull(),
@@ -81,7 +88,7 @@ export const verification = authSchema.table(
 );
 
 export const jwks = authSchema.table("jwks", {
-  id: text("id").primaryKey(),
+  id: uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
   publicKey: text("public_key").notNull(),
   privateKey: text("private_key").notNull(),
   createdAt: timestamp("created_at").notNull(),

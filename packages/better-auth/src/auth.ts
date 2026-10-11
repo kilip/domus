@@ -1,6 +1,7 @@
 import { drizzleAdapter } from "@better-auth/drizzle-adapter/relations-v2";
 import { betterAuth } from "better-auth";
 import { admin, jwt, openAPI, testUtils } from "better-auth/plugins";
+import { adminAc, defaultRoles } from "better-auth/plugins/admin/access";
 import { sql } from "drizzle-orm";
 import { authEnv } from "./authEnv";
 import { authDB, schema } from "./drizzle";
@@ -15,8 +16,19 @@ export const auth = betterAuth({
     schemaName: "auth",
     schema,
   }),
+  advanced: {
+    database: {
+      generateId: "uuid",
+    },
+  },
   plugins: [
-    admin(),
+    admin({
+      adminRoles: ["admin", "superadmin"],
+      roles: {
+        ...defaultRoles,
+        superadmin: adminAc,
+      },
+    }),
     jwt(),
     openAPI(),
     ...(process.env.E2E === "true" || process.env.NODE_ENV === "test"
@@ -76,4 +88,9 @@ export const auth = betterAuth({
   socialProviders,
 });
 
+export {
+  type SeedSuperadminOptions,
+  type SeedSuperadminResult,
+  seedSuperadmin,
+} from "./seedSuperadmin";
 export { authDB, authEnv };
