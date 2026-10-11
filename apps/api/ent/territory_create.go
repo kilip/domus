@@ -66,6 +66,20 @@ func (_c *TerritoryCreate) SetNillableUpdatedAt(v *time.Time) *TerritoryCreate {
 	return _c
 }
 
+// SetDeletedAt sets the "deletedAt" field.
+func (_c *TerritoryCreate) SetDeletedAt(v time.Time) *TerritoryCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deletedAt" field if the given value is not nil.
+func (_c *TerritoryCreate) SetNillableDeletedAt(v *time.Time) *TerritoryCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
+	}
+	return _c
+}
+
 // SetName sets the "name" field.
 func (_c *TerritoryCreate) SetName(v string) *TerritoryCreate {
 	_c.mutation.SetName(v)
@@ -350,6 +364,10 @@ func (_c *TerritoryCreate) createSpec() (*Territory, *sqlgraph.CreateSpec) {
 		_spec.SetField(territory.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(territory.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(territory.FieldName, field.TypeString, value)
 		_node.Name = value
@@ -565,6 +583,24 @@ func (u *TerritoryUpsert) UpdateUpdatedAt() *TerritoryUpsert {
 	return u
 }
 
+// SetDeletedAt sets the "deletedAt" field.
+func (u *TerritoryUpsert) SetDeletedAt(v time.Time) *TerritoryUpsert {
+	u.Set(territory.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateDeletedAt sets the "deletedAt" field to the value that was provided on create.
+func (u *TerritoryUpsert) UpdateDeletedAt() *TerritoryUpsert {
+	u.SetExcluded(territory.FieldDeletedAt)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (u *TerritoryUpsert) ClearDeletedAt() *TerritoryUpsert {
+	u.SetNull(territory.FieldDeletedAt)
+	return u
+}
+
 // SetName sets the "name" field.
 func (u *TerritoryUpsert) SetName(v string) *TerritoryUpsert {
 	u.Set(territory.FieldName, v)
@@ -727,6 +763,27 @@ func (u *TerritoryUpsertOne) SetUpdatedAt(v time.Time) *TerritoryUpsertOne {
 func (u *TerritoryUpsertOne) UpdateUpdatedAt() *TerritoryUpsertOne {
 	return u.Update(func(s *TerritoryUpsert) {
 		s.UpdateUpdatedAt()
+	})
+}
+
+// SetDeletedAt sets the "deletedAt" field.
+func (u *TerritoryUpsertOne) SetDeletedAt(v time.Time) *TerritoryUpsertOne {
+	return u.Update(func(s *TerritoryUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deletedAt" field to the value that was provided on create.
+func (u *TerritoryUpsertOne) UpdateDeletedAt() *TerritoryUpsertOne {
+	return u.Update(func(s *TerritoryUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (u *TerritoryUpsertOne) ClearDeletedAt() *TerritoryUpsertOne {
+	return u.Update(func(s *TerritoryUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 
@@ -1070,6 +1127,27 @@ func (u *TerritoryUpsertBulk) SetUpdatedAt(v time.Time) *TerritoryUpsertBulk {
 func (u *TerritoryUpsertBulk) UpdateUpdatedAt() *TerritoryUpsertBulk {
 	return u.Update(func(s *TerritoryUpsert) {
 		s.UpdateUpdatedAt()
+	})
+}
+
+// SetDeletedAt sets the "deletedAt" field.
+func (u *TerritoryUpsertBulk) SetDeletedAt(v time.Time) *TerritoryUpsertBulk {
+	return u.Update(func(s *TerritoryUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deletedAt" field to the value that was provided on create.
+func (u *TerritoryUpsertBulk) UpdateDeletedAt() *TerritoryUpsertBulk {
+	return u.Update(func(s *TerritoryUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (u *TerritoryUpsertBulk) ClearDeletedAt() *TerritoryUpsertBulk {
+	return u.Update(func(s *TerritoryUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 

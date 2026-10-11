@@ -11,6 +11,12 @@ type Parish struct {
 	ent.Schema
 }
 
+func (Parish) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		SoftDeleteMixin{},
+	}
+}
+
 // Fields of the Parish.
 func (Parish) Fields() []ent.Field {
 	return []ent.Field{

@@ -13,6 +13,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "active", Type: field.TypeBool, Default: true},
 		{Name: "created_by", Type: field.TypeUUID},
@@ -26,13 +27,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "dioceses_users_creator",
-				Columns:    []*schema.Column{DiocesesColumns[5]},
+				Columns:    []*schema.Column{DiocesesColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "dioceses_users_updater",
-				Columns:    []*schema.Column{DiocesesColumns[6]},
+				Columns:    []*schema.Column{DiocesesColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -73,6 +74,7 @@ var (
 	// ParishesColumns holds the columns for the "parishes" table.
 	ParishesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "church", Type: field.TypeString, Nullable: true},
 		{Name: "address", Type: field.TypeString, Nullable: true},
@@ -89,7 +91,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "parishes_dioceses_parishes",
-				Columns:    []*schema.Column{ParishesColumns[7]},
+				Columns:    []*schema.Column{ParishesColumns[8]},
 				RefColumns: []*schema.Column{DiocesesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -110,6 +112,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "code", Type: field.TypeString, Nullable: true},
 		{Name: "kind", Type: field.TypeString},
@@ -129,31 +132,31 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "territories_parishes_territories",
-				Columns:    []*schema.Column{TerritoriesColumns[8]},
+				Columns:    []*schema.Column{TerritoriesColumns[9]},
 				RefColumns: []*schema.Column{ParishesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "territories_users_creator",
-				Columns:    []*schema.Column{TerritoriesColumns[9]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-			{
-				Symbol:     "territories_users_updater",
 				Columns:    []*schema.Column{TerritoriesColumns[10]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "territories_territories_children",
+				Symbol:     "territories_users_updater",
 				Columns:    []*schema.Column{TerritoriesColumns[11]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "territories_territories_children",
+				Columns:    []*schema.Column{TerritoriesColumns[12]},
 				RefColumns: []*schema.Column{TerritoriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "territories_units_territory",
-				Columns:    []*schema.Column{TerritoriesColumns[12]},
+				Columns:    []*schema.Column{TerritoriesColumns[13]},
 				RefColumns: []*schema.Column{UnitsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -162,12 +165,12 @@ var (
 			{
 				Name:    "territory_code_parish_territories",
 				Unique:  true,
-				Columns: []*schema.Column{TerritoriesColumns[4], TerritoriesColumns[8]},
+				Columns: []*schema.Column{TerritoriesColumns[5], TerritoriesColumns[9]},
 			},
 			{
 				Name:    "territory_kind_name_parish_territories",
 				Unique:  true,
-				Columns: []*schema.Column{TerritoriesColumns[5], TerritoriesColumns[3], TerritoriesColumns[8]},
+				Columns: []*schema.Column{TerritoriesColumns[6], TerritoriesColumns[4], TerritoriesColumns[9]},
 			},
 		},
 	}
@@ -176,6 +179,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "code", Type: field.TypeString, Nullable: true},
 		{Name: "kind", Type: field.TypeEnum, Enums: []string{"council", "territorial", "category", "section", "committee"}},
@@ -194,25 +198,25 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "units_parishes_units",
-				Columns:    []*schema.Column{UnitsColumns[8]},
+				Columns:    []*schema.Column{UnitsColumns[9]},
 				RefColumns: []*schema.Column{ParishesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "units_users_creator",
-				Columns:    []*schema.Column{UnitsColumns[9]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-			{
-				Symbol:     "units_users_updater",
 				Columns:    []*schema.Column{UnitsColumns[10]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "units_units_children",
+				Symbol:     "units_users_updater",
 				Columns:    []*schema.Column{UnitsColumns[11]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "units_units_children",
+				Columns:    []*schema.Column{UnitsColumns[12]},
 				RefColumns: []*schema.Column{UnitsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -221,13 +225,14 @@ var (
 			{
 				Name:    "unit_code_parish_units",
 				Unique:  true,
-				Columns: []*schema.Column{UnitsColumns[4], UnitsColumns[8]},
+				Columns: []*schema.Column{UnitsColumns[5], UnitsColumns[9]},
 			},
 		},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "email", Type: field.TypeString},
 		{Name: "avatar", Type: field.TypeString, Nullable: true},

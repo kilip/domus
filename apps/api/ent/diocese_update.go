@@ -66,6 +66,26 @@ func (_u *DioceseUpdate) SetUpdatedAt(v time.Time) *DioceseUpdate {
 	return _u
 }
 
+// SetDeletedAt sets the "deletedAt" field.
+func (_u *DioceseUpdate) SetDeletedAt(v time.Time) *DioceseUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deletedAt" field if the given value is not nil.
+func (_u *DioceseUpdate) SetNillableDeletedAt(v *time.Time) *DioceseUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (_u *DioceseUpdate) ClearDeletedAt() *DioceseUpdate {
+	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
 // SetName sets the "name" field.
 func (_u *DioceseUpdate) SetName(v string) *DioceseUpdate {
 	_u.mutation.SetName(v)
@@ -236,6 +256,12 @@ func (_u *DioceseUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(diocese.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(diocese.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(diocese.FieldDeletedAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(diocese.FieldName, field.TypeString, value)
 	}
@@ -405,6 +431,26 @@ func (_u *DioceseUpdateOne) SetNillableUpdatedBy(v *uuid.UUID) *DioceseUpdateOne
 // SetUpdatedAt sets the "updatedAt" field.
 func (_u *DioceseUpdateOne) SetUpdatedAt(v time.Time) *DioceseUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
+// SetDeletedAt sets the "deletedAt" field.
+func (_u *DioceseUpdateOne) SetDeletedAt(v time.Time) *DioceseUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deletedAt" field if the given value is not nil.
+func (_u *DioceseUpdateOne) SetNillableDeletedAt(v *time.Time) *DioceseUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (_u *DioceseUpdateOne) ClearDeletedAt() *DioceseUpdateOne {
+	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
@@ -607,6 +653,12 @@ func (_u *DioceseUpdateOne) sqlSave(ctx context.Context) (_node *Diocese, err er
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(diocese.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(diocese.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(diocese.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(diocese.FieldName, field.TypeString, value)

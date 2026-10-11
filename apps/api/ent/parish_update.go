@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -28,6 +29,26 @@ type ParishUpdate struct {
 // Where appends a list predicates to the ParishUpdate builder.
 func (_u *ParishUpdate) Where(ps ...predicate.Parish) *ParishUpdate {
 	_u.mutation.Where(ps...)
+	return _u
+}
+
+// SetDeletedAt sets the "deletedAt" field.
+func (_u *ParishUpdate) SetDeletedAt(v time.Time) *ParishUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deletedAt" field if the given value is not nil.
+func (_u *ParishUpdate) SetNillableDeletedAt(v *time.Time) *ParishUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (_u *ParishUpdate) ClearDeletedAt() *ParishUpdate {
+	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
@@ -277,6 +298,12 @@ func (_u *ParishUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(parish.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(parish.FieldDeletedAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(parish.FieldName, field.TypeString, value)
 	}
@@ -454,6 +481,26 @@ type ParishUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *ParishMutation
+}
+
+// SetDeletedAt sets the "deletedAt" field.
+func (_u *ParishUpdateOne) SetDeletedAt(v time.Time) *ParishUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deletedAt" field if the given value is not nil.
+func (_u *ParishUpdateOne) SetNillableDeletedAt(v *time.Time) *ParishUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (_u *ParishUpdateOne) ClearDeletedAt() *ParishUpdateOne {
+	_u.mutation.ClearDeletedAt()
+	return _u
 }
 
 // SetName sets the "name" field.
@@ -731,6 +778,12 @@ func (_u *ParishUpdateOne) sqlSave(ctx context.Context) (_node *Parish, err erro
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(parish.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(parish.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(parish.FieldName, field.TypeString, value)

@@ -13,6 +13,7 @@ type User struct {
 func (User) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		IDV7Mixin{},
+		SoftDeleteMixin{},
 	}
 }
 

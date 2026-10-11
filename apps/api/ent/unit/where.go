@@ -77,6 +77,11 @@ func UpdatedAt(v time.Time) predicate.Unit {
 	return predicate.Unit(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
+// DeletedAt applies equality check predicate on the "deletedAt" field. It's identical to DeletedAtEQ.
+func DeletedAt(v time.Time) predicate.Unit {
+	return predicate.Unit(sql.FieldEQ(FieldDeletedAt, v))
+}
+
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
 func Name(v string) predicate.Unit {
 	return predicate.Unit(sql.FieldEQ(FieldName, v))
@@ -210,6 +215,56 @@ func UpdatedAtLT(v time.Time) predicate.Unit {
 // UpdatedAtLTE applies the LTE predicate on the "updatedAt" field.
 func UpdatedAtLTE(v time.Time) predicate.Unit {
 	return predicate.Unit(sql.FieldLTE(FieldUpdatedAt, v))
+}
+
+// DeletedAtEQ applies the EQ predicate on the "deletedAt" field.
+func DeletedAtEQ(v time.Time) predicate.Unit {
+	return predicate.Unit(sql.FieldEQ(FieldDeletedAt, v))
+}
+
+// DeletedAtNEQ applies the NEQ predicate on the "deletedAt" field.
+func DeletedAtNEQ(v time.Time) predicate.Unit {
+	return predicate.Unit(sql.FieldNEQ(FieldDeletedAt, v))
+}
+
+// DeletedAtIn applies the In predicate on the "deletedAt" field.
+func DeletedAtIn(vs ...time.Time) predicate.Unit {
+	return predicate.Unit(sql.FieldIn(FieldDeletedAt, vs...))
+}
+
+// DeletedAtNotIn applies the NotIn predicate on the "deletedAt" field.
+func DeletedAtNotIn(vs ...time.Time) predicate.Unit {
+	return predicate.Unit(sql.FieldNotIn(FieldDeletedAt, vs...))
+}
+
+// DeletedAtGT applies the GT predicate on the "deletedAt" field.
+func DeletedAtGT(v time.Time) predicate.Unit {
+	return predicate.Unit(sql.FieldGT(FieldDeletedAt, v))
+}
+
+// DeletedAtGTE applies the GTE predicate on the "deletedAt" field.
+func DeletedAtGTE(v time.Time) predicate.Unit {
+	return predicate.Unit(sql.FieldGTE(FieldDeletedAt, v))
+}
+
+// DeletedAtLT applies the LT predicate on the "deletedAt" field.
+func DeletedAtLT(v time.Time) predicate.Unit {
+	return predicate.Unit(sql.FieldLT(FieldDeletedAt, v))
+}
+
+// DeletedAtLTE applies the LTE predicate on the "deletedAt" field.
+func DeletedAtLTE(v time.Time) predicate.Unit {
+	return predicate.Unit(sql.FieldLTE(FieldDeletedAt, v))
+}
+
+// DeletedAtIsNil applies the IsNil predicate on the "deletedAt" field.
+func DeletedAtIsNil() predicate.Unit {
+	return predicate.Unit(sql.FieldIsNull(FieldDeletedAt))
+}
+
+// DeletedAtNotNil applies the NotNil predicate on the "deletedAt" field.
+func DeletedAtNotNil() predicate.Unit {
+	return predicate.Unit(sql.FieldNotNull(FieldDeletedAt))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.

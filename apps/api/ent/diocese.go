@@ -27,6 +27,8 @@ type Diocese struct {
 	UpdatedBy uuid.UUID `json:"updatedBy,omitempty"`
 	// UpdatedAt holds the value of the "updatedAt" field.
 	UpdatedAt time.Time `json:"updatedAt,omitempty"`
+	// DeletedAt holds the value of the "deletedAt" field.
+	DeletedAt *time.Time `json:"deletedAt,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Active holds the value of the "active" field.
@@ -92,7 +94,7 @@ func (*Diocese) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case diocese.FieldName:
 			values[i] = new(sql.NullString)
-		case diocese.FieldCreatedAt, diocese.FieldUpdatedAt:
+		case diocese.FieldCreatedAt, diocese.FieldUpdatedAt, diocese.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
 		case diocese.FieldCreatedBy, diocese.FieldUpdatedBy:
 			values[i] = new(uuid.UUID)
@@ -140,6 +142,13 @@ func (_m *Diocese) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field updatedAt", values[i])
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
+			}
+		case diocese.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deletedAt", values[i])
+			} else if value.Valid {
+				_m.DeletedAt = new(time.Time)
+				*_m.DeletedAt = value.Time
 			}
 		case diocese.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -215,6 +224,11 @@ func (_m *Diocese) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("updatedAt=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	if v := _m.DeletedAt; v != nil {
+		builder.WriteString("deletedAt=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)

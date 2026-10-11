@@ -382,12 +382,12 @@ func (_q *ParishQuery) WithUnits(opts ...func(*UnitQuery)) *ParishQuery {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		DeletedAt time.Time `json:"deletedAt,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Parish.Query().
-//		GroupBy(parish.FieldName).
+//		GroupBy(parish.FieldDeletedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (_q *ParishQuery) GroupBy(field string, fields ...string) *ParishGroupBy {
@@ -405,11 +405,11 @@ func (_q *ParishQuery) GroupBy(field string, fields ...string) *ParishGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		DeletedAt time.Time `json:"deletedAt,omitempty"`
 //	}
 //
 //	client.Parish.Query().
-//		Select(parish.FieldName).
+//		Select(parish.FieldDeletedAt).
 //		Scan(ctx, &v)
 func (_q *ParishQuery) Select(fields ...string) *ParishSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)

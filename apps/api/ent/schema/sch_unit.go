@@ -28,6 +28,7 @@ type Unit struct {
 func (Unit) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		AuditMixins{},
+		SoftDeleteMixin{},
 	}
 }
 

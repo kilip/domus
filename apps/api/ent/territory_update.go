@@ -67,6 +67,26 @@ func (_u *TerritoryUpdate) SetUpdatedAt(v time.Time) *TerritoryUpdate {
 	return _u
 }
 
+// SetDeletedAt sets the "deletedAt" field.
+func (_u *TerritoryUpdate) SetDeletedAt(v time.Time) *TerritoryUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deletedAt" field if the given value is not nil.
+func (_u *TerritoryUpdate) SetNillableDeletedAt(v *time.Time) *TerritoryUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (_u *TerritoryUpdate) ClearDeletedAt() *TerritoryUpdate {
+	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
 // SetName sets the "name" field.
 func (_u *TerritoryUpdate) SetName(v string) *TerritoryUpdate {
 	_u.mutation.SetName(v)
@@ -371,6 +391,12 @@ func (_u *TerritoryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(territory.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(territory.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(territory.FieldDeletedAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(territory.FieldName, field.TypeString, value)
 	}
@@ -648,6 +674,26 @@ func (_u *TerritoryUpdateOne) SetNillableUpdatedBy(v *uuid.UUID) *TerritoryUpdat
 // SetUpdatedAt sets the "updatedAt" field.
 func (_u *TerritoryUpdateOne) SetUpdatedAt(v time.Time) *TerritoryUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
+// SetDeletedAt sets the "deletedAt" field.
+func (_u *TerritoryUpdateOne) SetDeletedAt(v time.Time) *TerritoryUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deletedAt" field if the given value is not nil.
+func (_u *TerritoryUpdateOne) SetNillableDeletedAt(v *time.Time) *TerritoryUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (_u *TerritoryUpdateOne) ClearDeletedAt() *TerritoryUpdateOne {
+	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
@@ -984,6 +1030,12 @@ func (_u *TerritoryUpdateOne) sqlSave(ctx context.Context) (_node *Territory, er
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(territory.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(territory.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(territory.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(territory.FieldName, field.TypeString, value)

@@ -67,6 +67,26 @@ func (_u *UnitUpdate) SetUpdatedAt(v time.Time) *UnitUpdate {
 	return _u
 }
 
+// SetDeletedAt sets the "deletedAt" field.
+func (_u *UnitUpdate) SetDeletedAt(v time.Time) *UnitUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deletedAt" field if the given value is not nil.
+func (_u *UnitUpdate) SetNillableDeletedAt(v *time.Time) *UnitUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (_u *UnitUpdate) ClearDeletedAt() *UnitUpdate {
+	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
 // SetName sets the "name" field.
 func (_u *UnitUpdate) SetName(v string) *UnitUpdate {
 	_u.mutation.SetName(v)
@@ -371,6 +391,12 @@ func (_u *UnitUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(unit.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(unit.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(unit.FieldDeletedAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(unit.FieldName, field.TypeString, value)
 	}
@@ -648,6 +674,26 @@ func (_u *UnitUpdateOne) SetNillableUpdatedBy(v *uuid.UUID) *UnitUpdateOne {
 // SetUpdatedAt sets the "updatedAt" field.
 func (_u *UnitUpdateOne) SetUpdatedAt(v time.Time) *UnitUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
+// SetDeletedAt sets the "deletedAt" field.
+func (_u *UnitUpdateOne) SetDeletedAt(v time.Time) *UnitUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deletedAt" field if the given value is not nil.
+func (_u *UnitUpdateOne) SetNillableDeletedAt(v *time.Time) *UnitUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (_u *UnitUpdateOne) ClearDeletedAt() *UnitUpdateOne {
+	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
@@ -984,6 +1030,12 @@ func (_u *UnitUpdateOne) sqlSave(ctx context.Context) (_node *Unit, err error) {
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(unit.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(unit.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(unit.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(unit.FieldName, field.TypeString, value)

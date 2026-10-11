@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -22,6 +23,20 @@ type ParishCreate struct {
 	mutation *ParishMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
+}
+
+// SetDeletedAt sets the "deletedAt" field.
+func (_c *ParishCreate) SetDeletedAt(v time.Time) *ParishCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deletedAt" field if the given value is not nil.
+func (_c *ParishCreate) SetNillableDeletedAt(v *time.Time) *ParishCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
+	}
+	return _c
 }
 
 // SetName sets the "name" field.
@@ -238,6 +253,10 @@ func (_c *ParishCreate) createSpec() (*Parish, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(parish.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(parish.FieldName, field.TypeString, value)
 		_node.Name = value
@@ -321,7 +340,7 @@ func (_c *ParishCreate) createSpec() (*Parish, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.Parish.Create().
-//		SetName(v).
+//		SetDeletedAt(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -330,7 +349,7 @@ func (_c *ParishCreate) createSpec() (*Parish, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.ParishUpsert) {
-//			SetName(v+v).
+//			SetDeletedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (_c *ParishCreate) OnConflict(opts ...sql.ConflictOption) *ParishUpsertOne {
@@ -365,6 +384,24 @@ type (
 		*sql.UpdateSet
 	}
 )
+
+// SetDeletedAt sets the "deletedAt" field.
+func (u *ParishUpsert) SetDeletedAt(v time.Time) *ParishUpsert {
+	u.Set(parish.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateDeletedAt sets the "deletedAt" field to the value that was provided on create.
+func (u *ParishUpsert) UpdateDeletedAt() *ParishUpsert {
+	u.SetExcluded(parish.FieldDeletedAt)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (u *ParishUpsert) ClearDeletedAt() *ParishUpsert {
+	u.SetNull(parish.FieldDeletedAt)
+	return u
+}
 
 // SetName sets the "name" field.
 func (u *ParishUpsert) SetName(v string) *ParishUpsert {
@@ -508,6 +545,27 @@ func (u *ParishUpsertOne) Update(set func(*ParishUpsert)) *ParishUpsertOne {
 		set(&ParishUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetDeletedAt sets the "deletedAt" field.
+func (u *ParishUpsertOne) SetDeletedAt(v time.Time) *ParishUpsertOne {
+	return u.Update(func(s *ParishUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deletedAt" field to the value that was provided on create.
+func (u *ParishUpsertOne) UpdateDeletedAt() *ParishUpsertOne {
+	return u.Update(func(s *ParishUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (u *ParishUpsertOne) ClearDeletedAt() *ParishUpsertOne {
+	return u.Update(func(s *ParishUpsert) {
+		s.ClearDeletedAt()
+	})
 }
 
 // SetName sets the "name" field.
@@ -757,7 +815,7 @@ func (_c *ParishCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.ParishUpsert) {
-//			SetName(v+v).
+//			SetDeletedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (_c *ParishCreateBulk) OnConflict(opts ...sql.ConflictOption) *ParishUpsertBulk {
@@ -834,6 +892,27 @@ func (u *ParishUpsertBulk) Update(set func(*ParishUpsert)) *ParishUpsertBulk {
 		set(&ParishUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetDeletedAt sets the "deletedAt" field.
+func (u *ParishUpsertBulk) SetDeletedAt(v time.Time) *ParishUpsertBulk {
+	return u.Update(func(s *ParishUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deletedAt" field to the value that was provided on create.
+func (u *ParishUpsertBulk) UpdateDeletedAt() *ParishUpsertBulk {
+	return u.Update(func(s *ParishUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (u *ParishUpsertBulk) ClearDeletedAt() *ParishUpsertBulk {
+	return u.Update(func(s *ParishUpsert) {
+		s.ClearDeletedAt()
+	})
 }
 
 // SetName sets the "name" field.

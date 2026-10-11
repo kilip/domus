@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -17,6 +18,8 @@ type Parish struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// DeletedAt holds the value of the "deletedAt" field.
+	DeletedAt *time.Time `json:"deletedAt,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Church holds the value of the "church" field.
@@ -89,6 +92,8 @@ func (*Parish) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case parish.FieldName, parish.FieldChurch, parish.FieldAddress, parish.FieldPhone, parish.FieldEmail:
 			values[i] = new(sql.NullString)
+		case parish.FieldDeletedAt:
+			values[i] = new(sql.NullTime)
 		case parish.ForeignKeys[0]: // diocese_parishes
 			values[i] = new(sql.NullInt64)
 		default:
@@ -112,6 +117,13 @@ func (_m *Parish) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			_m.ID = int(value.Int64)
+		case parish.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deletedAt", values[i])
+			} else if value.Valid {
+				_m.DeletedAt = new(time.Time)
+				*_m.DeletedAt = value.Time
+			}
 		case parish.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
@@ -210,6 +222,11 @@ func (_m *Parish) String() string {
 	var builder strings.Builder
 	builder.WriteString("Parish(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
+	if v := _m.DeletedAt; v != nil {
+		builder.WriteString("deletedAt=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
 	builder.WriteString(", ")

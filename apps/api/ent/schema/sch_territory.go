@@ -26,6 +26,7 @@ type Territory struct {
 func (Territory) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		AuditMixins{},
+		SoftDeleteMixin{},
 	}
 }
 

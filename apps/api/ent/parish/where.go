@@ -3,6 +3,8 @@
 package parish
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/paroki/domus/api/ent/internal"
@@ -54,6 +56,11 @@ func IDLTE(id int) predicate.Parish {
 	return predicate.Parish(sql.FieldLTE(FieldID, id))
 }
 
+// DeletedAt applies equality check predicate on the "deletedAt" field. It's identical to DeletedAtEQ.
+func DeletedAt(v time.Time) predicate.Parish {
+	return predicate.Parish(sql.FieldEQ(FieldDeletedAt, v))
+}
+
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
 func Name(v string) predicate.Parish {
 	return predicate.Parish(sql.FieldEQ(FieldName, v))
@@ -82,6 +89,56 @@ func Email(v string) predicate.Parish {
 // Active applies equality check predicate on the "active" field. It's identical to ActiveEQ.
 func Active(v bool) predicate.Parish {
 	return predicate.Parish(sql.FieldEQ(FieldActive, v))
+}
+
+// DeletedAtEQ applies the EQ predicate on the "deletedAt" field.
+func DeletedAtEQ(v time.Time) predicate.Parish {
+	return predicate.Parish(sql.FieldEQ(FieldDeletedAt, v))
+}
+
+// DeletedAtNEQ applies the NEQ predicate on the "deletedAt" field.
+func DeletedAtNEQ(v time.Time) predicate.Parish {
+	return predicate.Parish(sql.FieldNEQ(FieldDeletedAt, v))
+}
+
+// DeletedAtIn applies the In predicate on the "deletedAt" field.
+func DeletedAtIn(vs ...time.Time) predicate.Parish {
+	return predicate.Parish(sql.FieldIn(FieldDeletedAt, vs...))
+}
+
+// DeletedAtNotIn applies the NotIn predicate on the "deletedAt" field.
+func DeletedAtNotIn(vs ...time.Time) predicate.Parish {
+	return predicate.Parish(sql.FieldNotIn(FieldDeletedAt, vs...))
+}
+
+// DeletedAtGT applies the GT predicate on the "deletedAt" field.
+func DeletedAtGT(v time.Time) predicate.Parish {
+	return predicate.Parish(sql.FieldGT(FieldDeletedAt, v))
+}
+
+// DeletedAtGTE applies the GTE predicate on the "deletedAt" field.
+func DeletedAtGTE(v time.Time) predicate.Parish {
+	return predicate.Parish(sql.FieldGTE(FieldDeletedAt, v))
+}
+
+// DeletedAtLT applies the LT predicate on the "deletedAt" field.
+func DeletedAtLT(v time.Time) predicate.Parish {
+	return predicate.Parish(sql.FieldLT(FieldDeletedAt, v))
+}
+
+// DeletedAtLTE applies the LTE predicate on the "deletedAt" field.
+func DeletedAtLTE(v time.Time) predicate.Parish {
+	return predicate.Parish(sql.FieldLTE(FieldDeletedAt, v))
+}
+
+// DeletedAtIsNil applies the IsNil predicate on the "deletedAt" field.
+func DeletedAtIsNil() predicate.Parish {
+	return predicate.Parish(sql.FieldIsNull(FieldDeletedAt))
+}
+
+// DeletedAtNotNil applies the NotNil predicate on the "deletedAt" field.
+func DeletedAtNotNil() predicate.Parish {
+	return predicate.Parish(sql.FieldNotNull(FieldDeletedAt))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.

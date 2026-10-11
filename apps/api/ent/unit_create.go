@@ -66,6 +66,20 @@ func (_c *UnitCreate) SetNillableUpdatedAt(v *time.Time) *UnitCreate {
 	return _c
 }
 
+// SetDeletedAt sets the "deletedAt" field.
+func (_c *UnitCreate) SetDeletedAt(v time.Time) *UnitCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deletedAt" field if the given value is not nil.
+func (_c *UnitCreate) SetNillableDeletedAt(v *time.Time) *UnitCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
+	}
+	return _c
+}
+
 // SetName sets the "name" field.
 func (_c *UnitCreate) SetName(v string) *UnitCreate {
 	_c.mutation.SetName(v)
@@ -350,6 +364,10 @@ func (_c *UnitCreate) createSpec() (*Unit, *sqlgraph.CreateSpec) {
 		_spec.SetField(unit.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(unit.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(unit.FieldName, field.TypeString, value)
 		_node.Name = value
@@ -564,6 +582,24 @@ func (u *UnitUpsert) UpdateUpdatedAt() *UnitUpsert {
 	return u
 }
 
+// SetDeletedAt sets the "deletedAt" field.
+func (u *UnitUpsert) SetDeletedAt(v time.Time) *UnitUpsert {
+	u.Set(unit.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateDeletedAt sets the "deletedAt" field to the value that was provided on create.
+func (u *UnitUpsert) UpdateDeletedAt() *UnitUpsert {
+	u.SetExcluded(unit.FieldDeletedAt)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (u *UnitUpsert) ClearDeletedAt() *UnitUpsert {
+	u.SetNull(unit.FieldDeletedAt)
+	return u
+}
+
 // SetName sets the "name" field.
 func (u *UnitUpsert) SetName(v string) *UnitUpsert {
 	u.Set(unit.FieldName, v)
@@ -726,6 +762,27 @@ func (u *UnitUpsertOne) SetUpdatedAt(v time.Time) *UnitUpsertOne {
 func (u *UnitUpsertOne) UpdateUpdatedAt() *UnitUpsertOne {
 	return u.Update(func(s *UnitUpsert) {
 		s.UpdateUpdatedAt()
+	})
+}
+
+// SetDeletedAt sets the "deletedAt" field.
+func (u *UnitUpsertOne) SetDeletedAt(v time.Time) *UnitUpsertOne {
+	return u.Update(func(s *UnitUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deletedAt" field to the value that was provided on create.
+func (u *UnitUpsertOne) UpdateDeletedAt() *UnitUpsertOne {
+	return u.Update(func(s *UnitUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (u *UnitUpsertOne) ClearDeletedAt() *UnitUpsertOne {
+	return u.Update(func(s *UnitUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 
@@ -1069,6 +1126,27 @@ func (u *UnitUpsertBulk) SetUpdatedAt(v time.Time) *UnitUpsertBulk {
 func (u *UnitUpsertBulk) UpdateUpdatedAt() *UnitUpsertBulk {
 	return u.Update(func(s *UnitUpsert) {
 		s.UpdateUpdatedAt()
+	})
+}
+
+// SetDeletedAt sets the "deletedAt" field.
+func (u *UnitUpsertBulk) SetDeletedAt(v time.Time) *UnitUpsertBulk {
+	return u.Update(func(s *UnitUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deletedAt" field to the value that was provided on create.
+func (u *UnitUpsertBulk) UpdateDeletedAt() *UnitUpsertBulk {
+	return u.Update(func(s *UnitUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (u *UnitUpsertBulk) ClearDeletedAt() *UnitUpsertBulk {
+	return u.Update(func(s *UnitUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 
