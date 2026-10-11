@@ -78,6 +78,16 @@ components:
         timestamp:
           type: string
       type: object
+    httpx.WebResponse-array_model_AccountResponse:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/model.AccountResponse'
+          type: array
+          uniqueItems: false
+        meta:
+          $ref: '#/components/schemas/httpx.Meta'
+      type: object
     httpx.WebResponse-array_model_DioceseResponse:
       properties:
         data:
@@ -125,6 +135,13 @@ components:
         meta:
           $ref: '#/components/schemas/httpx.Meta'
       type: object
+    httpx.WebResponse-model_AccountResponse:
+      properties:
+        data:
+          $ref: '#/components/schemas/model.AccountResponse'
+        meta:
+          $ref: '#/components/schemas/httpx.Meta'
+      type: object
     httpx.WebResponse-model_DioceseResponse:
       properties:
         data:
@@ -152,6 +169,70 @@ components:
           $ref: '#/components/schemas/model.UnitResponse'
         meta:
           $ref: '#/components/schemas/httpx.Meta'
+      type: object
+    model.AccountResponse:
+      properties:
+        code:
+          type: string
+        createdAt:
+          type: string
+        description:
+          type: string
+        id:
+          type: string
+        name:
+          type: string
+        normalBalance:
+          type: string
+        parentId:
+          type: string
+        parishId:
+          type: integer
+        postable:
+          type: boolean
+        status:
+          type: string
+        type:
+          type: string
+        unitId:
+          type: integer
+        updatedAt:
+          type: string
+      type: object
+    model.CreateAccountRequest:
+      properties:
+        code:
+          maxLength: 30
+          type: string
+        description:
+          type: string
+        name:
+          maxLength: 200
+          type: string
+        parentId:
+          type: string
+        postable:
+          type: boolean
+        status:
+          enum:
+          - active
+          - inactive
+          type: string
+        type:
+          enum:
+          - asset
+          - liability
+          - equity
+          - income
+          - expense
+          type: string
+        unitId:
+          type: integer
+      required:
+      - code
+      - name
+      - type
+      - unitId
       type: object
     model.CreateDioceseRequest:
       properties:
@@ -356,6 +437,38 @@ components:
           $ref: '#/components/schemas/model.TerritoryResponse'
         territoryId:
           type: integer
+      type: object
+    model.UpdateAccountRequest:
+      properties:
+        code:
+          maxLength: 30
+          type: string
+        description:
+          type: string
+        name:
+          maxLength: 200
+          type: string
+        parentId:
+          type: string
+        postable:
+          type: boolean
+        status:
+          enum:
+          - active
+          - inactive
+          type: string
+        type:
+          enum:
+          - asset
+          - liability
+          - equity
+          - income
+          - expense
+          type: string
+      required:
+      - code
+      - name
+      - type
       type: object
     model.UpdateDioceseRequest:
       properties:
@@ -898,6 +1011,319 @@ paths:
       summary: Update parish
       tags:
       - Parish
+  /parishes/{parishId}/finance/accounts:
+    get:
+      description: List accounts for a parish with optional filters, sorted by code
+      parameters:
+      - description: Parish ID
+        in: path
+        name: parishId
+        required: true
+        schema:
+          type: integer
+      - description: Account type
+        in: query
+        name: type
+        schema:
+          enum:
+          - asset
+          - liability
+          - equity
+          - income
+          - expense
+          type: string
+      - description: Status
+        in: query
+        name: status
+        schema:
+          enum:
+          - active
+          - inactive
+          type: string
+      - description: Postable
+        in: query
+        name: postable
+        schema:
+          type: boolean
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.WebResponse-array_model_AccountResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Not Found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unprocessable Entity
+      security:
+      - BearerAuth: []
+      summary: List accounts
+      tags:
+      - Finance Account
+    post:
+      description: Create a new account in chart of accounts
+      parameters:
+      - description: Parish ID
+        in: path
+        name: parishId
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.CreateAccountRequest'
+              description: Create account request
+              summary: request
+        description: Create account request
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.WebResponse-model_AccountResponse'
+          description: Created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Not Found
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Conflict
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unprocessable Entity
+      security:
+      - BearerAuth: []
+      summary: Create account
+      tags:
+      - Finance Account
+  /parishes/{parishId}/finance/accounts/{id}:
+    delete:
+      description: Soft delete an account (blocked if it has children or postings)
+      parameters:
+      - description: Parish ID
+        in: path
+        name: parishId
+        required: true
+        schema:
+          type: integer
+      - description: Account ID (UUID)
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Not Found
+      security:
+      - BearerAuth: []
+      summary: Delete account
+      tags:
+      - Finance Account
+    get:
+      description: Get account details by ID
+      parameters:
+      - description: Parish ID
+        in: path
+        name: parishId
+        required: true
+        schema:
+          type: integer
+      - description: Account ID (UUID)
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.WebResponse-model_AccountResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Not Found
+      security:
+      - BearerAuth: []
+      summary: Get account by ID
+      tags:
+      - Finance Account
+    put:
+      description: Update an existing account
+      parameters:
+      - description: Parish ID
+        in: path
+        name: parishId
+        required: true
+        schema:
+          type: integer
+      - description: Account ID (UUID)
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.UpdateAccountRequest'
+              description: Update account request
+              summary: request
+        description: Update account request
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.WebResponse-model_AccountResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Not Found
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Conflict
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unprocessable Entity
+      security:
+      - BearerAuth: []
+      summary: Update account
+      tags:
+      - Finance Account
   /ping:
     get:
       description: Returns current authenticated user information from context

@@ -201,14 +201,6 @@ func (_c *AccountCreate) SetUnitID(id int) *AccountCreate {
 	return _c
 }
 
-// SetNillableUnitID sets the "unit" edge to the Unit entity by ID if the given value is not nil.
-func (_c *AccountCreate) SetNillableUnitID(id *int) *AccountCreate {
-	if id != nil {
-		_c = _c.SetUnitID(*id)
-	}
-	return _c
-}
-
 // SetUnit sets the "unit" edge to the Unit entity.
 func (_c *AccountCreate) SetUnit(v *Unit) *AccountCreate {
 	return _c.SetUnitID(v.ID)
@@ -385,6 +377,9 @@ func (_c *AccountCreate) check() error {
 	}
 	if len(_c.mutation.ParishIDs()) == 0 {
 		return &ValidationError{Name: "parish", err: errors.New(`ent: missing required edge "Account.parish"`)}
+	}
+	if len(_c.mutation.UnitIDs()) == 0 {
+		return &ValidationError{Name: "unit", err: errors.New(`ent: missing required edge "Account.unit"`)}
 	}
 	return nil
 }

@@ -674,6 +674,414 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/parishes/{parishId}/finance/accounts": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List accounts
+     * @description List accounts for a parish with optional filters, sorted by code
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Account type */
+          type?: "asset" | "liability" | "equity" | "income" | "expense";
+          /** @description Status */
+          status?: "active" | "inactive";
+          /** @description Postable */
+          postable?: boolean;
+        };
+        header?: never;
+        path: {
+          /** @description Parish ID */
+          parishId: number;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.WebResponse-array_model_AccountResponse"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unprocessable Entity */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+      };
+    };
+    put?: never;
+    /**
+     * Create account
+     * @description Create a new account in chart of accounts
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Parish ID */
+          parishId: number;
+        };
+        cookie?: never;
+      };
+      /** @description Create account request */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["model.CreateAccountRequest"];
+        };
+      };
+      responses: {
+        /** @description Created */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.WebResponse-model_AccountResponse"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Conflict */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unprocessable Entity */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/parishes/{parishId}/finance/accounts/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get account by ID
+     * @description Get account details by ID
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Parish ID */
+          parishId: number;
+          /** @description Account ID (UUID) */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.WebResponse-model_AccountResponse"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+      };
+    };
+    /**
+     * Update account
+     * @description Update an existing account
+     */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Parish ID */
+          parishId: number;
+          /** @description Account ID (UUID) */
+          id: string;
+        };
+        cookie?: never;
+      };
+      /** @description Update account request */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["model.UpdateAccountRequest"];
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.WebResponse-model_AccountResponse"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Conflict */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unprocessable Entity */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+      };
+    };
+    post?: never;
+    /**
+     * Delete account
+     * @description Soft delete an account (blocked if it has children or postings)
+     */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Parish ID */
+          parishId: number;
+          /** @description Account ID (UUID) */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description No Content */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/ping": {
     parameters: {
       query?: never;
@@ -1514,6 +1922,10 @@ export interface components {
       requestId?: string;
       timestamp?: string;
     };
+    "httpx.WebResponse-array_model_AccountResponse": {
+      data?: components["schemas"]["model.AccountResponse"][];
+      meta?: components["schemas"]["httpx.Meta"];
+    };
     "httpx.WebResponse-array_model_DioceseResponse": {
       data?: components["schemas"]["model.DioceseResponse"][];
       meta?: components["schemas"]["httpx.Meta"];
@@ -1534,6 +1946,10 @@ export interface components {
       data?: components["schemas"]["core.AuthenticatedUser"];
       meta?: components["schemas"]["httpx.Meta"];
     };
+    "httpx.WebResponse-model_AccountResponse": {
+      data?: components["schemas"]["model.AccountResponse"];
+      meta?: components["schemas"]["httpx.Meta"];
+    };
     "httpx.WebResponse-model_DioceseResponse": {
       data?: components["schemas"]["model.DioceseResponse"];
       meta?: components["schemas"]["httpx.Meta"];
@@ -1549,6 +1965,33 @@ export interface components {
     "httpx.WebResponse-model_UnitResponse": {
       data?: components["schemas"]["model.UnitResponse"];
       meta?: components["schemas"]["httpx.Meta"];
+    };
+    "model.AccountResponse": {
+      code?: string;
+      createdAt?: string;
+      description?: string;
+      id?: string;
+      name?: string;
+      normalBalance?: string;
+      parentId?: string;
+      parishId?: number;
+      postable?: boolean;
+      status?: string;
+      type?: string;
+      unitId?: number;
+      updatedAt?: string;
+    };
+    "model.CreateAccountRequest": {
+      code: string;
+      description?: string;
+      name: string;
+      parentId?: string;
+      postable?: boolean;
+      /** @enum {string} */
+      status?: "active" | "inactive";
+      /** @enum {string} */
+      type: "asset" | "liability" | "equity" | "income" | "expense";
+      unitId: number;
     };
     "model.CreateDioceseRequest": {
       active?: boolean;
@@ -1647,6 +2090,17 @@ export interface components {
       status?: string;
       territory?: components["schemas"]["model.TerritoryResponse"];
       territoryId?: number;
+    };
+    "model.UpdateAccountRequest": {
+      code: string;
+      description?: string;
+      name: string;
+      parentId?: string;
+      postable?: boolean;
+      /** @enum {string} */
+      status?: "active" | "inactive";
+      /** @enum {string} */
+      type: "asset" | "liability" | "equity" | "income" | "expense";
     };
     "model.UpdateDioceseRequest": {
       active?: boolean;

@@ -14,10 +14,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent/account"
 	"github.com/paroki/domus/api/ent/internal"
-	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/posting"
 	"github.com/paroki/domus/api/ent/predicate"
-	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
 )
 
@@ -214,36 +212,6 @@ func (_u *AccountUpdate) SetUpdater(v *User) *AccountUpdate {
 	return _u.SetUpdaterID(v.ID)
 }
 
-// SetParishID sets the "parish" edge to the Parish entity by ID.
-func (_u *AccountUpdate) SetParishID(id int) *AccountUpdate {
-	_u.mutation.SetParishID(id)
-	return _u
-}
-
-// SetParish sets the "parish" edge to the Parish entity.
-func (_u *AccountUpdate) SetParish(v *Parish) *AccountUpdate {
-	return _u.SetParishID(v.ID)
-}
-
-// SetUnitID sets the "unit" edge to the Unit entity by ID.
-func (_u *AccountUpdate) SetUnitID(id int) *AccountUpdate {
-	_u.mutation.SetUnitID(id)
-	return _u
-}
-
-// SetNillableUnitID sets the "unit" edge to the Unit entity by ID if the given value is not nil.
-func (_u *AccountUpdate) SetNillableUnitID(id *int) *AccountUpdate {
-	if id != nil {
-		_u = _u.SetUnitID(*id)
-	}
-	return _u
-}
-
-// SetUnit sets the "unit" edge to the Unit entity.
-func (_u *AccountUpdate) SetUnit(v *Unit) *AccountUpdate {
-	return _u.SetUnitID(v.ID)
-}
-
 // SetParentID sets the "parent" edge to the Account entity by ID.
 func (_u *AccountUpdate) SetParentID(id uuid.UUID) *AccountUpdate {
 	_u.mutation.SetParentID(id)
@@ -307,18 +275,6 @@ func (_u *AccountUpdate) ClearCreator() *AccountUpdate {
 // ClearUpdater clears the "updater" edge to the User entity.
 func (_u *AccountUpdate) ClearUpdater() *AccountUpdate {
 	_u.mutation.ClearUpdater()
-	return _u
-}
-
-// ClearParish clears the "parish" edge to the Parish entity.
-func (_u *AccountUpdate) ClearParish() *AccountUpdate {
-	_u.mutation.ClearParish()
-	return _u
-}
-
-// ClearUnit clears the "unit" edge to the Unit entity.
-func (_u *AccountUpdate) ClearUnit() *AccountUpdate {
-	_u.mutation.ClearUnit()
 	return _u
 }
 
@@ -442,6 +398,9 @@ func (_u *AccountUpdate) check() error {
 	if _u.mutation.ParishCleared() && len(_u.mutation.ParishIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Account.parish"`)
 	}
+	if _u.mutation.UnitCleared() && len(_u.mutation.UnitIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Account.unit"`)
+	}
 	return nil
 }
 
@@ -544,68 +503,6 @@ func (_u *AccountUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
-			},
-		}
-		edge.Schema = _u.schemaConfig.Account
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.ParishCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   account.ParishTable,
-			Columns: []string{account.ParishColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(parish.FieldID, field.TypeInt),
-			},
-		}
-		edge.Schema = _u.schemaConfig.Account
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.ParishIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   account.ParishTable,
-			Columns: []string{account.ParishColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(parish.FieldID, field.TypeInt),
-			},
-		}
-		edge.Schema = _u.schemaConfig.Account
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.UnitCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   account.UnitTable,
-			Columns: []string{account.UnitColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
-			},
-		}
-		edge.Schema = _u.schemaConfig.Account
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.UnitIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   account.UnitTable,
-			Columns: []string{account.UnitColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
 			},
 		}
 		edge.Schema = _u.schemaConfig.Account
@@ -943,36 +840,6 @@ func (_u *AccountUpdateOne) SetUpdater(v *User) *AccountUpdateOne {
 	return _u.SetUpdaterID(v.ID)
 }
 
-// SetParishID sets the "parish" edge to the Parish entity by ID.
-func (_u *AccountUpdateOne) SetParishID(id int) *AccountUpdateOne {
-	_u.mutation.SetParishID(id)
-	return _u
-}
-
-// SetParish sets the "parish" edge to the Parish entity.
-func (_u *AccountUpdateOne) SetParish(v *Parish) *AccountUpdateOne {
-	return _u.SetParishID(v.ID)
-}
-
-// SetUnitID sets the "unit" edge to the Unit entity by ID.
-func (_u *AccountUpdateOne) SetUnitID(id int) *AccountUpdateOne {
-	_u.mutation.SetUnitID(id)
-	return _u
-}
-
-// SetNillableUnitID sets the "unit" edge to the Unit entity by ID if the given value is not nil.
-func (_u *AccountUpdateOne) SetNillableUnitID(id *int) *AccountUpdateOne {
-	if id != nil {
-		_u = _u.SetUnitID(*id)
-	}
-	return _u
-}
-
-// SetUnit sets the "unit" edge to the Unit entity.
-func (_u *AccountUpdateOne) SetUnit(v *Unit) *AccountUpdateOne {
-	return _u.SetUnitID(v.ID)
-}
-
 // SetParentID sets the "parent" edge to the Account entity by ID.
 func (_u *AccountUpdateOne) SetParentID(id uuid.UUID) *AccountUpdateOne {
 	_u.mutation.SetParentID(id)
@@ -1036,18 +903,6 @@ func (_u *AccountUpdateOne) ClearCreator() *AccountUpdateOne {
 // ClearUpdater clears the "updater" edge to the User entity.
 func (_u *AccountUpdateOne) ClearUpdater() *AccountUpdateOne {
 	_u.mutation.ClearUpdater()
-	return _u
-}
-
-// ClearParish clears the "parish" edge to the Parish entity.
-func (_u *AccountUpdateOne) ClearParish() *AccountUpdateOne {
-	_u.mutation.ClearParish()
-	return _u
-}
-
-// ClearUnit clears the "unit" edge to the Unit entity.
-func (_u *AccountUpdateOne) ClearUnit() *AccountUpdateOne {
-	_u.mutation.ClearUnit()
 	return _u
 }
 
@@ -1184,6 +1039,9 @@ func (_u *AccountUpdateOne) check() error {
 	if _u.mutation.ParishCleared() && len(_u.mutation.ParishIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Account.parish"`)
 	}
+	if _u.mutation.UnitCleared() && len(_u.mutation.UnitIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Account.unit"`)
+	}
 	return nil
 }
 
@@ -1303,68 +1161,6 @@ func (_u *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err er
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
-			},
-		}
-		edge.Schema = _u.schemaConfig.Account
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.ParishCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   account.ParishTable,
-			Columns: []string{account.ParishColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(parish.FieldID, field.TypeInt),
-			},
-		}
-		edge.Schema = _u.schemaConfig.Account
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.ParishIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   account.ParishTable,
-			Columns: []string{account.ParishColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(parish.FieldID, field.TypeInt),
-			},
-		}
-		edge.Schema = _u.schemaConfig.Account
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.UnitCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   account.UnitTable,
-			Columns: []string{account.UnitColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
-			},
-		}
-		edge.Schema = _u.schemaConfig.Account
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.UnitIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   account.UnitTable,
-			Columns: []string{account.UnitColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
 			},
 		}
 		edge.Schema = _u.schemaConfig.Account

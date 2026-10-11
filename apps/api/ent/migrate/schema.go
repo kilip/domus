@@ -24,7 +24,7 @@ var (
 		{Name: "created_by", Type: field.TypeUUID},
 		{Name: "updated_by", Type: field.TypeUUID},
 		{Name: "account_parish", Type: field.TypeInt},
-		{Name: "account_unit", Type: field.TypeInt, Nullable: true},
+		{Name: "account_unit", Type: field.TypeInt},
 		{Name: "account_children", Type: field.TypeUUID, Nullable: true},
 	}
 	// AccountsTable holds the schema information for the "accounts" table.
@@ -55,7 +55,7 @@ var (
 				Symbol:     "accounts_units_unit",
 				Columns:    []*schema.Column{AccountsColumns[14]},
 				RefColumns: []*schema.Column{UnitsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "accounts_accounts_children",

@@ -8,6 +8,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent"
+	"github.com/paroki/domus/api/internal/core"
 	"github.com/paroki/domus/api/internal/platform/authz"
 	"github.com/paroki/domus/api/testutil"
 	"github.com/stretchr/testify/assert"
@@ -33,6 +34,21 @@ func CreateTestParish(t *testing.T) *ent.Parish {
 		Save(context.Background())
 	require.NoError(t, err)
 	return parish
+}
+
+// CreateTestUnit creates a fresh unit belonging to the specified parish directly via Ent client.
+func CreateTestUnit(t *testing.T, parishID int, userID uuid.UUID) *ent.Unit {
+	t.Helper()
+	st := testutil.GetState()
+	ctx := core.ContextWithUser(context.Background(), core.AuthenticatedUser{ID: userID})
+	uniqueSuffix := uuid.New().String()[:8]
+	unit, err := st.Ent.Unit.Create().
+		SetName(fmt.Sprintf("Unit-%s", uniqueSuffix)).
+		SetKind("category").
+		SetParishID(parishID).
+		Save(ctx)
+	require.NoError(t, err)
+	return unit
 }
 
 type FinanceSmokeSuite struct {

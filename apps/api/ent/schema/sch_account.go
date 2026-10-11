@@ -43,9 +43,8 @@ func (Account) Fields() []ent.Field {
 
 func (Account) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("parish", Parish.Type).Unique().Required(),
-		// Optional: account dedicated to one unit.
-		edge.To("unit", Unit.Type).Unique(),
+		edge.To("parish", Parish.Type).Unique().Required().Immutable(),
+		edge.To("unit", Unit.Type).Unique().Required().Immutable(),
 		edge.To("children", Account.Type).From("parent").Unique(),
 		edge.From("postings", Posting.Type).Ref("account"),
 	}
