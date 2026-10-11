@@ -68,7 +68,6 @@ type CollectionsQuery struct {
 	From            string     `query:"from" validate:"required"`
 	To              string     `query:"to" validate:"required"`
 	ParentAccountID *uuid.UUID `query:"parentAccountId"`
-	UnitID          *int       `query:"unitId"`
 }
 
 type CollectionsRow struct {

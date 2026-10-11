@@ -10,20 +10,18 @@ import (
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent"
 	"github.com/paroki/domus/api/ent/account"
-	"github.com/paroki/domus/api/ent/parish"
-	entunit "github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/internal/modules/finance/model"
 )
 
 type TransactionRepository interface {
-	Create(ctx context.Context, parishID int, req model.CreateTransactionRequest, number string, txDate time.Time) (*model.TransactionResponse, error)
-	GetByID(ctx context.Context, parishID int, id uuid.UUID) (*model.TransactionResponse, error)
-	Search(ctx context.Context, parishID int, req model.SearchTransactionRequest) (*model.PaginatedResult[model.TransactionSummary], error)
-	Void(ctx context.Context, parishID int, id uuid.UUID, reversalDate *time.Time, reason *string) (*model.TransactionResponse, error)
+	Create(ctx context.Context, req model.CreateTransactionRequest, number string, txDate time.Time) (*model.TransactionResponse, error)
+	GetByID(ctx context.Context, id uuid.UUID) (*model.TransactionResponse, error)
+	Search(ctx context.Context, req model.SearchTransactionRequest) (*model.PaginatedResult[model.TransactionSummary], error)
+	Void(ctx context.Context, id uuid.UUID, reversalDate *time.Time, reason *string) (*model.TransactionResponse, error)
 }
 
 type AccountLookupRepository interface {
-	GetEntsByIDs(ctx context.Context, parishID int, ids []uuid.UUID) ([]*ent.Account, error)
+	GetEntsByIDs(ctx context.Context, ids []uuid.UUID) ([]*ent.Account, error)
 }
 
 type TransactionService struct {
@@ -47,8 +45,8 @@ func NewTransactionService(
 	}
 }
 
-func (s TransactionService) Create(ctx context.Context, parishID int, req model.CreateTransactionRequest) (*model.TransactionResponse, error) {
-	// Rule 1: Parse date (D2) and validate number pattern if supplied.
+func (s TransactionService) Create(ctx context.Context, req model.CreateTransactionRequest) (*model.TransactionResponse, error) {
+	// Rule 1: Parse date and validate number pattern if supplied.
 	txDate, err := model.ParseDate(req.Date)
 	if err != nil {
 		return nil, fiber.NewError(fiber.StatusBadRequest, "invalid date format: "+err.Error())
@@ -60,7 +58,7 @@ func (s TransactionService) Create(ctx context.Context, parishID int, req model.
 		}
 	}
 
-	// Rule 2: Σ debit == Σ credit and both sums > 0. At least one debit posting and one credit posting.
+	// Rule 2: sum(debit) == sum(credit) and both sums > 0. At least one debit posting and one credit posting.
 	var debitSum, creditSum int64
 	var debitCount, creditCount int
 	for _, p := range req.Postings {
@@ -84,7 +82,7 @@ func (s TransactionService) Create(ctx context.Context, parishID int, req model.
 		return nil, fiber.NewError(fiber.StatusBadRequest, "transaction is unbalanced: sum of debits must equal sum of credits and be greater than zero")
 	}
 
-	// Rule 3: Load distinct accounts via GetEntsByIDs(parishID, ids). Any missing or cross-parish account -> 400.
+	// Rule 3: Load distinct accounts via GetEntsByIDs(ids). Any missing account -> 400.
 	accountIDsMap := make(map[uuid.UUID]struct{})
 	var distinctAccountIDs []uuid.UUID
 	for _, p := range req.Postings {
@@ -94,7 +92,7 @@ func (s TransactionService) Create(ctx context.Context, parishID int, req model.
 		}
 	}
 
-	accounts, err := s.accountRepo.GetEntsByIDs(ctx, parishID, distinctAccountIDs)
+	accounts, err := s.accountRepo.GetEntsByIDs(ctx, distinctAccountIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -112,36 +110,20 @@ func (s TransactionService) Create(ctx context.Context, parishID int, req model.
 		}
 	}
 
-	// Rule 5: unitId, if supplied, must belong to the same parish -> else 400.
-	if req.UnitID != nil {
-		unitExists, err := s.entcli.Unit.Query().
-			Where(
-				entunit.IDEQ(*req.UnitID),
-				entunit.HasParishWith(parish.IDEQ(parishID)),
-			).
-			Exist(ctx)
-		if err != nil {
-			return nil, err
-		}
-		if !unitExists {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "unit does not belong to this parish")
-		}
-	}
-
-	// Rule 6: Call the repository Create. Duplicate supplied number -> 409.
+	// Rule 5: Call the repository Create. Duplicate supplied number -> 409.
 	number := ""
 	if req.Number != nil {
 		number = *req.Number
 	}
 
-	return s.txRepo.Create(ctx, parishID, req, number, txDate)
+	return s.txRepo.Create(ctx, req, number, txDate)
 }
 
-func (s TransactionService) GetByID(ctx context.Context, parishID int, id uuid.UUID) (*model.TransactionResponse, error) {
-	return s.txRepo.GetByID(ctx, parishID, id)
+func (s TransactionService) GetByID(ctx context.Context, id uuid.UUID) (*model.TransactionResponse, error) {
+	return s.txRepo.GetByID(ctx, id)
 }
 
-func (s TransactionService) Search(ctx context.Context, parishID int, req model.SearchTransactionRequest) (*model.PaginatedResult[model.TransactionSummary], error) {
+func (s TransactionService) Search(ctx context.Context, req model.SearchTransactionRequest) (*model.PaginatedResult[model.TransactionSummary], error) {
 	if req.From != nil && *req.From != "" {
 		if _, err := model.ParseDate(*req.From); err != nil {
 			return nil, fiber.NewError(fiber.StatusBadRequest, "invalid from date: "+err.Error())
@@ -152,10 +134,10 @@ func (s TransactionService) Search(ctx context.Context, parishID int, req model.
 			return nil, fiber.NewError(fiber.StatusBadRequest, "invalid to date: "+err.Error())
 		}
 	}
-	return s.txRepo.Search(ctx, parishID, req)
+	return s.txRepo.Search(ctx, req)
 }
 
-func (s TransactionService) Void(ctx context.Context, parishID int, id uuid.UUID, req model.VoidTransactionRequest) (*model.TransactionResponse, error) {
+func (s TransactionService) Void(ctx context.Context, id uuid.UUID, req model.VoidTransactionRequest) (*model.TransactionResponse, error) {
 	var reversalDate *time.Time
 	if req.Date != nil && *req.Date != "" {
 		parsedDate, err := model.ParseDate(*req.Date)
@@ -165,5 +147,5 @@ func (s TransactionService) Void(ctx context.Context, parishID int, id uuid.UUID
 		reversalDate = &parsedDate
 	}
 
-	return s.txRepo.Void(ctx, parishID, id, reversalDate, req.Reason)
+	return s.txRepo.Void(ctx, id, reversalDate, req.Reason)
 }

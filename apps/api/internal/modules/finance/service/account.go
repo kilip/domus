@@ -7,21 +7,19 @@ import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent"
-	"github.com/paroki/domus/api/ent/parish"
-	entunit "github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/internal/modules/finance/model"
 )
 
 type AccountRepository interface {
-	List(ctx context.Context, parishID int, filter model.ListAccountsQuery) ([]model.AccountResponse, error)
-	GetByID(ctx context.Context, parishID int, id uuid.UUID) (*model.AccountResponse, error)
-	GetEntByID(ctx context.Context, parishID int, id uuid.UUID) (*ent.Account, error)
+	List(ctx context.Context, filter model.ListAccountsQuery) ([]model.AccountResponse, error)
+	GetByID(ctx context.Context, id uuid.UUID) (*model.AccountResponse, error)
+	GetEntByID(ctx context.Context, id uuid.UUID) (*ent.Account, error)
 	HasChildren(ctx context.Context, id uuid.UUID) (bool, error)
 	HasPostings(ctx context.Context, id uuid.UUID) (bool, error)
 	HasDescendantPostings(ctx context.Context, id uuid.UUID) (bool, error)
-	Create(ctx context.Context, parishID int, req model.CreateAccountRequest, normalBalance string) (*model.AccountResponse, error)
-	Update(ctx context.Context, parishID int, id uuid.UUID, req model.UpdateAccountRequest, normalBalance string, updateChildrenType bool) (*model.AccountResponse, error)
-	Delete(ctx context.Context, parishID int, id uuid.UUID) error
+	Create(ctx context.Context, req model.CreateAccountRequest, normalBalance string) (*model.AccountResponse, error)
+	Update(ctx context.Context, id uuid.UUID, req model.UpdateAccountRequest, normalBalance string, updateChildrenType bool) (*model.AccountResponse, error)
+	Delete(ctx context.Context, id uuid.UUID) error
 }
 
 type AccountService struct {
@@ -34,19 +32,19 @@ func NewAccountService(repo AccountRepository, entcli *ent.Client, log *slog.Log
 	return AccountService{repo: repo, entcli: entcli, log: log}
 }
 
-func (s AccountService) List(ctx context.Context, parishID int, filter model.ListAccountsQuery) ([]model.AccountResponse, error) {
-	return s.repo.List(ctx, parishID, filter)
+func (s AccountService) List(ctx context.Context, filter model.ListAccountsQuery) ([]model.AccountResponse, error) {
+	return s.repo.List(ctx, filter)
 }
 
-func (s AccountService) GetByID(ctx context.Context, parishID int, id uuid.UUID) (*model.AccountResponse, error) {
-	return s.repo.GetByID(ctx, parishID, id)
+func (s AccountService) GetByID(ctx context.Context, id uuid.UUID) (*model.AccountResponse, error) {
+	return s.repo.GetByID(ctx, id)
 }
 
-func (s AccountService) Create(ctx context.Context, parishID int, req model.CreateAccountRequest) (*model.AccountResponse, error) {
+func (s AccountService) Create(ctx context.Context, req model.CreateAccountRequest) (*model.AccountResponse, error) {
 	normalBalance := model.DeriveNormalBalance(req.Type)
 
 	if req.ParentID != nil {
-		parent, err := s.repo.GetEntByID(ctx, parishID, *req.ParentID)
+		parent, err := s.repo.GetEntByID(ctx, *req.ParentID)
 		if err != nil {
 			return nil, fiber.NewError(fiber.StatusBadRequest, "parent account does not exist in this parish")
 		}
@@ -58,21 +56,11 @@ func (s AccountService) Create(ctx context.Context, parishID int, req model.Crea
 		}
 	}
 
-	exists, err := s.entcli.Unit.Query().
-		Where(entunit.IDEQ(req.UnitID), entunit.HasParishWith(parish.IDEQ(parishID))).
-		Exist(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, fiber.NewError(fiber.StatusBadRequest, "unit belongs to a different parish or does not exist")
-	}
-
-	return s.repo.Create(ctx, parishID, req, normalBalance)
+	return s.repo.Create(ctx, req, normalBalance)
 }
 
-func (s AccountService) Update(ctx context.Context, parishID int, id uuid.UUID, req model.UpdateAccountRequest) (*model.AccountResponse, error) {
-	existing, err := s.repo.GetEntByID(ctx, parishID, id)
+func (s AccountService) Update(ctx context.Context, id uuid.UUID, req model.UpdateAccountRequest) (*model.AccountResponse, error) {
+	existing, err := s.repo.GetEntByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +70,7 @@ func (s AccountService) Update(ctx context.Context, parishID int, id uuid.UUID, 
 			return nil, fiber.NewError(fiber.StatusBadRequest, "account cannot be its own parent")
 		}
 
-		parent, err := s.repo.GetEntByID(ctx, parishID, *req.ParentID)
+		parent, err := s.repo.GetEntByID(ctx, *req.ParentID)
 		if err != nil {
 			return nil, fiber.NewError(fiber.StatusBadRequest, "parent account does not exist in this parish")
 		}
@@ -102,7 +90,7 @@ func (s AccountService) Update(ctx context.Context, parishID int, id uuid.UUID, 
 			}
 			visited[currID] = true
 
-			curr, err := s.repo.GetEntByID(ctx, parishID, currID)
+			curr, err := s.repo.GetEntByID(ctx, currID)
 			if err != nil {
 				break
 			}
@@ -150,11 +138,11 @@ func (s AccountService) Update(ctx context.Context, parishID int, id uuid.UUID, 
 	}
 
 	normalBalance := model.DeriveNormalBalance(req.Type)
-	return s.repo.Update(ctx, parishID, id, req, normalBalance, updateChildrenType)
+	return s.repo.Update(ctx, id, req, normalBalance, updateChildrenType)
 }
 
-func (s AccountService) Delete(ctx context.Context, parishID int, id uuid.UUID) error {
-	_, err := s.repo.GetEntByID(ctx, parishID, id)
+func (s AccountService) Delete(ctx context.Context, id uuid.UUID) error {
+	_, err := s.repo.GetEntByID(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -175,5 +163,5 @@ func (s AccountService) Delete(ctx context.Context, parishID int, id uuid.UUID) 
 		return fiber.NewError(fiber.StatusBadRequest, "cannot delete account with postings; deactivate it instead")
 	}
 
-	return s.repo.Delete(ctx, parishID, id)
+	return s.repo.Delete(ctx, id)
 }

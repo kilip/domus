@@ -13,12 +13,11 @@ import (
 )
 
 type ReportRepository interface {
-	GetAccount(ctx context.Context, parishID int, accountID uuid.UUID) (*ent.Account, error)
-	ListParishAccounts(ctx context.Context, parishID int) ([]*ent.Account, error)
-	CheckUnitExists(ctx context.Context, parishID int, unitID int) (bool, error)
-	GetLedger(ctx context.Context, parishID int, acc *ent.Account, from, to time.Time, cursorDate *time.Time, cursorPostingID *uuid.UUID, limit int) (model.LedgerResponse, string, error)
-	GetTrialBalance(ctx context.Context, parishID int, asOf time.Time) (model.TrialBalanceResponse, error)
-	GetCollections(ctx context.Context, parishID int, from, to time.Time, allowedAccountIDs map[uuid.UUID]bool, unitID *int) (model.CollectionsResponse, error)
+	GetAccount(ctx context.Context, accountID uuid.UUID) (*ent.Account, error)
+	ListAccounts(ctx context.Context) ([]*ent.Account, error)
+	GetLedger(ctx context.Context, acc *ent.Account, from, to time.Time, cursorDate *time.Time, cursorPostingID *uuid.UUID, limit int) (model.LedgerResponse, string, error)
+	GetTrialBalance(ctx context.Context, asOf time.Time) (model.TrialBalanceResponse, error)
+	GetCollections(ctx context.Context, from, to time.Time, allowedAccountIDs map[uuid.UUID]bool) (model.CollectionsResponse, error)
 }
 
 type ReportService struct {
@@ -33,12 +32,12 @@ func NewReportService(repo ReportRepository, log *slog.Logger) ReportService {
 	}
 }
 
-func (s ReportService) GetLedger(ctx context.Context, parishID int, query model.LedgerQuery) (model.LedgerResponse, string, error) {
+func (s ReportService) GetLedger(ctx context.Context, query model.LedgerQuery) (model.LedgerResponse, string, error) {
 	if query.AccountID == uuid.Nil {
 		return model.LedgerResponse{}, "", fiber.NewError(fiber.StatusBadRequest, "accountId is required")
 	}
 
-	acc, err := s.repo.GetAccount(ctx, parishID, query.AccountID)
+	acc, err := s.repo.GetAccount(ctx, query.AccountID)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return model.LedgerResponse{}, "", fiber.NewError(fiber.StatusNotFound, "account not found in this parish")
@@ -64,28 +63,29 @@ func (s ReportService) GetLedger(ctx context.Context, parishID int, query model.
 		return model.LedgerResponse{}, "", fiber.NewError(fiber.StatusBadRequest, "from date must be before or equal to to date")
 	}
 
-	limit := query.Limit
-	if limit <= 0 {
-		limit = 50
-	} else if limit > 200 {
-		limit = 200
+	limit := 50
+	if query.Limit > 0 {
+		limit = query.Limit
+		if limit > 200 {
+			limit = 200
+		}
 	}
 
 	var cursorDate *time.Time
 	var cursorPostingID *uuid.UUID
 	if query.Cursor != "" {
-		cDate, cID, err := repository.DecodeCursor(query.Cursor)
+		cd, cid, err := repository.DecodeCursor(query.Cursor)
 		if err != nil {
-			return model.LedgerResponse{}, "", err
+			return model.LedgerResponse{}, "", fiber.NewError(fiber.StatusBadRequest, "invalid cursor: "+err.Error())
 		}
-		cursorDate = &cDate
-		cursorPostingID = &cID
+		cursorDate = &cd
+		cursorPostingID = &cid
 	}
 
-	return s.repo.GetLedger(ctx, parishID, acc, fromDate, toDate, cursorDate, cursorPostingID, limit)
+	return s.repo.GetLedger(ctx, acc, fromDate, toDate, cursorDate, cursorPostingID, limit)
 }
 
-func (s ReportService) GetTrialBalance(ctx context.Context, parishID int, query model.TrialBalanceQuery) (model.TrialBalanceResponse, error) {
+func (s ReportService) GetTrialBalance(ctx context.Context, query model.TrialBalanceQuery) (model.TrialBalanceResponse, error) {
 	if query.AsOf == "" {
 		return model.TrialBalanceResponse{}, fiber.NewError(fiber.StatusBadRequest, "asOf date is required")
 	}
@@ -95,10 +95,10 @@ func (s ReportService) GetTrialBalance(ctx context.Context, parishID int, query 
 		return model.TrialBalanceResponse{}, fiber.NewError(fiber.StatusBadRequest, "invalid asOf date: "+err.Error())
 	}
 
-	return s.repo.GetTrialBalance(ctx, parishID, asOfDate)
+	return s.repo.GetTrialBalance(ctx, asOfDate)
 }
 
-func (s ReportService) GetCollections(ctx context.Context, parishID int, query model.CollectionsQuery) (model.CollectionsResponse, error) {
+func (s ReportService) GetCollections(ctx context.Context, query model.CollectionsQuery) (model.CollectionsResponse, error) {
 	if query.From == "" || query.To == "" {
 		return model.CollectionsResponse{}, fiber.NewError(fiber.StatusBadRequest, "from and to dates are required")
 	}
@@ -124,7 +124,7 @@ func (s ReportService) GetCollections(ctx context.Context, parishID int, query m
 
 	var allowedAccountIDs map[uuid.UUID]bool
 	if query.ParentAccountID != nil {
-		accounts, err := s.repo.ListParishAccounts(ctx, parishID)
+		accounts, err := s.repo.ListAccounts(ctx)
 		if err != nil {
 			return model.CollectionsResponse{}, err
 		}
@@ -160,15 +160,5 @@ func (s ReportService) GetCollections(ctx context.Context, parishID int, query m
 		}
 	}
 
-	if query.UnitID != nil {
-		unitExists, err := s.repo.CheckUnitExists(ctx, parishID, *query.UnitID)
-		if err != nil {
-			return model.CollectionsResponse{}, err
-		}
-		if !unitExists {
-			return model.CollectionsResponse{}, fiber.NewError(fiber.StatusNotFound, "unit not found in this parish")
-		}
-	}
-
-	return s.repo.GetCollections(ctx, parishID, fromDate, toDate, allowedAccountIDs, query.UnitID)
+	return s.repo.GetCollections(ctx, fromDate, toDate, allowedAccountIDs)
 }

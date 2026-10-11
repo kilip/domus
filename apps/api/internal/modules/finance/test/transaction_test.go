@@ -37,10 +37,13 @@ func (s *TransactionSuite) grantRole(parishID int, role string) {
 	s.GrantRole(role, scope)
 }
 
-func (s *TransactionSuite) createAccount(parishID int, code string, accType string, postable bool, status string) *ent.Account {
+func (s *TransactionSuite) activate(parishID, unitID int) {
+	SetFinanceCookie(&s.ApiTestSuite, parishID, unitID)
+}
+
+func (s *TransactionSuite) createAccountWithUnit(parishID int, unitID int, code string, accType string, postable bool, status string) *ent.Account {
 	st := testutil.GetState()
 	ctx := core.ContextWithUser(context.Background(), core.AuthenticatedUser{ID: s.User.ID})
-	unit := CreateTestUnit(s.T(), parishID, s.User.ID)
 	acc, err := st.Ent.Account.Create().
 		SetCode(code).
 		SetName("Account " + code).
@@ -49,18 +52,25 @@ func (s *TransactionSuite) createAccount(parishID int, code string, accType stri
 		SetPostable(postable).
 		SetStatus(account.Status(status)).
 		SetParishID(parishID).
-		SetUnitID(unit.ID).
+		SetUnitID(unitID).
 		Save(ctx)
 	require.NoError(s.T(), err)
 	return acc
 }
 
+func (s *TransactionSuite) createAccount(parishID int, code string, accType string, postable bool, status string) *ent.Account {
+	unit := CreateTestUnit(s.T(), parishID, s.User.ID)
+	return s.createAccountWithUnit(parishID, unit.ID, code, accType, postable, status)
+}
+
 func (s *TransactionSuite) TestCreate_Success2LegAndAutoNumbering() {
 	parish := CreateTestParish(s.T())
+	unit := CreateTestUnit(s.T(), parish.ID, s.User.ID)
 	s.grantRole(parish.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter))
+	s.activate(parish.ID, unit.ID)
 
-	cash := s.createAccount(parish.ID, "1001", "asset", true, "active")
-	income := s.createAccount(parish.ID, "4001", "income", true, "active")
+	cash := s.createAccountWithUnit(parish.ID, unit.ID, "1001", "asset", true, "active")
+	income := s.createAccountWithUnit(parish.ID, unit.ID, "4001", "income", true, "active")
 
 	dateStr := "2026-10-15"
 	req1 := model.CreateTransactionRequest{
@@ -72,7 +82,7 @@ func (s *TransactionSuite) TestCreate_Success2LegAndAutoNumbering() {
 		},
 	}
 
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions", parish.ID), fiber.MethodPost, req1)
+	s.Request("/fin/transactions", fiber.MethodPost, req1)
 	s.Created()
 
 	res1 := s.GetResponse()
@@ -93,7 +103,7 @@ func (s *TransactionSuite) TestCreate_Success2LegAndAutoNumbering() {
 			{AccountID: income.ID, Side: "credit", Amount: 75000},
 		},
 	}
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions", parish.ID), fiber.MethodPost, req2)
+	s.Request("/fin/transactions", fiber.MethodPost, req2)
 	s.Created()
 
 	res2 := s.GetResponse()
@@ -102,11 +112,13 @@ func (s *TransactionSuite) TestCreate_Success2LegAndAutoNumbering() {
 
 func (s *TransactionSuite) TestCreate_SuccessSplitTransaction() {
 	parish := CreateTestParish(s.T())
+	unit := CreateTestUnit(s.T(), parish.ID, s.User.ID)
 	s.grantRole(parish.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter))
+	s.activate(parish.ID, unit.ID)
 
-	cash := s.createAccount(parish.ID, "1001", "asset", true, "active")
-	exp1 := s.createAccount(parish.ID, "5001", "expense", true, "active")
-	exp2 := s.createAccount(parish.ID, "5002", "expense", true, "active")
+	cash := s.createAccountWithUnit(parish.ID, unit.ID, "1001", "asset", true, "active")
+	exp1 := s.createAccountWithUnit(parish.ID, unit.ID, "5001", "expense", true, "active")
+	exp2 := s.createAccountWithUnit(parish.ID, unit.ID, "5002", "expense", true, "active")
 
 	req := model.CreateTransactionRequest{
 		Date: "2026-10-15",
@@ -117,7 +129,7 @@ func (s *TransactionSuite) TestCreate_SuccessSplitTransaction() {
 			{AccountID: cash.ID, Side: "credit", Amount: 50000},
 		},
 	}
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions", parish.ID), fiber.MethodPost, req)
+	s.Request("/fin/transactions", fiber.MethodPost, req)
 	s.Created()
 
 	res := s.GetResponse()
@@ -127,13 +139,15 @@ func (s *TransactionSuite) TestCreate_SuccessSplitTransaction() {
 
 func (s *TransactionSuite) TestCreate_ValidationErrors() {
 	parish := CreateTestParish(s.T())
+	unit := CreateTestUnit(s.T(), parish.ID, s.User.ID)
 	s.grantRole(parish.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter))
+	s.activate(parish.ID, unit.ID)
 
-	cash := s.createAccount(parish.ID, "1001", "asset", true, "active")
-	income := s.createAccount(parish.ID, "4001", "income", true, "active")
+	cash := s.createAccountWithUnit(parish.ID, unit.ID, "1001", "asset", true, "active")
+	income := s.createAccountWithUnit(parish.ID, unit.ID, "4001", "income", true, "active")
 
 	// 1. Unbalanced: debit != credit -> 400
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions", parish.ID), fiber.MethodPost, model.CreateTransactionRequest{
+	s.Request("/fin/transactions", fiber.MethodPost, model.CreateTransactionRequest{
 		Date: "2026-10-15",
 		Kind: "income",
 		Postings: []model.PostingInput{
@@ -144,7 +158,7 @@ func (s *TransactionSuite) TestCreate_ValidationErrors() {
 	s.Require().Equal(fiber.StatusBadRequest, s.HttpResponse.StatusCode)
 
 	// 2. Only debits -> 400
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions", parish.ID), fiber.MethodPost, model.CreateTransactionRequest{
+	s.Request("/fin/transactions", fiber.MethodPost, model.CreateTransactionRequest{
 		Date: "2026-10-15",
 		Kind: "income",
 		Postings: []model.PostingInput{
@@ -155,7 +169,7 @@ func (s *TransactionSuite) TestCreate_ValidationErrors() {
 	s.Require().Equal(fiber.StatusBadRequest, s.HttpResponse.StatusCode)
 
 	// 3. Amount 0 or negative -> 422
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions", parish.ID), fiber.MethodPost, model.CreateTransactionRequest{
+	s.Request("/fin/transactions", fiber.MethodPost, model.CreateTransactionRequest{
 		Date: "2026-10-15",
 		Kind: "income",
 		Postings: []model.PostingInput{
@@ -166,7 +180,7 @@ func (s *TransactionSuite) TestCreate_ValidationErrors() {
 	s.Require().Equal(fiber.StatusUnprocessableEntity, s.HttpResponse.StatusCode)
 
 	// 4. Amount above max limit (1,000,000,000,000,000) -> 422
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions", parish.ID), fiber.MethodPost, model.CreateTransactionRequest{
+	s.Request("/fin/transactions", fiber.MethodPost, model.CreateTransactionRequest{
 		Date: "2026-10-15",
 		Kind: "income",
 		Postings: []model.PostingInput{
@@ -177,7 +191,7 @@ func (s *TransactionSuite) TestCreate_ValidationErrors() {
 	s.Require().Equal(fiber.StatusUnprocessableEntity, s.HttpResponse.StatusCode)
 
 	// 5. Less than 2 postings -> 422
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions", parish.ID), fiber.MethodPost, model.CreateTransactionRequest{
+	s.Request("/fin/transactions", fiber.MethodPost, model.CreateTransactionRequest{
 		Date: "2026-10-15",
 		Kind: "income",
 		Postings: []model.PostingInput{
@@ -195,7 +209,7 @@ func (s *TransactionSuite) TestCreate_ValidationErrors() {
 			Amount:    100,
 		})
 	}
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions", parish.ID), fiber.MethodPost, model.CreateTransactionRequest{
+	s.Request("/fin/transactions", fiber.MethodPost, model.CreateTransactionRequest{
 		Date:     "2026-10-15",
 		Kind:     "income",
 		Postings: manyPostings,
@@ -205,18 +219,20 @@ func (s *TransactionSuite) TestCreate_ValidationErrors() {
 
 func (s *TransactionSuite) TestCreate_AccountAndUnitBusinessRules() {
 	parish := CreateTestParish(s.T())
+	unit := CreateTestUnit(s.T(), parish.ID, s.User.ID)
 	s.grantRole(parish.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter))
+	s.activate(parish.ID, unit.ID)
 
-	cash := s.createAccount(parish.ID, "1001", "asset", true, "active")
-	headerAcc := s.createAccount(parish.ID, "1000", "asset", false, "active")
-	inactiveAcc := s.createAccount(parish.ID, "1002", "asset", true, "inactive")
+	cash := s.createAccountWithUnit(parish.ID, unit.ID, "1001", "asset", true, "active")
+	headerAcc := s.createAccountWithUnit(parish.ID, unit.ID, "1000", "asset", false, "active")
+	inactiveAcc := s.createAccountWithUnit(parish.ID, unit.ID, "1002", "asset", true, "inactive")
 
 	otherParish := CreateTestParish(s.T())
-	otherAcc := s.createAccount(otherParish.ID, "1003", "asset", true, "active")
 	otherUnit := CreateTestUnit(s.T(), otherParish.ID, s.User.ID)
+	otherAcc := s.createAccountWithUnit(otherParish.ID, otherUnit.ID, "1003", "asset", true, "active")
 
 	// 1. Non-postable (header) account -> 400
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions", parish.ID), fiber.MethodPost, model.CreateTransactionRequest{
+	s.Request("/fin/transactions", fiber.MethodPost, model.CreateTransactionRequest{
 		Date: "2026-10-15",
 		Kind: "transfer",
 		Postings: []model.PostingInput{
@@ -227,7 +243,7 @@ func (s *TransactionSuite) TestCreate_AccountAndUnitBusinessRules() {
 	s.Require().Equal(fiber.StatusBadRequest, s.HttpResponse.StatusCode)
 
 	// 2. Inactive account -> 400
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions", parish.ID), fiber.MethodPost, model.CreateTransactionRequest{
+	s.Request("/fin/transactions", fiber.MethodPost, model.CreateTransactionRequest{
 		Date: "2026-10-15",
 		Kind: "transfer",
 		Postings: []model.PostingInput{
@@ -238,7 +254,7 @@ func (s *TransactionSuite) TestCreate_AccountAndUnitBusinessRules() {
 	s.Require().Equal(fiber.StatusBadRequest, s.HttpResponse.StatusCode)
 
 	// 3. Account from another parish -> 400
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions", parish.ID), fiber.MethodPost, model.CreateTransactionRequest{
+	s.Request("/fin/transactions", fiber.MethodPost, model.CreateTransactionRequest{
 		Date: "2026-10-15",
 		Kind: "transfer",
 		Postings: []model.PostingInput{
@@ -249,7 +265,7 @@ func (s *TransactionSuite) TestCreate_AccountAndUnitBusinessRules() {
 	s.Require().Equal(fiber.StatusBadRequest, s.HttpResponse.StatusCode)
 
 	// 4. Non-existent account -> 400
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions", parish.ID), fiber.MethodPost, model.CreateTransactionRequest{
+	s.Request("/fin/transactions", fiber.MethodPost, model.CreateTransactionRequest{
 		Date: "2026-10-15",
 		Kind: "transfer",
 		Postings: []model.PostingInput{
@@ -258,26 +274,16 @@ func (s *TransactionSuite) TestCreate_AccountAndUnitBusinessRules() {
 		},
 	})
 	s.Require().Equal(fiber.StatusBadRequest, s.HttpResponse.StatusCode)
-
-	// 5. Unit from another parish -> 400
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions", parish.ID), fiber.MethodPost, model.CreateTransactionRequest{
-		Date:   "2026-10-15",
-		Kind:   "transfer",
-		UnitID: &otherUnit.ID,
-		Postings: []model.PostingInput{
-			{AccountID: cash.ID, Side: "debit", Amount: 10000},
-			{AccountID: cash.ID, Side: "credit", Amount: 10000},
-		},
-	})
-	s.Require().Equal(fiber.StatusBadRequest, s.HttpResponse.StatusCode)
 }
 
 func (s *TransactionSuite) TestCreate_NumberingAndDateValidation() {
 	parish := CreateTestParish(s.T())
+	unit := CreateTestUnit(s.T(), parish.ID, s.User.ID)
 	s.grantRole(parish.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter))
+	s.activate(parish.ID, unit.ID)
 
-	cash := s.createAccount(parish.ID, "1001", "asset", true, "active")
-	income := s.createAccount(parish.ID, "4001", "income", true, "active")
+	cash := s.createAccountWithUnit(parish.ID, unit.ID, "1001", "asset", true, "active")
+	income := s.createAccountWithUnit(parish.ID, unit.ID, "4001", "income", true, "active")
 
 	// 1. User-supplied number success
 	num := "CUSTOM-TRX-001"
@@ -290,17 +296,17 @@ func (s *TransactionSuite) TestCreate_NumberingAndDateValidation() {
 			{AccountID: income.ID, Side: "credit", Amount: 10000},
 		},
 	}
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions", parish.ID), fiber.MethodPost, req)
+	s.Request("/fin/transactions", fiber.MethodPost, req)
 	s.Created()
 	s.Equal(num, s.GetResponse().Data.Number)
 
 	// 2. Duplicate user-supplied number in same parish -> 409
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions", parish.ID), fiber.MethodPost, req)
+	s.Request("/fin/transactions", fiber.MethodPost, req)
 	s.Require().Equal(fiber.StatusConflict, s.HttpResponse.StatusCode)
 
 	// 3. Invalid number pattern -> 422
 	badNum := "INVALID NUMBER WITH SPACES!"
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions", parish.ID), fiber.MethodPost, model.CreateTransactionRequest{
+	s.Request("/fin/transactions", fiber.MethodPost, model.CreateTransactionRequest{
 		Number: &badNum,
 		Date:   "2026-10-15",
 		Kind:   "income",
@@ -312,7 +318,7 @@ func (s *TransactionSuite) TestCreate_NumberingAndDateValidation() {
 	s.Require().Equal(fiber.StatusUnprocessableEntity, s.HttpResponse.StatusCode)
 
 	// 4. Invalid date -> 400
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions", parish.ID), fiber.MethodPost, model.CreateTransactionRequest{
+	s.Request("/fin/transactions", fiber.MethodPost, model.CreateTransactionRequest{
 		Date: "2026-13-01",
 		Kind: "income",
 		Postings: []model.PostingInput{
@@ -325,13 +331,15 @@ func (s *TransactionSuite) TestCreate_NumberingAndDateValidation() {
 
 func (s *TransactionSuite) TestCreate_AtomicityRollback() {
 	parish := CreateTestParish(s.T())
+	unit := CreateTestUnit(s.T(), parish.ID, s.User.ID)
 	st := testutil.GetState()
 	repo := repository.NewTransactionRepository(st.Ent, st.Log)
 
-	cash := s.createAccount(parish.ID, "1001", "asset", true, "active")
+	cash := s.createAccountWithUnit(parish.ID, unit.ID, "1001", "asset", true, "active")
 	fakeAccountID := uuid.New()
 
 	ctx := core.ContextWithUser(context.Background(), core.AuthenticatedUser{ID: s.User.ID})
+	ctx = model.WithFinanceContext(ctx, model.FinanceContext{ParishID: parish.ID, UnitID: unit.ID})
 	txDate, err := model.ParseDate("2026-10-15")
 	require.NoError(s.T(), err)
 
@@ -345,7 +353,7 @@ func (s *TransactionSuite) TestCreate_AtomicityRollback() {
 		},
 	}
 
-	_, err = repo.Create(ctx, parish.ID, req, "", txDate)
+	_, err = repo.Create(ctx, req, "", txDate)
 	require.Error(s.T(), err)
 
 	// Assert 0 transaction rows remain for this parish
@@ -372,15 +380,18 @@ func (s *TransactionSuite) TestCreate_AtomicityRollback() {
 
 func (s *TransactionSuite) TestGetByID_SuccessAndCrossParish404() {
 	parish1 := CreateTestParish(s.T())
+	unit1 := CreateTestUnit(s.T(), parish1.ID, s.User.ID)
 	parish2 := CreateTestParish(s.T())
+	unit2 := CreateTestUnit(s.T(), parish2.ID, s.User.ID)
 	s.grantRole(parish1.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter))
 	s.grantRole(parish2.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter))
 
-	cash1 := s.createAccount(parish1.ID, "1001", "asset", true, "active")
-	income1 := s.createAccount(parish1.ID, "4001", "income", true, "active")
+	cash1 := s.createAccountWithUnit(parish1.ID, unit1.ID, "1001", "asset", true, "active")
+	income1 := s.createAccountWithUnit(parish1.ID, unit1.ID, "4001", "income", true, "active")
 
 	// Create transaction in parish1
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions", parish1.ID), fiber.MethodPost, model.CreateTransactionRequest{
+	s.activate(parish1.ID, unit1.ID)
+	s.Request("/fin/transactions", fiber.MethodPost, model.CreateTransactionRequest{
 		Date: "2026-10-15",
 		Kind: "income",
 		Postings: []model.PostingInput{
@@ -392,52 +403,51 @@ func (s *TransactionSuite) TestGetByID_SuccessAndCrossParish404() {
 	txID := s.GetResponse().Data.ID
 
 	// 1. Get in parish1 -> 200
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions/%s", parish1.ID, txID), fiber.MethodGet, nil)
+	s.Request(fmt.Sprintf("/fin/transactions/%s", txID), fiber.MethodGet, nil)
 	s.OK()
 	s.Equal(txID, s.GetResponse().Data.ID)
 
 	// 2. Get from parish2 -> 404 (tenant isolation)
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions/%s", parish2.ID, txID), fiber.MethodGet, nil)
+	s.activate(parish2.ID, unit2.ID)
+	s.Request(fmt.Sprintf("/fin/transactions/%s", txID), fiber.MethodGet, nil)
 	s.Require().Equal(fiber.StatusNotFound, s.HttpResponse.StatusCode)
 
 	// 3. Non-existent ID -> 404
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions/%s", parish1.ID, uuid.New()), fiber.MethodGet, nil)
+	s.activate(parish1.ID, unit1.ID)
+	s.Request(fmt.Sprintf("/fin/transactions/%s", uuid.New()), fiber.MethodGet, nil)
 	s.Require().Equal(fiber.StatusNotFound, s.HttpResponse.StatusCode)
 }
 
 func (s *TransactionSuite) TestSearch_FiltersAndCursorPagination() {
 	parish := CreateTestParish(s.T())
-	s.grantRole(parish.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter))
-
-	cash := s.createAccount(parish.ID, "1001", "asset", true, "active")
-	income := s.createAccount(parish.ID, "4001", "income", true, "active")
-	exp := s.createAccount(parish.ID, "5001", "expense", true, "active")
-
 	unit := CreateTestUnit(s.T(), parish.ID, s.User.ID)
+	s.grantRole(parish.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter))
+	s.activate(parish.ID, unit.ID)
+
+	cash := s.createAccountWithUnit(parish.ID, unit.ID, "1001", "asset", true, "active")
+	income := s.createAccountWithUnit(parish.ID, unit.ID, "4001", "income", true, "active")
+	exp := s.createAccountWithUnit(parish.ID, unit.ID, "5001", "expense", true, "active")
 
 	// Create 5 transactions on the SAME date to verify stable cursor pagination across identical dates
 	sameDate := "2026-10-20"
-	var createdIDs []uuid.UUID
 	for i := 1; i <= 5; i++ {
 		desc := fmt.Sprintf("Kolekte Minggu %d", i)
 		req := model.CreateTransactionRequest{
 			Date:        sameDate,
 			Kind:        "income",
 			Description: &desc,
-			UnitID:      &unit.ID,
 			Postings: []model.PostingInput{
 				{AccountID: cash.ID, Side: "debit", Amount: int64(10000 * i)},
 				{AccountID: income.ID, Side: "credit", Amount: int64(10000 * i)},
 			},
 		}
-		s.Request(fmt.Sprintf("/parishes/%d/finance/transactions", parish.ID), fiber.MethodPost, req)
+		s.Request("/fin/transactions", fiber.MethodPost, req)
 		s.Created()
-		createdIDs = append(createdIDs, s.GetResponse().Data.ID)
 	}
 
 	// Create 1 expense transaction on another date
 	diffDate := "2026-10-22"
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions", parish.ID), fiber.MethodPost, model.CreateTransactionRequest{
+	s.Request("/fin/transactions", fiber.MethodPost, model.CreateTransactionRequest{
 		Date: diffDate,
 		Kind: "expense",
 		Postings: []model.PostingInput{
@@ -449,7 +459,7 @@ func (s *TransactionSuite) TestSearch_FiltersAndCursorPagination() {
 
 	// 1. Pagination across identical dates (limit = 2)
 	limit := 2
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions/search", parish.ID), fiber.MethodPost, model.SearchTransactionRequest{
+	s.Request("/fin/transactions/search", fiber.MethodPost, model.SearchTransactionRequest{
 		From:  &sameDate,
 		To:    &sameDate,
 		Limit: &limit,
@@ -462,7 +472,7 @@ func (s *TransactionSuite) TestSearch_FiltersAndCursorPagination() {
 
 	// Page 2
 	cursor1 := page1.Meta.Cursor
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions/search", parish.ID), fiber.MethodPost, model.SearchTransactionRequest{
+	s.Request("/fin/transactions/search", fiber.MethodPost, model.SearchTransactionRequest{
 		From:   &sameDate,
 		To:     &sameDate,
 		Cursor: &cursor1,
@@ -476,7 +486,7 @@ func (s *TransactionSuite) TestSearch_FiltersAndCursorPagination() {
 
 	// Page 3
 	cursor2 := page2.Meta.Cursor
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions/search", parish.ID), fiber.MethodPost, model.SearchTransactionRequest{
+	s.Request("/fin/transactions/search", fiber.MethodPost, model.SearchTransactionRequest{
 		From:   &sameDate,
 		To:     &sameDate,
 		Cursor: &cursor2,
@@ -489,7 +499,7 @@ func (s *TransactionSuite) TestSearch_FiltersAndCursorPagination() {
 
 	// 2. Filter by Kind
 	kind := "expense"
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions/search", parish.ID), fiber.MethodPost, model.SearchTransactionRequest{
+	s.Request("/fin/transactions/search", fiber.MethodPost, model.SearchTransactionRequest{
 		Kind: &kind,
 	})
 	s.OK()
@@ -499,7 +509,7 @@ func (s *TransactionSuite) TestSearch_FiltersAndCursorPagination() {
 	s.Equal(int64(25000), expSearch.Data[0].TotalAmount)
 
 	// 3. Filter by Account
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions/search", parish.ID), fiber.MethodPost, model.SearchTransactionRequest{
+	s.Request("/fin/transactions/search", fiber.MethodPost, model.SearchTransactionRequest{
 		AccountID: &exp.ID,
 	})
 	s.OK()
@@ -508,7 +518,7 @@ func (s *TransactionSuite) TestSearch_FiltersAndCursorPagination() {
 
 	// 4. Filter by text query Q
 	query := "Minggu 3"
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions/search", parish.ID), fiber.MethodPost, model.SearchTransactionRequest{
+	s.Request("/fin/transactions/search", fiber.MethodPost, model.SearchTransactionRequest{
 		Q: &query,
 	})
 	s.OK()
@@ -519,13 +529,17 @@ func (s *TransactionSuite) TestSearch_FiltersAndCursorPagination() {
 
 func (s *TransactionSuite) TestAuthzMatrix() {
 	parish1 := CreateTestParish(s.T())
+	unit1 := CreateTestUnit(s.T(), parish1.ID, s.User.ID)
 	parish2 := CreateTestParish(s.T())
+	unit2 := CreateTestUnit(s.T(), parish2.ID, s.User.ID)
+	_ = unit2
 
-	cash := s.createAccount(parish1.ID, "1001", "asset", true, "active")
-	income := s.createAccount(parish1.ID, "4001", "income", true, "active")
+	cash := s.createAccountWithUnit(parish1.ID, unit1.ID, "1001", "asset", true, "active")
+	income := s.createAccountWithUnit(parish1.ID, unit1.ID, "4001", "income", true, "active")
 
 	// 1. No membership -> 403
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions", parish1.ID), fiber.MethodPost, model.CreateTransactionRequest{
+	s.activate(parish1.ID, unit1.ID)
+	s.Request("/fin/transactions", fiber.MethodPost, model.CreateTransactionRequest{
 		Date: "2026-10-15",
 		Kind: "income",
 		Postings: []model.PostingInput{
@@ -537,7 +551,7 @@ func (s *TransactionSuite) TestAuthzMatrix() {
 
 	// 2. Reader can search and GET, cannot POST -> 403
 	s.grantRole(parish1.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelReader))
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions", parish1.ID), fiber.MethodPost, model.CreateTransactionRequest{
+	s.Request("/fin/transactions", fiber.MethodPost, model.CreateTransactionRequest{
 		Date: "2026-10-15",
 		Kind: "income",
 		Postings: []model.PostingInput{
@@ -547,12 +561,13 @@ func (s *TransactionSuite) TestAuthzMatrix() {
 	})
 	s.Require().Equal(http.StatusForbidden, s.HttpResponse.StatusCode)
 
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions/search", parish1.ID), fiber.MethodPost, nil)
+	s.Request("/fin/transactions/search", fiber.MethodPost, nil)
 	s.OK()
 
 	// 3. Writer in parish 2 cannot access parish 1
 	s.grantRole(parish2.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter))
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions", parish1.ID), fiber.MethodPost, model.CreateTransactionRequest{
+	s.activate(parish1.ID, unit1.ID)
+	s.Request("/fin/transactions", fiber.MethodPost, model.CreateTransactionRequest{
 		Date: "2026-10-15",
 		Kind: "income",
 		Postings: []model.PostingInput{

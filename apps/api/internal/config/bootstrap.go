@@ -50,6 +50,7 @@ func initFinance(state State) {
 		Log:     state.Log,
 	})
 	finModule.InitRoutes(state.FiberApp)
+	finModule.InitEntCli(state.Ent)
 }
 
 func Bootstrap(state State) {

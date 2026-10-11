@@ -72,13 +72,13 @@ func toTransactionResponse(tx *ent.Transaction) model.TransactionResponse {
 		}
 		for _, p := range e.Edges.Postings {
 			postResp := model.PostingResponse{
-				ID:     p.ID,
-				Side:   string(p.Side),
-				Amount: p.Amount,
-				Memo:   p.Memo,
+				ID:        p.ID,
+				Side:      string(p.Side),
+				Amount:    p.Amount,
+				Memo:      p.Memo,
+				AccountID: p.Edges.Account.ID,
 			}
 			if p.Edges.Account != nil {
-				postResp.AccountID = p.Edges.Account.ID
 				postResp.AccountCode = p.Edges.Account.Code
 				postResp.AccountName = p.Edges.Account.Name
 			}
@@ -86,7 +86,6 @@ func toTransactionResponse(tx *ent.Transaction) model.TransactionResponse {
 		}
 		resp.Entries = append(resp.Entries, entryResp)
 	}
-
 	return resp
 }
 
@@ -125,12 +124,13 @@ func toTransactionSummary(tx *ent.Transaction) model.TransactionSummary {
 	return summary
 }
 
-func (r TransactionRepository) NextNumber(ctx context.Context, tx *ent.Tx, parishID int, date time.Time) (string, error) {
+func (r TransactionRepository) NextNumber(ctx context.Context, tx *ent.Tx, date time.Time) (string, error) {
+	fc, _ := model.FinanceContextFromContext(ctx)
 	prefix := fmt.Sprintf("TRX-%s-", date.UTC().Format("200601"))
 
 	rows, err := tx.Transaction.Query().
 		Where(
-			transaction.HasParishWith(parish.IDEQ(parishID)),
+			transaction.HasParishWith(parish.IDEQ(fc.ParishID)),
 			transaction.NumberHasPrefix(prefix),
 		).
 		Select(transaction.FieldNumber).
@@ -151,7 +151,8 @@ func (r TransactionRepository) NextNumber(ctx context.Context, tx *ent.Tx, paris
 	return fmt.Sprintf("%s%04d", prefix, nextSeq), nil
 }
 
-func (r TransactionRepository) Create(ctx context.Context, parishID int, req model.CreateTransactionRequest, number string, txDate time.Time) (*model.TransactionResponse, error) {
+func (r TransactionRepository) Create(ctx context.Context, req model.CreateTransactionRequest, number string, txDate time.Time) (*model.TransactionResponse, error) {
+	fc, _ := model.FinanceContextFromContext(ctx)
 	var resp *model.TransactionResponse
 
 	maxAttempts := 1
@@ -164,23 +165,27 @@ func (r TransactionRepository) Create(ctx context.Context, parishID int, req mod
 			num := number
 			if num == "" {
 				var err error
-				num, err = r.NextNumber(ctx, tx, parishID, txDate)
+				num, err = r.NextNumber(ctx, tx, txDate)
 				if err != nil {
 					return err
 				}
 			}
 
 			txBuilder := tx.Transaction.Create().
-				SetParishID(parishID).
 				SetNumber(num).
 				SetDate(txDate).
 				SetKind(transaction.Kind(req.Kind)).
 				SetStatus(transaction.StatusPosted)
+
+			if fc.ParishID > 0 {
+				txBuilder.SetParishID(fc.ParishID)
+			}
+			if fc.UnitID > 0 {
+				txBuilder.SetUnitID(fc.UnitID)
+			}
+
 			if req.Description != nil && *req.Description != "" {
 				txBuilder.SetDescription(*req.Description)
-			}
-			if req.UnitID != nil {
-				txBuilder.SetUnitID(*req.UnitID)
 			}
 
 			txEnt, err := txBuilder.Save(ctx)
@@ -260,11 +265,13 @@ func (r TransactionRepository) Create(ctx context.Context, parishID int, req mod
 	return nil, fiber.NewError(fiber.StatusConflict, "could not allocate transaction number after retries")
 }
 
-func (r TransactionRepository) GetByID(ctx context.Context, parishID int, id uuid.UUID) (*model.TransactionResponse, error) {
+func (r TransactionRepository) GetByID(ctx context.Context, id uuid.UUID) (*model.TransactionResponse, error) {
+	fc, _ := model.FinanceContextFromContext(ctx)
 	txEnt, err := r.entcli.Transaction.Query().
 		Where(
 			transaction.IDEQ(id),
-			transaction.HasParishWith(parish.IDEQ(parishID)),
+			transaction.HasParishWith(parish.IDEQ(fc.ParishID)),
+			transaction.HasUnitWith(entunit.IDEQ(fc.UnitID)),
 		).
 		WithParish().
 		WithUnit().
@@ -288,9 +295,13 @@ func (r TransactionRepository) GetByID(ctx context.Context, parishID int, id uui
 	return &resp, nil
 }
 
-func (r TransactionRepository) Search(ctx context.Context, parishID int, req model.SearchTransactionRequest) (*model.PaginatedResult[model.TransactionSummary], error) {
+func (r TransactionRepository) Search(ctx context.Context, req model.SearchTransactionRequest) (*model.PaginatedResult[model.TransactionSummary], error) {
+	fc, _ := model.FinanceContextFromContext(ctx)
 	q := r.entcli.Transaction.Query().
-		Where(transaction.HasParishWith(parish.IDEQ(parishID)))
+		Where(
+			transaction.HasParishWith(parish.IDEQ(fc.ParishID)),
+			transaction.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+		)
 
 	if req.From != nil && *req.From != "" {
 		fromDate, err := model.ParseDate(*req.From)
@@ -314,10 +325,6 @@ func (r TransactionRepository) Search(ctx context.Context, parishID int, req mod
 
 	if req.Status != nil && *req.Status != "" {
 		q = q.Where(transaction.StatusEQ(transaction.Status(*req.Status)))
-	}
-
-	if req.UnitID != nil {
-		q = q.Where(transaction.HasUnitWith(entunit.IDEQ(*req.UnitID)))
 	}
 
 	if req.AccountID != nil {

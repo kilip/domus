@@ -3,6 +3,8 @@ package test
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"net/url"
 	"testing"
 
 	"github.com/gofiber/fiber/v3"
@@ -15,6 +17,17 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
+
+// SetFinanceCookie sets the domus.fin cookie in the test suite for active parish and unit.
+func SetFinanceCookie[T any](s *testutil.ApiTestSuite[T], parishID int, unitID int) {
+	s.T().Helper()
+	cookieVal := fmt.Sprintf(`{"activeParishId":%d,"activeUnitId":%d}`, parishID, unitID)
+	s.SetCookie(&http.Cookie{
+		Name:  "domus.fin",
+		Value: url.QueryEscape(cookieVal),
+		Path:  "/",
+	})
+}
 
 // EnsureUserSnapshot performs an authenticated GET /ping to ensure
 // that the current test user snapshot is stored in the database.

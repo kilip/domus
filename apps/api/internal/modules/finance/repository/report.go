@@ -30,38 +30,44 @@ func NewReportRepository(entcli *ent.Client, log *slog.Logger) ReportRepository 
 	}
 }
 
-func (r ReportRepository) GetAccount(ctx context.Context, parishID int, accountID uuid.UUID) (*ent.Account, error) {
+func (r ReportRepository) GetAccount(ctx context.Context, accountID uuid.UUID) (*ent.Account, error) {
+	fc, _ := model.FinanceContextFromContext(ctx)
 	return r.entcli.Account.Query().
 		Where(
 			account.IDEQ(accountID),
-			account.HasParishWith(parish.IDEQ(parishID)),
+			account.HasParishWith(parish.IDEQ(fc.ParishID)),
+			account.HasUnitWith(entunit.IDEQ(fc.UnitID)),
 		).
 		Only(ctx)
 }
 
-func (r ReportRepository) ListParishAccounts(ctx context.Context, parishID int) ([]*ent.Account, error) {
+func (r ReportRepository) ListAccounts(ctx context.Context) ([]*ent.Account, error) {
+	fc, _ := model.FinanceContextFromContext(ctx)
 	return r.entcli.Account.Query().
-		Where(account.HasParishWith(parish.IDEQ(parishID))).
+		Where(
+			account.HasParishWith(parish.IDEQ(fc.ParishID)),
+			account.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+		).
 		WithParent().
 		All(ctx)
 }
 
-func (r ReportRepository) CheckUnitExists(ctx context.Context, parishID int, unitID int) (bool, error) {
-	return r.entcli.Unit.Query().
-		Where(
-			entunit.IDEQ(unitID),
-			entunit.HasParishWith(parish.IDEQ(parishID)),
-		).
-		Exist(ctx)
-}
-
-func (r ReportRepository) forEachPosting(ctx context.Context, parishID int, pred predicate.Posting, fn func(*ent.Posting) error) error {
+func (r ReportRepository) forEachPosting(ctx context.Context, pred predicate.Posting, fn func(*ent.Posting) error) error {
+	fc, _ := model.FinanceContextFromContext(ctx)
 	var lastID *uuid.UUID
 	for {
 		q := r.entcli.Posting.Query().
 			Where(
-				posting.HasAccountWith(account.HasParishWith(parish.IDEQ(parishID))),
-				posting.HasEntryWith(entry.HasTransactionWith(transaction.HasParishWith(parish.IDEQ(parishID)))),
+				posting.HasAccountWith(
+					account.HasParishWith(parish.IDEQ(fc.ParishID)),
+					account.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+				),
+				posting.HasEntryWith(
+					entry.HasTransactionWith(
+						transaction.HasParishWith(parish.IDEQ(fc.ParishID)),
+						transaction.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+					),
+				),
 			)
 		if pred != nil {
 			q = q.Where(pred)
@@ -95,16 +101,23 @@ func (r ReportRepository) forEachPosting(ctx context.Context, parishID int, pred
 	return nil
 }
 
-func (r ReportRepository) forEachPostingForAccount(ctx context.Context, parishID int, accountID uuid.UUID, pred predicate.Posting, fn func(*ent.Posting) error) error {
+func (r ReportRepository) forEachPostingForAccount(ctx context.Context, accountID uuid.UUID, pred predicate.Posting, fn func(*ent.Posting) error) error {
+	fc, _ := model.FinanceContextFromContext(ctx)
 	var lastID *uuid.UUID
 	for {
 		q := r.entcli.Posting.Query().
 			Where(
 				posting.HasAccountWith(
 					account.IDEQ(accountID),
-					account.HasParishWith(parish.IDEQ(parishID)),
+					account.HasParishWith(parish.IDEQ(fc.ParishID)),
+					account.HasUnitWith(entunit.IDEQ(fc.UnitID)),
 				),
-				posting.HasEntryWith(entry.HasTransactionWith(transaction.HasParishWith(parish.IDEQ(parishID)))),
+				posting.HasEntryWith(
+					entry.HasTransactionWith(
+						transaction.HasParishWith(parish.IDEQ(fc.ParishID)),
+						transaction.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+					),
+				),
 			)
 		if pred != nil {
 			q = q.Where(pred)
@@ -138,13 +151,13 @@ func (r ReportRepository) forEachPostingForAccount(ctx context.Context, parishID
 
 func (r ReportRepository) GetLedger(
 	ctx context.Context,
-	parishID int,
 	acc *ent.Account,
 	from, to time.Time,
 	cursorDate *time.Time,
 	cursorPostingID *uuid.UUID,
 	limit int,
 ) (model.LedgerResponse, string, error) {
+	fc, _ := model.FinanceContextFromContext(ctx)
 	isDebitNormal := acc.NormalBalance == account.NormalBalanceDebit
 	var openingBalance int64
 
@@ -161,7 +174,7 @@ func (r ReportRepository) GetLedger(
 		)
 	}
 
-	err := r.forEachPostingForAccount(ctx, parishID, acc.ID, opPred, func(p *ent.Posting) error {
+	err := r.forEachPostingForAccount(ctx, acc.ID, opPred, func(p *ent.Posting) error {
 		if isDebitNormal {
 			if p.Side == posting.SideDebit {
 				openingBalance += p.Amount
@@ -185,10 +198,14 @@ func (r ReportRepository) GetLedger(
 		Where(
 			posting.HasAccountWith(
 				account.IDEQ(acc.ID),
-				account.HasParishWith(parish.IDEQ(parishID)),
+				account.HasParishWith(parish.IDEQ(fc.ParishID)),
+				account.HasUnitWith(entunit.IDEQ(fc.UnitID)),
 			),
 			posting.HasEntryWith(
-				entry.HasTransactionWith(transaction.HasParishWith(parish.IDEQ(parishID))),
+				entry.HasTransactionWith(
+					transaction.HasParishWith(parish.IDEQ(fc.ParishID)),
+					transaction.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+				),
 				entry.DateGTE(from),
 				entry.DateLTE(to),
 			),
@@ -298,7 +315,7 @@ func (r ReportRepository) GetLedger(
 	return resp, nextCursor, nil
 }
 
-func (r ReportRepository) GetTrialBalance(ctx context.Context, parishID int, asOf time.Time) (model.TrialBalanceResponse, error) {
+func (r ReportRepository) GetTrialBalance(ctx context.Context, asOf time.Time) (model.TrialBalanceResponse, error) {
 	type accStats struct {
 		acc    *ent.Account
 		debit  int64
@@ -307,7 +324,7 @@ func (r ReportRepository) GetTrialBalance(ctx context.Context, parishID int, asO
 	statsMap := make(map[uuid.UUID]*accStats)
 
 	pred := posting.HasEntryWith(entry.DateLTE(asOf))
-	err := r.forEachPosting(ctx, parishID, pred, func(p *ent.Posting) error {
+	err := r.forEachPosting(ctx, pred, func(p *ent.Posting) error {
 		acc := p.Edges.Account
 		if acc == nil || !acc.Postable {
 			return nil
@@ -368,10 +385,8 @@ func (r ReportRepository) GetTrialBalance(ctx context.Context, parishID int, asO
 
 func (r ReportRepository) GetCollections(
 	ctx context.Context,
-	parishID int,
 	from, to time.Time,
 	allowedAccountIDs map[uuid.UUID]bool,
-	unitID *int,
 ) (model.CollectionsResponse, error) {
 	type incStats struct {
 		acc   *ent.Account
@@ -388,18 +403,8 @@ func (r ReportRepository) GetCollections(
 			account.TypeEQ(account.TypeIncome),
 		),
 	)
-	if unitID != nil {
-		pred = posting.And(
-			pred,
-			posting.HasEntryWith(
-				entry.HasTransactionWith(
-					transaction.HasUnitWith(entunit.IDEQ(*unitID)),
-				),
-			),
-		)
-	}
 
-	err := r.forEachPosting(ctx, parishID, pred, func(p *ent.Posting) error {
+	err := r.forEachPosting(ctx, pred, func(p *ent.Posting) error {
 		acc := p.Edges.Account
 		if acc == nil || acc.Type != account.TypeIncome {
 			return nil

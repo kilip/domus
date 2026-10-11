@@ -11,9 +11,9 @@ import (
 )
 
 type ReportService interface {
-	GetLedger(ctx context.Context, parishID int, query model.LedgerQuery) (model.LedgerResponse, string, error)
-	GetTrialBalance(ctx context.Context, parishID int, query model.TrialBalanceQuery) (model.TrialBalanceResponse, error)
-	GetCollections(ctx context.Context, parishID int, query model.CollectionsQuery) (model.CollectionsResponse, error)
+	GetLedger(ctx context.Context, query model.LedgerQuery) (model.LedgerResponse, string, error)
+	GetTrialBalance(ctx context.Context, query model.TrialBalanceQuery) (model.TrialBalanceResponse, error)
+	GetCollections(ctx context.Context, query model.CollectionsQuery) (model.CollectionsResponse, error)
 }
 
 type ReportController struct {
@@ -31,7 +31,6 @@ func NewReportController(svc ReportService) ReportController {
 //	@Tags			Finance Report
 //	@Produce		json
 //	@Security		BearerAuth
-//	@Param			parishId	path		int		true	"Parish ID"
 //	@Param			accountId	query		string	true	"Account ID (UUID)"
 //	@Param			from		query		string	true	"Start date (YYYY-MM-DD)"
 //	@Param			to			query		string	true	"End date (YYYY-MM-DD)"
@@ -43,12 +42,8 @@ func NewReportController(svc ReportService) ReportController {
 //	@Failure		403			{object}	httpx.ErrorResponse
 //	@Failure		404			{object}	httpx.ErrorResponse
 //	@Failure		422			{object}	httpx.ErrorResponse
-//	@Router			/parishes/{parishId}/finance/reports/ledger [get]
+//	@Router			/fin/reports/ledger [get]
 func (rc ReportController) GetLedger(c fiber.Ctx) error {
-	parishID, err := httpx.GetIntParam(c, "parishId")
-	if err != nil {
-		return err
-	}
 	var query model.LedgerQuery
 	if err := c.Bind().Query(&query); err != nil {
 		return err
@@ -75,7 +70,7 @@ func (rc ReportController) GetLedger(c fiber.Ctx) error {
 		}
 	}
 
-	res, nextCursor, err := rc.svc.GetLedger(c, parishID, query)
+	res, nextCursor, err := rc.svc.GetLedger(c, query)
 	if err != nil {
 		return err
 	}
@@ -89,20 +84,15 @@ func (rc ReportController) GetLedger(c fiber.Ctx) error {
 //	@Tags			Finance Report
 //	@Produce		json
 //	@Security		BearerAuth
-//	@Param			parishId	path		int		true	"Parish ID"
-//	@Param			asOf		query		string	true	"As of date (YYYY-MM-DD)"
-//	@Success		200			{object}	httpx.WebResponse[model.TrialBalanceResponse]
-//	@Failure		400			{object}	httpx.ErrorResponse
-//	@Failure		401			{object}	httpx.ErrorResponse
-//	@Failure		403			{object}	httpx.ErrorResponse
-//	@Failure		404			{object}	httpx.ErrorResponse
-//	@Failure		422			{object}	httpx.ErrorResponse
-//	@Router			/parishes/{parishId}/finance/reports/trial-balance [get]
+//	@Param			asOf	query		string	true	"As of date (YYYY-MM-DD)"
+//	@Success		200		{object}	httpx.WebResponse[model.TrialBalanceResponse]
+//	@Failure		400		{object}	httpx.ErrorResponse
+//	@Failure		401		{object}	httpx.ErrorResponse
+//	@Failure		403		{object}	httpx.ErrorResponse
+//	@Failure		404		{object}	httpx.ErrorResponse
+//	@Failure		422		{object}	httpx.ErrorResponse
+//	@Router			/fin/reports/trial-balance [get]
 func (rc ReportController) GetTrialBalance(c fiber.Ctx) error {
-	parishID, err := httpx.GetIntParam(c, "parishId")
-	if err != nil {
-		return err
-	}
 	var query model.TrialBalanceQuery
 	if err := c.Bind().Query(&query); err != nil {
 		return err
@@ -111,7 +101,7 @@ func (rc ReportController) GetTrialBalance(c fiber.Ctx) error {
 		query.AsOf = asOf
 	}
 
-	res, err := rc.svc.GetTrialBalance(c, parishID, query)
+	res, err := rc.svc.GetTrialBalance(c, query)
 	if err != nil {
 		return err
 	}
@@ -125,23 +115,17 @@ func (rc ReportController) GetTrialBalance(c fiber.Ctx) error {
 //	@Tags			Finance Report
 //	@Produce		json
 //	@Security		BearerAuth
-//	@Param			parishId		path		int		true	"Parish ID"
 //	@Param			from			query		string	true	"Start date (YYYY-MM-DD)"
 //	@Param			to				query		string	true	"End date (YYYY-MM-DD)"
 //	@Param			parentAccountId	query		string	false	"Filter by header account subtree (UUID)"
-//	@Param			unitId			query		int		false	"Filter by transaction unit ID"
 //	@Success		200				{object}	httpx.WebResponse[model.CollectionsResponse]
 //	@Failure		400				{object}	httpx.ErrorResponse
 //	@Failure		401				{object}	httpx.ErrorResponse
 //	@Failure		403				{object}	httpx.ErrorResponse
 //	@Failure		404				{object}	httpx.ErrorResponse
 //	@Failure		422				{object}	httpx.ErrorResponse
-//	@Router			/parishes/{parishId}/finance/reports/collections [get]
+//	@Router			/fin/reports/collections [get]
 func (rc ReportController) GetCollections(c fiber.Ctx) error {
-	parishID, err := httpx.GetIntParam(c, "parishId")
-	if err != nil {
-		return err
-	}
 	var query model.CollectionsQuery
 	if err := c.Bind().Query(&query); err != nil {
 		return err
@@ -159,15 +143,8 @@ func (rc ReportController) GetCollections(c fiber.Ctx) error {
 		}
 		query.ParentAccountID = &pID
 	}
-	if unitIDStr := c.Query("unitId"); unitIDStr != "" {
-		uID, err := strconv.Atoi(unitIDStr)
-		if err != nil {
-			return fiber.NewError(fiber.StatusBadRequest, "invalid unitId: "+err.Error())
-		}
-		query.UnitID = &uID
-	}
 
-	res, err := rc.svc.GetCollections(c, parishID, query)
+	res, err := rc.svc.GetCollections(c, query)
 	if err != nil {
 		return err
 	}

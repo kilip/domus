@@ -37,6 +37,8 @@ type Spec struct {
 	// ParishParam / OwnerParam default to "parishId" / "id".
 	ParishParam string
 	OwnerParam  string
+	// ParishFunc optionally resolves parish ID (e.g. from context cookie) instead of route param.
+	ParishFunc func(c fiber.Ctx) (int, error)
 }
 
 type Module struct {
@@ -76,7 +78,13 @@ func ownerFrom(c fiber.Ctx) Owner {
 // guard resolves the owner and checks the permission at the owner's unit scope.
 func (m Module) guard(spec Spec, act authz.Action) fiber.Handler {
 	return func(c fiber.Ctx) error {
-		parishID, err := parseParish(c, spec.ParishParam)
+		var parishID int
+		var err error
+		if spec.ParishFunc != nil {
+			parishID, err = spec.ParishFunc(c)
+		} else {
+			parishID, err = parseParish(c, spec.ParishParam)
+		}
 		if err != nil {
 			return err
 		}

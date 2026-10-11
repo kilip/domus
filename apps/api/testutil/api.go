@@ -23,15 +23,31 @@ type ApiTestSuite[T any] struct {
 	suite.Suite
 	HttpResponse *http.Response
 	User         *core.AuthenticatedUser
+	Cookies      []*http.Cookie
 }
 
 func (s *ApiTestSuite[T]) SetupTest() {
+	s.Cookies = nil
 	s.User = &core.AuthenticatedUser{
 		Name:  "Test User",
 		Email: "test@example.com",
 		ID:    core.GenerateID(),
 		Roles: []core.UserRole{core.UserRoleAdmin},
 	}
+}
+
+func (s *ApiTestSuite[T]) SetCookie(cookie *http.Cookie) {
+	for i, c := range s.Cookies {
+		if c.Name == cookie.Name {
+			s.Cookies[i] = cookie
+			return
+		}
+	}
+	s.Cookies = append(s.Cookies, cookie)
+}
+
+func (s *ApiTestSuite[T]) ClearCookies() {
+	s.Cookies = nil
 }
 
 // GrantRole creates a Membership row for the current test user and
@@ -72,6 +88,9 @@ func (s *ApiTestSuite[T]) RequestWithToken(path string, method string, requestBo
 	}
 	if token != "" {
 		req.Header.Set("Authorization", "Bearer "+token)
+	}
+	for _, c := range s.Cookies {
+		req.AddCookie(c)
 	}
 
 	var err error
@@ -134,6 +153,9 @@ func (s *ApiTestSuite[T]) RequestMultipartWithClaims(path string, method string,
 
 	token := SignToken(s.T(), claims)
 	req.Header.Set("Authorization", "Bearer "+token)
+	for _, c := range s.Cookies {
+		req.AddCookie(c)
+	}
 
 	var err error
 	s.HttpResponse = nil

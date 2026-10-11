@@ -10,11 +10,11 @@ import (
 )
 
 type AccountService interface {
-	List(ctx context.Context, parishID int, filter model.ListAccountsQuery) ([]model.AccountResponse, error)
-	GetByID(ctx context.Context, parishID int, id uuid.UUID) (*model.AccountResponse, error)
-	Create(ctx context.Context, parishID int, req model.CreateAccountRequest) (*model.AccountResponse, error)
-	Update(ctx context.Context, parishID int, id uuid.UUID, req model.UpdateAccountRequest) (*model.AccountResponse, error)
-	Delete(ctx context.Context, parishID int, id uuid.UUID) error
+	List(ctx context.Context, filter model.ListAccountsQuery) ([]model.AccountResponse, error)
+	GetByID(ctx context.Context, id uuid.UUID) (*model.AccountResponse, error)
+	Create(ctx context.Context, req model.CreateAccountRequest) (*model.AccountResponse, error)
+	Update(ctx context.Context, id uuid.UUID, req model.UpdateAccountRequest) (*model.AccountResponse, error)
+	Delete(ctx context.Context, id uuid.UUID) error
 }
 
 type AccountController struct {
@@ -33,26 +33,21 @@ func NewAccountController(svc AccountService) AccountController {
 //	@Accept			json
 //	@Produce		json
 //	@Security		BearerAuth
-//	@Param			parishId	path		int							true	"Parish ID"
-//	@Param			request		body		model.CreateAccountRequest	true	"Create account request"
-//	@Success		201			{object}	httpx.WebResponse[model.AccountResponse]
-//	@Failure		400			{object}	httpx.ErrorResponse
-//	@Failure		401			{object}	httpx.ErrorResponse
-//	@Failure		403			{object}	httpx.ErrorResponse
-//	@Failure		404			{object}	httpx.ErrorResponse
-//	@Failure		409			{object}	httpx.ErrorResponse
-//	@Failure		422			{object}	httpx.ErrorResponse
-//	@Router			/parishes/{parishId}/finance/accounts [post]
+//	@Param			request	body		model.CreateAccountRequest	true	"Create account request"
+//	@Success		201		{object}	httpx.WebResponse[model.AccountResponse]
+//	@Failure		400		{object}	httpx.ErrorResponse
+//	@Failure		401		{object}	httpx.ErrorResponse
+//	@Failure		403		{object}	httpx.ErrorResponse
+//	@Failure		404		{object}	httpx.ErrorResponse
+//	@Failure		409		{object}	httpx.ErrorResponse
+//	@Failure		422		{object}	httpx.ErrorResponse
+//	@Router			/fin/accounts [post]
 func (ac AccountController) Create(c fiber.Ctx) error {
-	parishID, err := httpx.GetIntParam(c, "parishId")
-	if err != nil {
-		return err
-	}
 	var req model.CreateAccountRequest
 	if err := c.Bind().Body(&req); err != nil {
 		return err
 	}
-	res, err := ac.svc.Create(c, parishID, req)
+	res, err := ac.svc.Create(c, req)
 	if err != nil {
 		return err
 	}
@@ -62,11 +57,10 @@ func (ac AccountController) Create(c fiber.Ctx) error {
 // List godoc
 //
 //	@Summary		List accounts
-//	@Description	List accounts for a parish with optional filters, sorted by code
+//	@Description	List accounts for active parish and unit with optional filters, sorted by code
 //	@Tags			Finance Account
 //	@Produce		json
 //	@Security		BearerAuth
-//	@Param			parishId	path		int		true	"Parish ID"
 //	@Param			type		query		string	false	"Account type"	Enums(asset, liability, equity, income, expense)
 //	@Param			status		query		string	false	"Status"		Enums(active, inactive)
 //	@Param			postable	query		bool	false	"Postable"
@@ -76,12 +70,8 @@ func (ac AccountController) Create(c fiber.Ctx) error {
 //	@Failure		403			{object}	httpx.ErrorResponse
 //	@Failure		404			{object}	httpx.ErrorResponse
 //	@Failure		422			{object}	httpx.ErrorResponse
-//	@Router			/parishes/{parishId}/finance/accounts [get]
+//	@Router			/fin/accounts [get]
 func (ac AccountController) List(c fiber.Ctx) error {
-	parishID, err := httpx.GetIntParam(c, "parishId")
-	if err != nil {
-		return err
-	}
 	var query model.ListAccountsQuery
 	if err := c.Bind().Query(&query); err != nil {
 		return err
@@ -96,7 +86,7 @@ func (ac AccountController) List(c fiber.Ctx) error {
 		postable := postableStr == "true" || postableStr == "1"
 		query.Postable = &postable
 	}
-	res, err := ac.svc.List(c, parishID, query)
+	res, err := ac.svc.List(c, query)
 	if err != nil {
 		return err
 	}
@@ -110,24 +100,19 @@ func (ac AccountController) List(c fiber.Ctx) error {
 //	@Tags			Finance Account
 //	@Produce		json
 //	@Security		BearerAuth
-//	@Param			parishId	path		int		true	"Parish ID"
-//	@Param			id			path		string	true	"Account ID (UUID)"
-//	@Success		200			{object}	httpx.WebResponse[model.AccountResponse]
-//	@Failure		400			{object}	httpx.ErrorResponse
-//	@Failure		401			{object}	httpx.ErrorResponse
-//	@Failure		403			{object}	httpx.ErrorResponse
-//	@Failure		404			{object}	httpx.ErrorResponse
-//	@Router			/parishes/{parishId}/finance/accounts/{id} [get]
+//	@Param			id	path		string	true	"Account ID (UUID)"
+//	@Success		200	{object}	httpx.WebResponse[model.AccountResponse]
+//	@Failure		400	{object}	httpx.ErrorResponse
+//	@Failure		401	{object}	httpx.ErrorResponse
+//	@Failure		403	{object}	httpx.ErrorResponse
+//	@Failure		404	{object}	httpx.ErrorResponse
+//	@Router			/fin/accounts/{id} [get]
 func (ac AccountController) GetByID(c fiber.Ctx) error {
-	parishID, err := httpx.GetIntParam(c, "parishId")
-	if err != nil {
-		return err
-	}
 	id, err := httpx.GetID(c)
 	if err != nil {
 		return err
 	}
-	res, err := ac.svc.GetByID(c, parishID, *id)
+	res, err := ac.svc.GetByID(c, *id)
 	if err != nil {
 		return err
 	}
@@ -142,22 +127,17 @@ func (ac AccountController) GetByID(c fiber.Ctx) error {
 //	@Accept			json
 //	@Produce		json
 //	@Security		BearerAuth
-//	@Param			parishId	path		int							true	"Parish ID"
-//	@Param			id			path		string						true	"Account ID (UUID)"
-//	@Param			request		body		model.UpdateAccountRequest	true	"Update account request"
-//	@Success		200			{object}	httpx.WebResponse[model.AccountResponse]
-//	@Failure		400			{object}	httpx.ErrorResponse
-//	@Failure		401			{object}	httpx.ErrorResponse
-//	@Failure		403			{object}	httpx.ErrorResponse
-//	@Failure		404			{object}	httpx.ErrorResponse
-//	@Failure		409			{object}	httpx.ErrorResponse
-//	@Failure		422			{object}	httpx.ErrorResponse
-//	@Router			/parishes/{parishId}/finance/accounts/{id} [put]
+//	@Param			id		path		string						true	"Account ID (UUID)"
+//	@Param			request	body		model.UpdateAccountRequest	true	"Update account request"
+//	@Success		200		{object}	httpx.WebResponse[model.AccountResponse]
+//	@Failure		400		{object}	httpx.ErrorResponse
+//	@Failure		401		{object}	httpx.ErrorResponse
+//	@Failure		403		{object}	httpx.ErrorResponse
+//	@Failure		404		{object}	httpx.ErrorResponse
+//	@Failure		409		{object}	httpx.ErrorResponse
+//	@Failure		422		{object}	httpx.ErrorResponse
+//	@Router			/fin/accounts/{id} [put]
 func (ac AccountController) Update(c fiber.Ctx) error {
-	parishID, err := httpx.GetIntParam(c, "parishId")
-	if err != nil {
-		return err
-	}
 	id, err := httpx.GetID(c)
 	if err != nil {
 		return err
@@ -166,7 +146,7 @@ func (ac AccountController) Update(c fiber.Ctx) error {
 	if err := c.Bind().Body(&req); err != nil {
 		return err
 	}
-	res, err := ac.svc.Update(c, parishID, *id, req)
+	res, err := ac.svc.Update(c, *id, req)
 	if err != nil {
 		return err
 	}
@@ -180,24 +160,19 @@ func (ac AccountController) Update(c fiber.Ctx) error {
 //	@Tags			Finance Account
 //	@Produce		json
 //	@Security		BearerAuth
-//	@Param			parishId	path		int		true	"Parish ID"
-//	@Param			id			path		string	true	"Account ID (UUID)"
-//	@Success		204			"No Content"
-//	@Failure		400			{object}	httpx.ErrorResponse
-//	@Failure		401			{object}	httpx.ErrorResponse
-//	@Failure		403			{object}	httpx.ErrorResponse
-//	@Failure		404			{object}	httpx.ErrorResponse
-//	@Router			/parishes/{parishId}/finance/accounts/{id} [delete]
+//	@Param			id	path	string	true	"Account ID (UUID)"
+//	@Success		204	"No Content"
+//	@Failure		400	{object}	httpx.ErrorResponse
+//	@Failure		401	{object}	httpx.ErrorResponse
+//	@Failure		403	{object}	httpx.ErrorResponse
+//	@Failure		404	{object}	httpx.ErrorResponse
+//	@Router			/fin/accounts/{id} [delete]
 func (ac AccountController) Delete(c fiber.Ctx) error {
-	parishID, err := httpx.GetIntParam(c, "parishId")
-	if err != nil {
-		return err
-	}
 	id, err := httpx.GetID(c)
 	if err != nil {
 		return err
 	}
-	if err := ac.svc.Delete(c, parishID, *id); err != nil {
+	if err := ac.svc.Delete(c, *id); err != nil {
 		return err
 	}
 	return c.SendStatus(fiber.StatusNoContent)

@@ -39,10 +39,13 @@ func (s *VoidSuite) grantRole(parishID int, role string) {
 	s.GrantRole(role, scope)
 }
 
-func (s *VoidSuite) createAccount(parishID int, code string, accType string, postable bool, status string) *ent.Account {
+func (s *VoidSuite) activate(parishID, unitID int) {
+	SetFinanceCookie(&s.ApiTestSuite, parishID, unitID)
+}
+
+func (s *VoidSuite) createAccountWithUnit(parishID int, unitID int, code string, accType string, postable bool, status string) *ent.Account {
 	st := testutil.GetState()
 	ctx := core.ContextWithUser(context.Background(), core.AuthenticatedUser{ID: s.User.ID})
-	unit := CreateTestUnit(s.T(), parishID, s.User.ID)
 	acc, err := st.Ent.Account.Create().
 		SetCode(code).
 		SetName("Account " + code).
@@ -51,13 +54,13 @@ func (s *VoidSuite) createAccount(parishID int, code string, accType string, pos
 		SetPostable(postable).
 		SetStatus(account.Status(status)).
 		SetParishID(parishID).
-		SetUnitID(unit.ID).
+		SetUnitID(unitID).
 		Save(ctx)
 	require.NoError(s.T(), err)
 	return acc
 }
 
-func (s *VoidSuite) createPostedTransaction(parishID int, cashID, incomeID uuid.UUID, dateStr string, amount int64) model.TransactionResponse {
+func (s *VoidSuite) createPostedTransaction(cashID, incomeID uuid.UUID, dateStr string, amount int64) model.TransactionResponse {
 	req := model.CreateTransactionRequest{
 		Date: dateStr,
 		Kind: "income",
@@ -66,24 +69,26 @@ func (s *VoidSuite) createPostedTransaction(parishID int, cashID, incomeID uuid.
 			{AccountID: incomeID, Side: "credit", Amount: amount},
 		},
 	}
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions", parishID), fiber.MethodPost, req)
+	s.Request("/fin/transactions", fiber.MethodPost, req)
 	s.Created()
 	return s.GetResponse().Data
 }
 
 func (s *VoidSuite) TestVoid_SuccessDefaultDateAndReversalMirror() {
 	parish := CreateTestParish(s.T())
+	unit := CreateTestUnit(s.T(), parish.ID, s.User.ID)
 	s.grantRole(parish.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter))
+	s.activate(parish.ID, unit.ID)
 
-	cash := s.createAccount(parish.ID, "1001", "asset", true, "active")
-	income := s.createAccount(parish.ID, "4001", "income", true, "active")
+	cash := s.createAccountWithUnit(parish.ID, unit.ID, "1001", "asset", true, "active")
+	income := s.createAccountWithUnit(parish.ID, unit.ID, "4001", "income", true, "active")
 
-	tx := s.createPostedTransaction(parish.ID, cash.ID, income.ID, "2026-10-15", 50000)
+	tx := s.createPostedTransaction(cash.ID, income.ID, "2026-10-15", 50000)
 	s.Equal("posted", tx.Status)
 	s.Len(tx.Entries, 1)
 
 	// Void without body -> default date = original entry date ("2026-10-15"), reason empty
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions/%s/void", parish.ID, tx.ID), fiber.MethodPost, nil)
+	s.Request(fmt.Sprintf("/fin/transactions/%s/void", tx.ID), fiber.MethodPost, nil)
 	s.OK()
 
 	voidResp := s.GetResponse().Data
@@ -137,12 +142,14 @@ func (s *VoidSuite) TestVoid_SuccessDefaultDateAndReversalMirror() {
 
 func (s *VoidSuite) TestVoid_SuccessCustomDateAndReason() {
 	parish := CreateTestParish(s.T())
+	unit := CreateTestUnit(s.T(), parish.ID, s.User.ID)
 	s.grantRole(parish.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter))
+	s.activate(parish.ID, unit.ID)
 
-	cash := s.createAccount(parish.ID, "1001", "asset", true, "active")
-	income := s.createAccount(parish.ID, "4001", "income", true, "active")
+	cash := s.createAccountWithUnit(parish.ID, unit.ID, "1001", "asset", true, "active")
+	income := s.createAccountWithUnit(parish.ID, unit.ID, "4001", "income", true, "active")
 
-	tx := s.createPostedTransaction(parish.ID, cash.ID, income.ID, "2026-10-15", 75000)
+	tx := s.createPostedTransaction(cash.ID, income.ID, "2026-10-15", 75000)
 
 	customDate := "2026-10-18"
 	reason := "Salah catat akun kolekte"
@@ -151,7 +158,7 @@ func (s *VoidSuite) TestVoid_SuccessCustomDateAndReason() {
 		Reason: &reason,
 	}
 
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions/%s/void", parish.ID, tx.ID), fiber.MethodPost, req)
+	s.Request(fmt.Sprintf("/fin/transactions/%s/void", tx.ID), fiber.MethodPost, req)
 	s.OK()
 
 	voidResp := s.GetResponse().Data
@@ -165,34 +172,39 @@ func (s *VoidSuite) TestVoid_SuccessCustomDateAndReason() {
 
 func (s *VoidSuite) TestVoid_TwiceConflict409() {
 	parish := CreateTestParish(s.T())
+	unit := CreateTestUnit(s.T(), parish.ID, s.User.ID)
 	s.grantRole(parish.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter))
+	s.activate(parish.ID, unit.ID)
 
-	cash := s.createAccount(parish.ID, "1001", "asset", true, "active")
-	income := s.createAccount(parish.ID, "4001", "income", true, "active")
+	cash := s.createAccountWithUnit(parish.ID, unit.ID, "1001", "asset", true, "active")
+	income := s.createAccountWithUnit(parish.ID, unit.ID, "4001", "income", true, "active")
 
-	tx := s.createPostedTransaction(parish.ID, cash.ID, income.ID, "2026-10-15", 30000)
+	tx := s.createPostedTransaction(cash.ID, income.ID, "2026-10-15", 30000)
 
 	// First void -> 200
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions/%s/void", parish.ID, tx.ID), fiber.MethodPost, nil)
+	s.Request(fmt.Sprintf("/fin/transactions/%s/void", tx.ID), fiber.MethodPost, nil)
 	s.OK()
 
 	// Second void -> 409
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions/%s/void", parish.ID, tx.ID), fiber.MethodPost, nil)
+	s.Request(fmt.Sprintf("/fin/transactions/%s/void", tx.ID), fiber.MethodPost, nil)
 	s.Require().Equal(fiber.StatusConflict, s.HttpResponse.StatusCode)
 }
 
 func (s *VoidSuite) TestVoid_ConcurrentRequests() {
 	parish := CreateTestParish(s.T())
+	unit := CreateTestUnit(s.T(), parish.ID, s.User.ID)
 	s.grantRole(parish.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter))
+	s.activate(parish.ID, unit.ID)
 
-	cash := s.createAccount(parish.ID, "1001", "asset", true, "active")
-	income := s.createAccount(parish.ID, "4001", "income", true, "active")
+	cash := s.createAccountWithUnit(parish.ID, unit.ID, "1001", "asset", true, "active")
+	income := s.createAccountWithUnit(parish.ID, unit.ID, "4001", "income", true, "active")
 
-	tx := s.createPostedTransaction(parish.ID, cash.ID, income.ID, "2026-10-15", 30000)
+	tx := s.createPostedTransaction(cash.ID, income.ID, "2026-10-15", 30000)
 
 	st := testutil.GetState()
 	repo := repository.NewTransactionRepository(st.Ent, st.Log)
 	ctx := core.ContextWithUser(context.Background(), core.AuthenticatedUser{ID: s.User.ID})
+	ctx = model.WithFinanceContext(ctx, model.FinanceContext{ParishID: parish.ID, UnitID: unit.ID})
 
 	var wg sync.WaitGroup
 	results := make([]error, 2)
@@ -201,7 +213,7 @@ func (s *VoidSuite) TestVoid_ConcurrentRequests() {
 		wg.Add(1)
 		go func(idx int) {
 			defer wg.Done()
-			_, err := repo.Void(ctx, parish.ID, tx.ID, nil, nil)
+			_, err := repo.Void(ctx, tx.ID, nil, nil)
 			results[idx] = err
 		}(i)
 	}
@@ -233,12 +245,14 @@ func (s *VoidSuite) TestVoid_ConcurrentRequests() {
 
 func (s *VoidSuite) TestVoid_WithDeactivatedAccountAllowed() {
 	parish := CreateTestParish(s.T())
+	unit := CreateTestUnit(s.T(), parish.ID, s.User.ID)
 	s.grantRole(parish.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter))
+	s.activate(parish.ID, unit.ID)
 
-	cash := s.createAccount(parish.ID, "1001", "asset", true, "active")
-	income := s.createAccount(parish.ID, "4001", "income", true, "active")
+	cash := s.createAccountWithUnit(parish.ID, unit.ID, "1001", "asset", true, "active")
+	income := s.createAccountWithUnit(parish.ID, unit.ID, "4001", "income", true, "active")
 
-	tx := s.createPostedTransaction(parish.ID, cash.ID, income.ID, "2026-10-15", 40000)
+	tx := s.createPostedTransaction(cash.ID, income.ID, "2026-10-15", 40000)
 
 	// Now deactivate income account
 	st := testutil.GetState()
@@ -247,41 +261,49 @@ func (s *VoidSuite) TestVoid_WithDeactivatedAccountAllowed() {
 	require.NoError(s.T(), err)
 
 	// Void must still succeed even though an account is inactive
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions/%s/void", parish.ID, tx.ID), fiber.MethodPost, nil)
+	s.Request(fmt.Sprintf("/fin/transactions/%s/void", tx.ID), fiber.MethodPost, nil)
 	s.OK()
 	s.Equal("void", s.GetResponse().Data.Status)
 }
 
 func (s *VoidSuite) TestVoid_CrossParish404() {
 	parish1 := CreateTestParish(s.T())
+	unit1 := CreateTestUnit(s.T(), parish1.ID, s.User.ID)
 	parish2 := CreateTestParish(s.T())
+	unit2 := CreateTestUnit(s.T(), parish2.ID, s.User.ID)
 	s.grantRole(parish1.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter))
 	s.grantRole(parish2.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter))
 
-	cash1 := s.createAccount(parish1.ID, "1001", "asset", true, "active")
-	income1 := s.createAccount(parish1.ID, "4001", "income", true, "active")
+	s.activate(parish1.ID, unit1.ID)
+	cash1 := s.createAccountWithUnit(parish1.ID, unit1.ID, "1001", "asset", true, "active")
+	income1 := s.createAccountWithUnit(parish1.ID, unit1.ID, "4001", "income", true, "active")
 
-	tx := s.createPostedTransaction(parish1.ID, cash1.ID, income1.ID, "2026-10-15", 20000)
+	tx := s.createPostedTransaction(cash1.ID, income1.ID, "2026-10-15", 20000)
 
 	// Attempt to void transaction of parish1 in parish2 -> 404
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions/%s/void", parish2.ID, tx.ID), fiber.MethodPost, nil)
+	s.activate(parish2.ID, unit2.ID)
+	s.Request(fmt.Sprintf("/fin/transactions/%s/void", tx.ID), fiber.MethodPost, nil)
 	s.Require().Equal(fiber.StatusNotFound, s.HttpResponse.StatusCode)
 }
 
 func (s *VoidSuite) TestVoid_AuthzMatrix() {
 	parish := CreateTestParish(s.T())
+	unit := CreateTestUnit(s.T(), parish.ID, s.User.ID)
 	s.grantRole(parish.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter))
+	s.activate(parish.ID, unit.ID)
 
-	cash := s.createAccount(parish.ID, "1001", "asset", true, "active")
-	income := s.createAccount(parish.ID, "4001", "income", true, "active")
+	cash := s.createAccountWithUnit(parish.ID, unit.ID, "1001", "asset", true, "active")
+	income := s.createAccountWithUnit(parish.ID, unit.ID, "4001", "income", true, "active")
 
-	tx := s.createPostedTransaction(parish.ID, cash.ID, income.ID, "2026-10-15", 20000)
+	tx := s.createPostedTransaction(cash.ID, income.ID, "2026-10-15", 20000)
 
 	// Reader cannot void -> 403
 	readerParish := CreateTestParish(s.T())
+	readerUnit := CreateTestUnit(s.T(), readerParish.ID, s.User.ID)
 	s.grantRole(readerParish.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelReader))
+	s.activate(readerParish.ID, readerUnit.ID)
 
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions/%s/void", readerParish.ID, tx.ID), fiber.MethodPost, nil)
+	s.Request(fmt.Sprintf("/fin/transactions/%s/void", tx.ID), fiber.MethodPost, nil)
 	s.Require().Equal(http.StatusForbidden, s.HttpResponse.StatusCode)
 }
 

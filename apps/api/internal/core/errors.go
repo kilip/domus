@@ -12,3 +12,9 @@ var (
 func IsNotFound(err error) bool {
 	return errors.Is(err, ErrItemNotFound)
 }
+
+type ErrorMap struct {
+	Status  int    `json:"status"`
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}

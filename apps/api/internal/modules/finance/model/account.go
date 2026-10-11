@@ -11,7 +11,6 @@ type CreateAccountRequest struct {
 	Name        string     `json:"name" validate:"required,max=200"`
 	Type        string     `json:"type" validate:"required,oneof=asset liability equity income expense"`
 	ParentID    *uuid.UUID `json:"parentId,omitempty"`
-	UnitID      int        `json:"unitId" validate:"required"`
 	Postable    *bool      `json:"postable,omitempty"`
 	Description *string    `json:"description,omitempty"`
 	Status      *string    `json:"status,omitempty" validate:"omitempty,oneof=active inactive"`

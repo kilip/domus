@@ -206,6 +206,13 @@ components:
         meta:
           $ref: '#/components/schemas/httpx.Meta'
       type: object
+    httpx.WebResponse-model_ActivateFinanceResponse:
+      properties:
+        data:
+          $ref: '#/components/schemas/model.ActivateFinanceResponse'
+        meta:
+          $ref: '#/components/schemas/httpx.Meta'
+      type: object
     httpx.WebResponse-model_CollectionsResponse:
       properties:
         data:
@@ -291,6 +298,25 @@ components:
         updatedAt:
           type: string
       type: object
+    model.ActivateFinanceRequest:
+      properties:
+        parishId:
+          minimum: 1
+          type: integer
+        unitId:
+          minimum: 1
+          type: integer
+      required:
+      - parishId
+      - unitId
+      type: object
+    model.ActivateFinanceResponse:
+      properties:
+        activeParishId:
+          type: integer
+        activeUnitId:
+          type: integer
+      type: object
     model.CollectionsResponse:
       properties:
         from:
@@ -343,13 +369,10 @@ components:
           - income
           - expense
           type: string
-        unitId:
-          type: integer
       required:
       - code
       - name
       - type
-      - unitId
       type: object
     model.CreateDioceseRequest:
       properties:
@@ -425,8 +448,6 @@ components:
           minItems: 2
           type: array
           uniqueItems: false
-        unitId:
-          type: integer
       required:
       - date
       - kind
@@ -648,8 +669,6 @@ components:
           type: string
         to:
           type: string
-        unitId:
-          type: integer
       type: object
     model.SearchUnitRequest:
       properties:
@@ -1166,6 +1185,747 @@ paths:
       summary: Update diocese
       tags:
       - Diocese
+  /fin/accounts:
+    get:
+      description: List accounts for active parish and unit with optional filters,
+        sorted by code
+      parameters:
+      - description: Account type
+        in: query
+        name: type
+        schema:
+          enum:
+          - asset
+          - liability
+          - equity
+          - income
+          - expense
+          type: string
+      - description: Status
+        in: query
+        name: status
+        schema:
+          enum:
+          - active
+          - inactive
+          type: string
+      - description: Postable
+        in: query
+        name: postable
+        schema:
+          type: boolean
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.WebResponse-array_model_AccountResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Not Found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unprocessable Entity
+      security:
+      - BearerAuth: []
+      summary: List accounts
+      tags:
+      - Finance Account
+    post:
+      description: Create a new account in chart of accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.CreateAccountRequest'
+              description: Create account request
+              summary: request
+        description: Create account request
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.WebResponse-model_AccountResponse'
+          description: Created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Not Found
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Conflict
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unprocessable Entity
+      security:
+      - BearerAuth: []
+      summary: Create account
+      tags:
+      - Finance Account
+  /fin/accounts/{id}:
+    delete:
+      description: Soft delete an account (blocked if it has children or postings)
+      parameters:
+      - description: Account ID (UUID)
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Not Found
+      security:
+      - BearerAuth: []
+      summary: Delete account
+      tags:
+      - Finance Account
+    get:
+      description: Get account details by ID
+      parameters:
+      - description: Account ID (UUID)
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.WebResponse-model_AccountResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Not Found
+      security:
+      - BearerAuth: []
+      summary: Get account by ID
+      tags:
+      - Finance Account
+    put:
+      description: Update an existing account
+      parameters:
+      - description: Account ID (UUID)
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.UpdateAccountRequest'
+              description: Update account request
+              summary: request
+        description: Update account request
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.WebResponse-model_AccountResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Not Found
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Conflict
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unprocessable Entity
+      security:
+      - BearerAuth: []
+      summary: Update account
+      tags:
+      - Finance Account
+  /fin/activate:
+    post:
+      description: Set active parish and unit for finance module in user cookie
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.ActivateFinanceRequest'
+              description: Activate finance request
+              summary: request
+        description: Activate finance request
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.WebResponse-model_ActivateFinanceResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Forbidden
+      security:
+      - BearerAuth: []
+      summary: Activate finance context
+      tags:
+      - Finance
+  /fin/reports/collections:
+    get:
+      description: Get summary of collections (kolekte) for income accounts within
+        a date range
+      parameters:
+      - description: Start date (YYYY-MM-DD)
+        in: query
+        name: from
+        required: true
+        schema:
+          type: string
+      - description: End date (YYYY-MM-DD)
+        in: query
+        name: to
+        required: true
+        schema:
+          type: string
+      - description: Filter by header account subtree (UUID)
+        in: query
+        name: parentAccountId
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.WebResponse-model_CollectionsResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Not Found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unprocessable Entity
+      security:
+      - BearerAuth: []
+      summary: Get collections report
+      tags:
+      - Finance Report
+  /fin/reports/ledger:
+    get:
+      description: Get detailed transactions and running balance for an account
+      parameters:
+      - description: Account ID (UUID)
+        in: query
+        name: accountId
+        required: true
+        schema:
+          type: string
+      - description: Start date (YYYY-MM-DD)
+        in: query
+        name: from
+        required: true
+        schema:
+          type: string
+      - description: End date (YYYY-MM-DD)
+        in: query
+        name: to
+        required: true
+        schema:
+          type: string
+      - description: Pagination cursor
+        in: query
+        name: cursor
+        schema:
+          type: string
+      - description: Items per page (default 50, max 200)
+        in: query
+        name: limit
+        schema:
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.WebResponse-model_LedgerResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Not Found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unprocessable Entity
+      security:
+      - BearerAuth: []
+      summary: Get account ledger
+      tags:
+      - Finance Report
+  /fin/reports/trial-balance:
+    get:
+      description: Get trial balance report as of a specific date
+      parameters:
+      - description: As of date (YYYY-MM-DD)
+        in: query
+        name: asOf
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.WebResponse-model_TrialBalanceResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Not Found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unprocessable Entity
+      security:
+      - BearerAuth: []
+      summary: Get trial balance
+      tags:
+      - Finance Report
+  /fin/transactions:
+    post:
+      description: Create and post a new transaction with single-step journal entry
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.CreateTransactionRequest'
+              description: Create transaction request
+              summary: request
+        description: Create transaction request
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.WebResponse-model_TransactionResponse'
+          description: Created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Not Found
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Conflict
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unprocessable Entity
+      security:
+      - BearerAuth: []
+      summary: Create transaction
+      tags:
+      - Finance Transaction
+  /fin/transactions/{id}:
+    get:
+      description: Get transaction details including journal entries and postings
+      parameters:
+      - description: Transaction ID (UUID)
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.WebResponse-model_TransactionResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Not Found
+      security:
+      - BearerAuth: []
+      summary: Get transaction by ID
+      tags:
+      - Finance Transaction
+  /fin/transactions/{id}/void:
+    post:
+      description: Void a posted transaction by creating a reversal entry and setting
+        transaction status to void
+      parameters:
+      - description: Transaction ID (UUID)
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.VoidTransactionRequest'
+              description: Void transaction request
+              summary: request
+        description: Void transaction request
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.WebResponse-model_TransactionResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Not Found
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Conflict
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unprocessable Entity
+      security:
+      - BearerAuth: []
+      summary: Void transaction
+      tags:
+      - Finance Transaction
+  /fin/transactions/search:
+    post:
+      description: Search transactions with filters and cursor pagination
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.SearchTransactionRequest'
+              description: Search transaction request
+              summary: request
+        description: Search transaction request
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.WebResponse-array_model_TransactionSummary'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Not Found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/httpx.ErrorResponse'
+          description: Unprocessable Entity
+      security:
+      - BearerAuth: []
+      summary: Search transactions
+      tags:
+      - Finance Transaction
   /parishes:
     get:
       description: Get all parishes list
@@ -1387,651 +2147,6 @@ paths:
       summary: Update parish
       tags:
       - Parish
-  /parishes/{parishId}/finance/accounts:
-    get:
-      description: List accounts for a parish with optional filters, sorted by code
-      parameters:
-      - description: Parish ID
-        in: path
-        name: parishId
-        required: true
-        schema:
-          type: integer
-      - description: Account type
-        in: query
-        name: type
-        schema:
-          enum:
-          - asset
-          - liability
-          - equity
-          - income
-          - expense
-          type: string
-      - description: Status
-        in: query
-        name: status
-        schema:
-          enum:
-          - active
-          - inactive
-          type: string
-      - description: Postable
-        in: query
-        name: postable
-        schema:
-          type: boolean
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.WebResponse-array_model_AccountResponse'
-          description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Bad Request
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Forbidden
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Not Found
-        "422":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Unprocessable Entity
-      security:
-      - BearerAuth: []
-      summary: List accounts
-      tags:
-      - Finance Account
-    post:
-      description: Create a new account in chart of accounts
-      parameters:
-      - description: Parish ID
-        in: path
-        name: parishId
-        required: true
-        schema:
-          type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.CreateAccountRequest'
-              description: Create account request
-              summary: request
-        description: Create account request
-        required: true
-      responses:
-        "201":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.WebResponse-model_AccountResponse'
-          description: Created
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Bad Request
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Forbidden
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Not Found
-        "409":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Conflict
-        "422":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Unprocessable Entity
-      security:
-      - BearerAuth: []
-      summary: Create account
-      tags:
-      - Finance Account
-  /parishes/{parishId}/finance/accounts/{id}:
-    delete:
-      description: Soft delete an account (blocked if it has children or postings)
-      parameters:
-      - description: Parish ID
-        in: path
-        name: parishId
-        required: true
-        schema:
-          type: integer
-      - description: Account ID (UUID)
-        in: path
-        name: id
-        required: true
-        schema:
-          type: string
-      responses:
-        "204":
-          description: No Content
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Bad Request
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Forbidden
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Not Found
-      security:
-      - BearerAuth: []
-      summary: Delete account
-      tags:
-      - Finance Account
-    get:
-      description: Get account details by ID
-      parameters:
-      - description: Parish ID
-        in: path
-        name: parishId
-        required: true
-        schema:
-          type: integer
-      - description: Account ID (UUID)
-        in: path
-        name: id
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.WebResponse-model_AccountResponse'
-          description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Bad Request
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Forbidden
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Not Found
-      security:
-      - BearerAuth: []
-      summary: Get account by ID
-      tags:
-      - Finance Account
-    put:
-      description: Update an existing account
-      parameters:
-      - description: Parish ID
-        in: path
-        name: parishId
-        required: true
-        schema:
-          type: integer
-      - description: Account ID (UUID)
-        in: path
-        name: id
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.UpdateAccountRequest'
-              description: Update account request
-              summary: request
-        description: Update account request
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.WebResponse-model_AccountResponse'
-          description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Bad Request
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Forbidden
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Not Found
-        "409":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Conflict
-        "422":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Unprocessable Entity
-      security:
-      - BearerAuth: []
-      summary: Update account
-      tags:
-      - Finance Account
-  /parishes/{parishId}/finance/reports/collections:
-    get:
-      description: Get summary of collections (kolekte) for income accounts within
-        a date range
-      parameters:
-      - description: Parish ID
-        in: path
-        name: parishId
-        required: true
-        schema:
-          type: integer
-      - description: Start date (YYYY-MM-DD)
-        in: query
-        name: from
-        required: true
-        schema:
-          type: string
-      - description: End date (YYYY-MM-DD)
-        in: query
-        name: to
-        required: true
-        schema:
-          type: string
-      - description: Filter by header account subtree (UUID)
-        in: query
-        name: parentAccountId
-        schema:
-          type: string
-      - description: Filter by transaction unit ID
-        in: query
-        name: unitId
-        schema:
-          type: integer
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.WebResponse-model_CollectionsResponse'
-          description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Bad Request
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Forbidden
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Not Found
-        "422":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Unprocessable Entity
-      security:
-      - BearerAuth: []
-      summary: Get collections report
-      tags:
-      - Finance Report
-  /parishes/{parishId}/finance/reports/ledger:
-    get:
-      description: Get detailed transactions and running balance for an account
-      parameters:
-      - description: Parish ID
-        in: path
-        name: parishId
-        required: true
-        schema:
-          type: integer
-      - description: Account ID (UUID)
-        in: query
-        name: accountId
-        required: true
-        schema:
-          type: string
-      - description: Start date (YYYY-MM-DD)
-        in: query
-        name: from
-        required: true
-        schema:
-          type: string
-      - description: End date (YYYY-MM-DD)
-        in: query
-        name: to
-        required: true
-        schema:
-          type: string
-      - description: Pagination cursor
-        in: query
-        name: cursor
-        schema:
-          type: string
-      - description: Items per page (default 50, max 200)
-        in: query
-        name: limit
-        schema:
-          type: integer
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.WebResponse-model_LedgerResponse'
-          description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Bad Request
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Forbidden
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Not Found
-        "422":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Unprocessable Entity
-      security:
-      - BearerAuth: []
-      summary: Get account ledger
-      tags:
-      - Finance Report
-  /parishes/{parishId}/finance/reports/trial-balance:
-    get:
-      description: Get trial balance report as of a specific date
-      parameters:
-      - description: Parish ID
-        in: path
-        name: parishId
-        required: true
-        schema:
-          type: integer
-      - description: As of date (YYYY-MM-DD)
-        in: query
-        name: asOf
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.WebResponse-model_TrialBalanceResponse'
-          description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Bad Request
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Forbidden
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Not Found
-        "422":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Unprocessable Entity
-      security:
-      - BearerAuth: []
-      summary: Get trial balance
-      tags:
-      - Finance Report
-  /parishes/{parishId}/finance/transactions:
-    post:
-      description: Create and post a new transaction with single-step journal entry
-      parameters:
-      - description: Parish ID
-        in: path
-        name: parishId
-        required: true
-        schema:
-          type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.CreateTransactionRequest'
-              description: Create transaction request
-              summary: request
-        description: Create transaction request
-        required: true
-      responses:
-        "201":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.WebResponse-model_TransactionResponse'
-          description: Created
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Bad Request
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Forbidden
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Not Found
-        "409":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Conflict
-        "422":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Unprocessable Entity
-      security:
-      - BearerAuth: []
-      summary: Create transaction
-      tags:
-      - Finance Transaction
-  /parishes/{parishId}/finance/transactions/{id}:
-    get:
-      description: Get transaction details including journal entries and postings
-      parameters:
-      - description: Parish ID
-        in: path
-        name: parishId
-        required: true
-        schema:
-          type: integer
-      - description: Transaction ID (UUID)
-        in: path
-        name: id
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.WebResponse-model_TransactionResponse'
-          description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Bad Request
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Forbidden
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Not Found
-      security:
-      - BearerAuth: []
-      summary: Get transaction by ID
-      tags:
-      - Finance Transaction
   /parishes/{parishId}/finance/transactions/{id}/attachments:
     get:
       description: List all attachments of an owner record
@@ -2232,139 +2347,6 @@ paths:
       summary: Get presigned download URL for attachment
       tags:
       - Attachment
-  /parishes/{parishId}/finance/transactions/{id}/void:
-    post:
-      description: Void a posted transaction by creating a reversal entry and setting
-        transaction status to void
-      parameters:
-      - description: Parish ID
-        in: path
-        name: parishId
-        required: true
-        schema:
-          type: integer
-      - description: Transaction ID (UUID)
-        in: path
-        name: id
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.VoidTransactionRequest'
-              description: Void transaction request
-              summary: request
-        description: Void transaction request
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.WebResponse-model_TransactionResponse'
-          description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Bad Request
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Forbidden
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Not Found
-        "409":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Conflict
-        "422":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Unprocessable Entity
-      security:
-      - BearerAuth: []
-      summary: Void transaction
-      tags:
-      - Finance Transaction
-  /parishes/{parishId}/finance/transactions/search:
-    post:
-      description: Search transactions with filters and cursor pagination
-      parameters:
-      - description: Parish ID
-        in: path
-        name: parishId
-        required: true
-        schema:
-          type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.SearchTransactionRequest'
-              description: Search transaction request
-              summary: request
-        description: Search transaction request
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.WebResponse-array_model_TransactionSummary'
-          description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Bad Request
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Forbidden
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Not Found
-        "422":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/httpx.ErrorResponse'
-          description: Unprocessable Entity
-      security:
-      - BearerAuth: []
-      summary: Search transactions
-      tags:
-      - Finance Transaction
   /ping:
     get:
       description: Returns current authenticated user information from context

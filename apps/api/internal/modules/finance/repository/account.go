@@ -10,6 +10,7 @@ import (
 	"github.com/paroki/domus/api/ent/account"
 	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/posting"
+	entunit "github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/internal/core"
 	"github.com/paroki/domus/api/internal/modules/finance/model"
 	"github.com/paroki/domus/api/internal/platform/database"
@@ -49,9 +50,13 @@ func toAccountResponse(acc *ent.Account) model.AccountResponse {
 	return resp
 }
 
-func (r AccountRepository) List(ctx context.Context, parishID int, filter model.ListAccountsQuery) ([]model.AccountResponse, error) {
+func (r AccountRepository) List(ctx context.Context, filter model.ListAccountsQuery) ([]model.AccountResponse, error) {
+	fc, _ := model.FinanceContextFromContext(ctx)
 	q := r.entcli.Account.Query().
-		Where(account.HasParishWith(parish.IDEQ(parishID))).
+		Where(
+			account.HasParishWith(parish.IDEQ(fc.ParishID)),
+			account.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+		).
 		WithParish().
 		WithParent().
 		WithUnit()
@@ -75,15 +80,20 @@ func (r AccountRepository) List(ctx context.Context, parishID int, filter model.
 	for i, acc := range accounts {
 		result[i] = toAccountResponse(acc)
 		if result[i].ParishID == 0 {
-			result[i].ParishID = parishID
+			result[i].ParishID = fc.ParishID
 		}
 	}
 	return result, nil
 }
 
-func (r AccountRepository) GetByID(ctx context.Context, parishID int, id uuid.UUID) (*model.AccountResponse, error) {
+func (r AccountRepository) GetByID(ctx context.Context, id uuid.UUID) (*model.AccountResponse, error) {
+	fc, _ := model.FinanceContextFromContext(ctx)
 	acc, err := r.entcli.Account.Query().
-		Where(account.IDEQ(id), account.HasParishWith(parish.IDEQ(parishID))).
+		Where(
+			account.IDEQ(id),
+			account.HasParishWith(parish.IDEQ(fc.ParishID)),
+			account.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+		).
 		WithParish().
 		WithParent().
 		WithUnit().
@@ -97,14 +107,19 @@ func (r AccountRepository) GetByID(ctx context.Context, parishID int, id uuid.UU
 
 	resp := toAccountResponse(acc)
 	if resp.ParishID == 0 {
-		resp.ParishID = parishID
+		resp.ParishID = fc.ParishID
 	}
 	return &resp, nil
 }
 
-func (r AccountRepository) GetEntByID(ctx context.Context, parishID int, id uuid.UUID) (*ent.Account, error) {
+func (r AccountRepository) GetEntByID(ctx context.Context, id uuid.UUID) (*ent.Account, error) {
+	fc, _ := model.FinanceContextFromContext(ctx)
 	acc, err := r.entcli.Account.Query().
-		Where(account.IDEQ(id), account.HasParishWith(parish.IDEQ(parishID))).
+		Where(
+			account.IDEQ(id),
+			account.HasParishWith(parish.IDEQ(fc.ParishID)),
+			account.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+		).
 		WithParish().
 		WithParent().
 		WithUnit().
@@ -118,9 +133,14 @@ func (r AccountRepository) GetEntByID(ctx context.Context, parishID int, id uuid
 	return acc, nil
 }
 
-func (r AccountRepository) GetEntsByIDs(ctx context.Context, parishID int, ids []uuid.UUID) ([]*ent.Account, error) {
+func (r AccountRepository) GetEntsByIDs(ctx context.Context, ids []uuid.UUID) ([]*ent.Account, error) {
+	fc, _ := model.FinanceContextFromContext(ctx)
 	return r.entcli.Account.Query().
-		Where(account.IDIn(ids...), account.HasParishWith(parish.IDEQ(parishID))).
+		Where(
+			account.IDIn(ids...),
+			account.HasParishWith(parish.IDEQ(fc.ParishID)),
+			account.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+		).
 		WithParish().
 		WithParent().
 		WithUnit().
@@ -187,16 +207,15 @@ func (r AccountRepository) updateDescendantsType(ctx context.Context, tx *ent.Tx
 	return nil
 }
 
-func (r AccountRepository) Create(ctx context.Context, parishID int, req model.CreateAccountRequest, normalBalance string) (*model.AccountResponse, error) {
+func (r AccountRepository) Create(ctx context.Context, req model.CreateAccountRequest, normalBalance string) (*model.AccountResponse, error) {
+	fc, _ := model.FinanceContextFromContext(ctx)
 	var created *ent.Account
 	err := database.WithTx(ctx, r.entcli, func(tx *ent.Tx) error {
 		builder := tx.Account.Create().
 			SetCode(req.Code).
 			SetName(req.Name).
 			SetType(account.Type(req.Type)).
-			SetNormalBalance(account.NormalBalance(normalBalance)).
-			SetParishID(parishID).
-			SetUnitID(req.UnitID)
+			SetNormalBalance(account.NormalBalance(normalBalance))
 
 		if req.Postable != nil {
 			builder.SetPostable(*req.Postable)
@@ -216,6 +235,14 @@ func (r AccountRepository) Create(ctx context.Context, parishID int, req model.C
 
 		if req.ParentID != nil {
 			builder.SetParentID(*req.ParentID)
+		}
+
+		// Set explicitly as well if in context, otherwise Ent hook sets it
+		if fc.ParishID > 0 {
+			builder.SetParishID(fc.ParishID)
+		}
+		if fc.UnitID > 0 {
+			builder.SetUnitID(fc.UnitID)
 		}
 
 		acc, err := builder.Save(ctx)
@@ -239,16 +266,21 @@ func (r AccountRepository) Create(ctx context.Context, parishID int, req model.C
 	}
 	resp := toAccountResponse(created)
 	if resp.ParishID == 0 {
-		resp.ParishID = parishID
+		resp.ParishID = fc.ParishID
 	}
 	return &resp, nil
 }
 
-func (r AccountRepository) Update(ctx context.Context, parishID int, id uuid.UUID, req model.UpdateAccountRequest, normalBalance string, updateChildrenType bool) (*model.AccountResponse, error) {
+func (r AccountRepository) Update(ctx context.Context, id uuid.UUID, req model.UpdateAccountRequest, normalBalance string, updateChildrenType bool) (*model.AccountResponse, error) {
+	fc, _ := model.FinanceContextFromContext(ctx)
 	var updated *ent.Account
 	err := database.WithTx(ctx, r.entcli, func(tx *ent.Tx) error {
 		exists, err := tx.Account.Query().
-			Where(account.IDEQ(id), account.HasParishWith(parish.IDEQ(parishID))).
+			Where(
+				account.IDEQ(id),
+				account.HasParishWith(parish.IDEQ(fc.ParishID)),
+				account.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+			).
 			Exist(ctx)
 		if err != nil {
 			return err
@@ -307,15 +339,20 @@ func (r AccountRepository) Update(ctx context.Context, parishID int, id uuid.UUI
 	}
 	resp := toAccountResponse(updated)
 	if resp.ParishID == 0 {
-		resp.ParishID = parishID
+		resp.ParishID = fc.ParishID
 	}
 	return &resp, nil
 }
 
-func (r AccountRepository) Delete(ctx context.Context, parishID int, id uuid.UUID) error {
+func (r AccountRepository) Delete(ctx context.Context, id uuid.UUID) error {
+	fc, _ := model.FinanceContextFromContext(ctx)
 	return database.WithTx(ctx, r.entcli, func(tx *ent.Tx) error {
 		exists, err := tx.Account.Query().
-			Where(account.IDEQ(id), account.HasParishWith(parish.IDEQ(parishID))).
+			Where(
+				account.IDEQ(id),
+				account.HasParishWith(parish.IDEQ(fc.ParishID)),
+				account.HasUnitWith(entunit.IDEQ(fc.UnitID)),
+			).
 			Exist(ctx)
 		if err != nil {
 			return err

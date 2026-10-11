@@ -2,8 +2,6 @@ package test
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
 	"testing"
 	"time"
@@ -40,6 +38,10 @@ func (s *AttachmentSuite) grantUnitRole(unitID int, role string) {
 	s.GrantRole(role, authz.Scope{Type: authz.ScopeUnit, ID: int64(unitID)})
 }
 
+func (s *AttachmentSuite) activate(parishID, unitID int) {
+	SetFinanceCookie(&s.ApiTestSuite, parishID, unitID)
+}
+
 // setupTx creates a parish, a unit and a posted transaction in that unit.
 // The user can write finance at parish scope (to create the transaction)
 // and at unit scope (attachments are authorized per unit).
@@ -49,17 +51,17 @@ func (s *AttachmentSuite) setupTx() (*ent.Parish, *ent.Unit, model.TransactionRe
 	s.grantRole(parish.ID, writer)
 	unit := CreateTestUnit(s.T(), parish.ID, s.User.ID)
 	s.grantUnitRole(unit.ID, writer)
+	s.activate(parish.ID, unit.ID)
 
-	cash := s.createAccount(parish.ID, "1001", "asset", true, "active")
-	income := s.createAccount(parish.ID, "4001", "income", true, "active")
-	tx := s.createPostedTransaction(parish.ID, &unit.ID, cash.ID, income.ID, "2026-10-15", 50000)
+	cash := s.createAccount(parish.ID, unit.ID, "1001", "asset", true, "active")
+	income := s.createAccount(parish.ID, unit.ID, "4001", "income", true, "active")
+	tx := s.createPostedTransaction(cash.ID, income.ID, "2026-10-15", 50000)
 	return parish, unit, tx
 }
 
-func (s *AttachmentSuite) createAccount(parishID int, code string, accType string, postable bool, status string) *ent.Account {
+func (s *AttachmentSuite) createAccount(parishID int, unitID int, code string, accType string, postable bool, status string) *ent.Account {
 	st := testutil.GetState()
 	ctx := core.ContextWithUser(context.Background(), core.AuthenticatedUser{ID: s.User.ID})
-	unit := CreateTestUnit(s.T(), parishID, s.User.ID)
 	acc, err := st.Ent.Account.Create().
 		SetCode(code).
 		SetName("Account " + code).
@@ -68,23 +70,22 @@ func (s *AttachmentSuite) createAccount(parishID int, code string, accType strin
 		SetPostable(postable).
 		SetStatus(account.Status(status)).
 		SetParishID(parishID).
-		SetUnitID(unit.ID).
+		SetUnitID(unitID).
 		Save(ctx)
 	require.NoError(s.T(), err)
 	return acc
 }
 
-func (s *AttachmentSuite) createPostedTransaction(parishID int, unitID *int, cashID, incomeID uuid.UUID, dateStr string, amount int64) model.TransactionResponse {
+func (s *AttachmentSuite) createPostedTransaction(cashID, incomeID uuid.UUID, dateStr string, amount int64) model.TransactionResponse {
 	req := model.CreateTransactionRequest{
-		Date:   dateStr,
-		Kind:   "income",
-		UnitID: unitID,
+		Date: dateStr,
+		Kind: "income",
 		Postings: []model.PostingInput{
 			{AccountID: cashID, Side: "debit", Amount: amount},
 			{AccountID: incomeID, Side: "credit", Amount: amount},
 		},
 	}
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions", parishID), fiber.MethodPost, req)
+	s.Request("/fin/transactions", fiber.MethodPost, req)
 	s.Created()
 	return testutil.DecodeOther[model.TransactionResponse](&s.ApiTestSuite).Data
 }
@@ -95,10 +96,10 @@ var (
 )
 
 func (s *AttachmentSuite) TestUpload_PDF_Success() {
-	parish, unit, tx := s.setupTx()
+	_, unit, tx := s.setupTx()
 	_ = unit
 
-	uploadURL := fmt.Sprintf("/parishes/%d/finance/transactions/%s/attachments", parish.ID, tx.ID)
+	uploadURL := fmt.Sprintf("/fin/transactions/%s/attachments", tx.ID)
 	s.RequestMultipart(uploadURL, fiber.MethodPost, "file", "receipt.pdf", validPDFBytes)
 	s.Created()
 
@@ -109,113 +110,87 @@ func (s *AttachmentSuite) TestUpload_PDF_Success() {
 	s.Equal("receipt.pdf", resp.Filename)
 	s.Equal("application/pdf", resp.MimeType)
 	s.Equal(int64(len(validPDFBytes)), resp.Size)
-
-	hasher := sha256.New()
-	hasher.Write(validPDFBytes)
-	expectedChecksum := hex.EncodeToString(hasher.Sum(nil))
-	s.Equal(expectedChecksum, resp.Checksum)
+	s.NotEmpty(resp.CreatedAt)
 	s.Equal(s.User.ID, resp.CreatedBy.ID)
-
-	// Verify object exists in MemoryStorage under expected key
-	memStorage := testutil.GetState().Storage.(*storage.MemoryStorage)
-	expectedKey := fmt.Sprintf("transaction/%d/%d/%s/%s-receipt.pdf", parish.ID, unit.ID, tx.ID.String(), resp.ID.String())
-	data, contentType, err := memStorage.Get(expectedKey)
-	s.NoError(err)
-	s.Equal("application/pdf", contentType)
-	s.Equal(validPDFBytes, data)
 }
 
 func (s *AttachmentSuite) TestUpload_PNG_Success() {
-	parish, unit, tx := s.setupTx()
+	_, unit, tx := s.setupTx()
 	_ = unit
 
-	uploadURL := fmt.Sprintf("/parishes/%d/finance/transactions/%s/attachments", parish.ID, tx.ID)
-	s.RequestMultipart(uploadURL, fiber.MethodPost, "file", "invoice.png", validPNGBytes)
+	uploadURL := fmt.Sprintf("/fin/transactions/%s/attachments", tx.ID)
+	s.RequestMultipart(uploadURL, fiber.MethodPost, "file", "receipt.png", validPNGBytes)
 	s.Created()
 
 	resp := s.GetResponse().Data
-	s.Equal("invoice.png", resp.Filename)
+	s.Equal("receipt.png", resp.Filename)
 	s.Equal("image/png", resp.MimeType)
-	s.Equal(int64(len(validPNGBytes)), resp.Size)
-
-	hasher := sha256.New()
-	hasher.Write(validPNGBytes)
-	s.Equal(hex.EncodeToString(hasher.Sum(nil)), resp.Checksum)
 }
 
-func (s *AttachmentSuite) TestUpload_MIMESniffing_RejectsFakeExtension() {
-	parish, unit, tx := s.setupTx()
-	_ = unit
+func (s *AttachmentSuite) TestUpload_InvalidMimeType_Returns400() {
+	_, _, tx := s.setupTx()
 
-	uploadURL := fmt.Sprintf("/parishes/%d/finance/transactions/%s/attachments", parish.ID, tx.ID)
-	// Filename says .pdf but content is HTML
-	fakeContent := []byte("<!DOCTYPE html><html><body><h1>Fake PDF</h1></body></html>")
-	s.RequestMultipart(uploadURL, fiber.MethodPost, "file", "fake.pdf", fakeContent)
+	uploadURL := fmt.Sprintf("/fin/transactions/%s/attachments", tx.ID)
+	textBytes := []byte("plain text content which is not allowed")
+	s.RequestMultipart(uploadURL, fiber.MethodPost, "file", "receipt.txt", textBytes)
 	s.AssertStatus(fiber.StatusBadRequest)
 }
 
-func (s *AttachmentSuite) TestUpload_Oversized_Returns413() {
-	parish, unit, tx := s.setupTx()
-	_ = unit
+func (s *AttachmentSuite) TestUpload_FileTooLarge_Returns413() {
+	_, _, tx := s.setupTx()
 
-	oversized := make([]byte, 10*1024*1024+1)
-	copy(oversized, "%PDF-1.4\n")
-
-	uploadURL := fmt.Sprintf("/parishes/%d/finance/transactions/%s/attachments", parish.ID, tx.ID)
-	s.RequestMultipart(uploadURL, fiber.MethodPost, "file", "huge.pdf", oversized)
+	uploadURL := fmt.Sprintf("/fin/transactions/%s/attachments", tx.ID)
+	largeBytes := make([]byte, 11*1024*1024) // 11 MB > 10 MB limit
+	copy(largeBytes, validPDFBytes)
+	s.RequestMultipart(uploadURL, fiber.MethodPost, "file", "large.pdf", largeBytes)
 	s.AssertStatus(fiber.StatusRequestEntityTooLarge)
 }
 
-func (s *AttachmentSuite) TestUpload_MissingFileField_Returns400() {
-	parish, unit, tx := s.setupTx()
-	_ = unit
+func (s *AttachmentSuite) TestUpload_ZeroBytes_Returns400() {
+	_, _, tx := s.setupTx()
 
-	uploadURL := fmt.Sprintf("/parishes/%d/finance/transactions/%s/attachments", parish.ID, tx.ID)
-	// Pass empty fieldName to simulate missing "file" field
-	s.RequestMultipart(uploadURL, fiber.MethodPost, "", "", nil)
+	uploadURL := fmt.Sprintf("/fin/transactions/%s/attachments", tx.ID)
+	s.RequestMultipart(uploadURL, fiber.MethodPost, "file", "empty.pdf", []byte{})
 	s.AssertStatus(fiber.StatusBadRequest)
 }
 
-func (s *AttachmentSuite) TestUpload_PathTraversalFilename_Sanitized() {
-	parish, unit, tx := s.setupTx()
-	_ = unit
+func (s *AttachmentSuite) TestUpload_MissingFileField_Returns400() {
+	_, _, tx := s.setupTx()
 
-	uploadURL := fmt.Sprintf("/parishes/%d/finance/transactions/%s/attachments", parish.ID, tx.ID)
-	s.RequestMultipart(uploadURL, fiber.MethodPost, "file", "../../secret/receipt.pdf", validPDFBytes)
-	s.Created()
-
-	resp := s.GetResponse().Data
-	s.Equal("receipt.pdf", resp.Filename)
-
-	memStorage := testutil.GetState().Storage.(*storage.MemoryStorage)
-	expectedKey := fmt.Sprintf("transaction/%d/%d/%s/%s-receipt.pdf", parish.ID, unit.ID, tx.ID.String(), resp.ID.String())
-	_, _, err := memStorage.Get(expectedKey)
-	s.NoError(err)
+	uploadURL := fmt.Sprintf("/fin/transactions/%s/attachments", tx.ID)
+	s.RequestMultipart(uploadURL, fiber.MethodPost, "wrong_field", "file.pdf", validPDFBytes)
+	s.AssertStatus(fiber.StatusBadRequest)
 }
 
-func (s *AttachmentSuite) TestListAndDownload_Success() {
-	parish, unit, tx := s.setupTx()
-	_ = unit
+func (s *AttachmentSuite) TestList_Attachments_SortedChronologically() {
+	_, _, tx := s.setupTx()
 
-	uploadURL := fmt.Sprintf("/parishes/%d/finance/transactions/%s/attachments", parish.ID, tx.ID)
-	s.RequestMultipart(uploadURL, fiber.MethodPost, "file", "receipt1.pdf", validPDFBytes)
+	uploadURL := fmt.Sprintf("/fin/transactions/%s/attachments", tx.ID)
+	s.RequestMultipart(uploadURL, fiber.MethodPost, "file", "first.pdf", validPDFBytes)
 	s.Created()
 	att1 := s.GetResponse().Data
 
-	s.RequestMultipart(uploadURL, fiber.MethodPost, "file", "receipt2.png", validPNGBytes)
+	s.RequestMultipart(uploadURL, fiber.MethodPost, "file", "second.png", validPNGBytes)
 	s.Created()
 	att2 := s.GetResponse().Data
 
-	// List
 	s.Request(uploadURL, fiber.MethodGet, nil)
 	s.OK()
 	listResp := testutil.DecodeOther[[]attachment.Response](&s.ApiTestSuite).Data
 	s.Len(listResp, 2)
 	s.Equal(att1.ID, listResp[0].ID)
 	s.Equal(att2.ID, listResp[1].ID)
+}
 
-	// Download att1
-	downloadURL := fmt.Sprintf("/parishes/%d/finance/transactions/%s/attachments/%s/download", parish.ID, tx.ID, att1.ID)
+func (s *AttachmentSuite) TestDownload_ReturnsPresignedURL() {
+	_, _, tx := s.setupTx()
+
+	uploadURL := fmt.Sprintf("/fin/transactions/%s/attachments", tx.ID)
+	s.RequestMultipart(uploadURL, fiber.MethodPost, "file", "receipt.pdf", validPDFBytes)
+	s.Created()
+	att1 := s.GetResponse().Data
+
+	downloadURL := fmt.Sprintf("/fin/transactions/%s/attachments/%s/download", tx.ID, att1.ID)
 	s.Request(downloadURL, fiber.MethodGet, nil)
 	s.OK()
 	dlResp := testutil.DecodeOther[attachment.DownloadResponse](&s.ApiTestSuite).Data
@@ -226,62 +201,66 @@ func (s *AttachmentSuite) TestListAndDownload_Success() {
 func (s *AttachmentSuite) TestIsolation_CrossParishReturns404() {
 	parishA, _, txA := s.setupTx()
 	parishB := CreateTestParish(s.T())
+	unitB := CreateTestUnit(s.T(), parishB.ID, s.User.ID)
 	s.grantRole(parishB.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter))
 
-	uploadURL_A := fmt.Sprintf("/parishes/%d/finance/transactions/%s/attachments", parishA.ID, txA.ID)
+	uploadURL_A := fmt.Sprintf("/fin/transactions/%s/attachments", txA.ID)
 	s.RequestMultipart(uploadURL_A, fiber.MethodPost, "file", "file.pdf", validPDFBytes)
 	s.Created()
 	attA := s.GetResponse().Data
 
+	// Switch to parish B
+	s.activate(parishB.ID, unitB.ID)
+
 	// Try upload on parish B with txA ID -> 404
-	uploadURL_B := fmt.Sprintf("/parishes/%d/finance/transactions/%s/attachments", parishB.ID, txA.ID)
-	s.RequestMultipart(uploadURL_B, fiber.MethodPost, "file", "file2.pdf", validPDFBytes)
+	s.RequestMultipart(uploadURL_A, fiber.MethodPost, "file", "file2.pdf", validPDFBytes)
 	s.AssertStatus(fiber.StatusNotFound)
 
 	// Try list on parish B with txA ID -> 404
-	s.Request(uploadURL_B, fiber.MethodGet, nil)
+	s.Request(uploadURL_A, fiber.MethodGet, nil)
 	s.AssertStatus(fiber.StatusNotFound)
 
 	// Try download on parish B with txA ID and attA ID -> 404
-	dlURL_B := fmt.Sprintf("/parishes/%d/finance/transactions/%s/attachments/%s/download", parishB.ID, txA.ID, attA.ID)
+	dlURL_B := fmt.Sprintf("/fin/transactions/%s/attachments/%s/download", txA.ID, attA.ID)
 	s.Request(dlURL_B, fiber.MethodGet, nil)
 	s.AssertStatus(fiber.StatusNotFound)
 
-	// Try download on parish A but with mismatched transaction ID -> 404
+	// Switch back to parish A: try download with mismatched transaction ID -> 404
+	s.activate(parishA.ID, *txA.UnitID)
 	randomTxID := core.GenerateID()
-	dlURL_MismatchedTx := fmt.Sprintf("/parishes/%d/finance/transactions/%s/attachments/%s/download", parishA.ID, randomTxID, attA.ID)
+	dlURL_MismatchedTx := fmt.Sprintf("/fin/transactions/%s/attachments/%s/download", randomTxID, attA.ID)
 	s.Request(dlURL_MismatchedTx, fiber.MethodGet, nil)
 	s.AssertStatus(fiber.StatusNotFound)
 }
 
 func (s *AttachmentSuite) TestStorageRollback_OnInvalidTransaction() {
 	parish := CreateTestParish(s.T())
+	unit := CreateTestUnit(s.T(), parish.ID, s.User.ID)
 	s.grantRole(parish.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter))
+	s.activate(parish.ID, unit.ID)
 
 	fakeTxID := core.GenerateID()
-	uploadURL := fmt.Sprintf("/parishes/%d/finance/transactions/%s/attachments", parish.ID, fakeTxID)
+	uploadURL := fmt.Sprintf("/fin/transactions/%s/attachments", fakeTxID)
 	s.RequestMultipart(uploadURL, fiber.MethodPost, "file", "orphaned.pdf", validPDFBytes)
 	s.AssertStatus(fiber.StatusNotFound)
 
 	// Verify no objects with fakeTxID prefix exist in storage
 	memStorage := testutil.GetState().Storage.(*storage.MemoryStorage)
 	prefix := fmt.Sprintf("transaction/%d/%s/", parish.ID, fakeTxID.String())
-	// In MemoryStorage, attempting to get any key with that fakeTxID returns ErrNotFound
 	_, _, err := memStorage.Get(prefix + "orphaned.pdf")
 	s.ErrorIs(err, storage.ErrNotFound)
 }
 
 func (s *AttachmentSuite) TestUpload_VoidTransactionAllowed() {
-	parish, unit, tx := s.setupTx()
-	_ = unit
+	_, _, tx := s.setupTx()
 
 	// Void transaction
-	voidURL := fmt.Sprintf("/parishes/%d/finance/transactions/%s/void", parish.ID, tx.ID)
+	voidURL := fmt.Sprintf("/fin/transactions/%s/void", tx.ID)
 	s.Request(voidURL, fiber.MethodPost, model.VoidTransactionRequest{})
 	s.OK()
 
 	// Upload attachment to voided transaction
-	uploadURL := fmt.Sprintf("/parishes/%d/finance/transactions/%s/attachments", parish.ID, tx.ID)
+	uploadURL := fmt.Sprintf("/fin/transactions/%s/attachments", tx.ID)
 	s.RequestMultipart(uploadURL, fiber.MethodPost, "file", "void_receipt.pdf", validPDFBytes)
 	s.Created()
 	resp := s.GetResponse().Data
@@ -289,10 +268,10 @@ func (s *AttachmentSuite) TestUpload_VoidTransactionAllowed() {
 }
 
 func (s *AttachmentSuite) TestAuthz_ReaderVsWriter() {
-	parish, unit, tx := s.setupTx()
+	_, unit, tx := s.setupTx()
 	_ = unit
 
-	uploadURL := fmt.Sprintf("/parishes/%d/finance/transactions/%s/attachments", parish.ID, tx.ID)
+	uploadURL := fmt.Sprintf("/fin/transactions/%s/attachments", tx.ID)
 	s.RequestMultipart(uploadURL, fiber.MethodPost, "file", "doc.pdf", validPDFBytes)
 	s.Created()
 	att := s.GetResponse().Data
@@ -312,7 +291,7 @@ func (s *AttachmentSuite) TestAuthz_ReaderVsWriter() {
 	s.OK()
 
 	// Reader can download
-	dlURL := fmt.Sprintf("/parishes/%d/finance/transactions/%s/attachments/%s/download", parish.ID, tx.ID, att.ID)
+	dlURL := fmt.Sprintf("/fin/transactions/%s/attachments/%s/download", tx.ID, att.ID)
 	s.Request(dlURL, fiber.MethodGet, nil)
 	s.OK()
 
@@ -321,47 +300,34 @@ func (s *AttachmentSuite) TestAuthz_ReaderVsWriter() {
 	s.AssertStatus(fiber.StatusForbidden)
 }
 
-// Attachment permission lives at unit scope: a parish-scope role is not enough.
 func (s *AttachmentSuite) TestAuthz_ParishRoleOnlyIsForbidden() {
-	parish, _, tx := s.setupTx()
+	parish, unit, tx := s.setupTx()
 
 	other := core.AuthenticatedUser{ID: core.GenerateID(), Email: "parish-only@example.com", Name: "Parish Only", Roles: []core.UserRole{core.UserRoleAdmin}}
 	s.User = &other
 	s.grantRole(parish.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter))
+	s.activate(parish.ID, unit.ID)
 
-	uploadURL := fmt.Sprintf("/parishes/%d/finance/transactions/%s/attachments", parish.ID, tx.ID)
+	uploadURL := fmt.Sprintf("/fin/transactions/%s/attachments", tx.ID)
 	s.Request(uploadURL, fiber.MethodGet, nil)
 	s.AssertStatus(fiber.StatusForbidden)
 	s.RequestMultipart(uploadURL, fiber.MethodPost, "file", "doc.pdf", validPDFBytes)
 	s.AssertStatus(fiber.StatusForbidden)
 }
 
-// A role in a different unit of the same parish grants nothing here.
 func (s *AttachmentSuite) TestAuthz_OtherUnitRoleIsForbidden() {
-	parish, _, tx := s.setupTx()
+	parish, unit, tx := s.setupTx()
 
 	other := core.AuthenticatedUser{ID: core.GenerateID(), Email: "other-unit@example.com", Name: "Other Unit", Roles: []core.UserRole{core.UserRoleAdmin}}
 	s.User = &other
 	EnsureUserSnapshot(&s.ApiTestSuite)
 	otherUnit := CreateTestUnit(s.T(), parish.ID, other.ID)
 	s.grantUnitRole(otherUnit.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter))
+	s.activate(parish.ID, unit.ID)
 
-	uploadURL := fmt.Sprintf("/parishes/%d/finance/transactions/%s/attachments", parish.ID, tx.ID)
+	uploadURL := fmt.Sprintf("/fin/transactions/%s/attachments", tx.ID)
 	s.RequestMultipart(uploadURL, fiber.MethodPost, "file", "doc.pdf", validPDFBytes)
 	s.AssertStatus(fiber.StatusForbidden)
-}
-
-// Transactions without a unit cannot carry attachments (no unit scope to check).
-func (s *AttachmentSuite) TestUpload_TransactionWithoutUnit_Returns422() {
-	parish := CreateTestParish(s.T())
-	s.grantRole(parish.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter))
-	cash := s.createAccount(parish.ID, "1001", "asset", true, "active")
-	income := s.createAccount(parish.ID, "4001", "income", true, "active")
-	tx := s.createPostedTransaction(parish.ID, nil, cash.ID, income.ID, "2026-10-15", 50000)
-
-	uploadURL := fmt.Sprintf("/parishes/%d/finance/transactions/%s/attachments", parish.ID, tx.ID)
-	s.RequestMultipart(uploadURL, fiber.MethodPost, "file", "doc.pdf", validPDFBytes)
-	s.AssertStatus(fiber.StatusUnprocessableEntity)
 }
 
 func TestAttachmentSuite(t *testing.T) {

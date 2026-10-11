@@ -37,10 +37,13 @@ func (s *InvariantsSuite) grantRole(parishID int, role string) {
 	s.GrantRole(role, scope)
 }
 
-func (s *InvariantsSuite) createAccount(parishID int, code, name, accType string, postable bool) *ent.Account {
+func (s *InvariantsSuite) activate(parishID, unitID int) {
+	SetFinanceCookie(&s.ApiTestSuite, parishID, unitID)
+}
+
+func (s *InvariantsSuite) createAccountWithUnit(parishID int, unitID int, code, name, accType string, postable bool) *ent.Account {
 	st := testutil.GetState()
 	ctx := core.ContextWithUser(context.Background(), core.AuthenticatedUser{ID: s.User.ID})
-	unit := CreateTestUnit(s.T(), parishID, s.User.ID)
 	acc, err := st.Ent.Account.Create().
 		SetCode(code).
 		SetName(name).
@@ -49,33 +52,33 @@ func (s *InvariantsSuite) createAccount(parishID int, code, name, accType string
 		SetPostable(postable).
 		SetStatus(account.StatusActive).
 		SetParishID(parishID).
-		SetUnitID(unit.ID).
+		SetUnitID(unitID).
 		Save(ctx)
 	require.NoError(s.T(), err)
 	return acc
 }
 
-func (s *InvariantsSuite) createPostedTransaction(parishID int, dateStr string, postings []model.PostingInput) model.TransactionResponse {
+func (s *InvariantsSuite) createPostedTransaction(dateStr string, postings []model.PostingInput) model.TransactionResponse {
 	req := model.CreateTransactionRequest{
 		Date:     dateStr,
 		Kind:     "adjustment",
 		Postings: postings,
 	}
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions", parishID), fiber.MethodPost, req)
+	s.Request("/fin/transactions", fiber.MethodPost, req)
 	s.Created()
 	res := testutil.DecodeOther[model.TransactionResponse](s)
 	return res.Data
 }
 
-func (s *InvariantsSuite) voidTransaction(parishID int, txID uuid.UUID) model.TransactionResponse {
-	s.Request(fmt.Sprintf("/parishes/%d/finance/transactions/%s/void", parishID, txID), fiber.MethodPost, nil)
+func (s *InvariantsSuite) voidTransaction(txID uuid.UUID) model.TransactionResponse {
+	s.Request(fmt.Sprintf("/fin/transactions/%s/void", txID), fiber.MethodPost, nil)
 	s.OK()
 	res := testutil.DecodeOther[model.TransactionResponse](s)
 	return res.Data
 }
 
 // checkAccountingInvariants validates all four accounting invariants for a given parish:
-// 1. global Σ debit == Σ credit over all postings in the parish
+// 1. global sum debit == sum credit over all postings in the parish
 // 2. trial balance totals are equal (Totals.Debit == Totals.Credit)
 // 3. every voided transaction has exactly 2 entries and nets to zero per account
 // 4. every non-void transaction has exactly 1 entry
@@ -109,7 +112,7 @@ func (s *InvariantsSuite) checkAccountingInvariants(parishID int, asOf string) e
 	}
 
 	// 2. Trial balance totals are equal
-	tbURL := fmt.Sprintf("/parishes/%d/finance/reports/trial-balance?asOf=%s", parishID, asOf)
+	tbURL := fmt.Sprintf("/fin/reports/trial-balance?asOf=%s", asOf)
 	s.Request(tbURL, fiber.MethodGet, nil)
 	if s.HttpResponse.StatusCode != fiber.StatusOK {
 		return fmt.Errorf("trial balance returned status %d", s.HttpResponse.StatusCode)
@@ -183,39 +186,41 @@ func (s *InvariantsSuite) checkAccountingInvariants(parishID int, asOf string) e
 
 func (s *InvariantsSuite) TestAccountingInvariants_AllHold() {
 	parish := CreateTestParish(s.T())
+	unit := CreateTestUnit(s.T(), parish.ID, s.User.ID)
 	s.grantRole(parish.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter))
+	s.activate(parish.ID, unit.ID)
 
 	// Chart of Accounts
-	cash := s.createAccount(parish.ID, "1001", "Cash", "asset", true)
-	bank := s.createAccount(parish.ID, "1002", "Bank", "asset", true)
-	ar := s.createAccount(parish.ID, "1201", "Accounts Receivable", "asset", true)
-	kolekte := s.createAccount(parish.ID, "4001", "Kolekte", "income", true)
-	donation := s.createAccount(parish.ID, "4002", "Donations", "income", true)
-	opExpense := s.createAccount(parish.ID, "5001", "Operational Expense", "expense", true)
-	utilExpense := s.createAccount(parish.ID, "5002", "Utilities Expense", "expense", true)
+	cash := s.createAccountWithUnit(parish.ID, unit.ID, "1001", "Cash", "asset", true)
+	bank := s.createAccountWithUnit(parish.ID, unit.ID, "1002", "Bank", "asset", true)
+	ar := s.createAccountWithUnit(parish.ID, unit.ID, "1201", "Accounts Receivable", "asset", true)
+	kolekte := s.createAccountWithUnit(parish.ID, unit.ID, "4001", "Kolekte", "income", true)
+	donation := s.createAccountWithUnit(parish.ID, unit.ID, "4002", "Donations", "income", true)
+	opExpense := s.createAccountWithUnit(parish.ID, unit.ID, "5001", "Operational Expense", "expense", true)
+	utilExpense := s.createAccountWithUnit(parish.ID, unit.ID, "5002", "Utilities Expense", "expense", true)
 
 	// 1. Simple transaction (1 debit, 1 credit)
-	s.createPostedTransaction(parish.ID, "2026-10-01", []model.PostingInput{
+	s.createPostedTransaction("2026-10-01", []model.PostingInput{
 		{AccountID: cash.ID, Side: "debit", Amount: 500000},
 		{AccountID: kolekte.ID, Side: "credit", Amount: 500000},
 	})
 
 	// 2. Split transaction (1 debit, 2 credits)
-	s.createPostedTransaction(parish.ID, "2026-10-02", []model.PostingInput{
+	s.createPostedTransaction("2026-10-02", []model.PostingInput{
 		{AccountID: cash.ID, Side: "debit", Amount: 1500000},
 		{AccountID: kolekte.ID, Side: "credit", Amount: 1000000},
 		{AccountID: donation.ID, Side: "credit", Amount: 500000},
 	})
 
 	// 3. Split transaction (2 debits, 1 credit) - to be voided later
-	tx3 := s.createPostedTransaction(parish.ID, "2026-10-03", []model.PostingInput{
+	tx3 := s.createPostedTransaction("2026-10-03", []model.PostingInput{
 		{AccountID: opExpense.ID, Side: "debit", Amount: 300000},
 		{AccountID: utilExpense.ID, Side: "debit", Amount: 200000},
 		{AccountID: bank.ID, Side: "credit", Amount: 500000},
 	})
 
 	// 4. Split transaction (multi-debit, multi-credit)
-	s.createPostedTransaction(parish.ID, "2026-10-04", []model.PostingInput{
+	s.createPostedTransaction("2026-10-04", []model.PostingInput{
 		{AccountID: cash.ID, Side: "debit", Amount: 400000},
 		{AccountID: ar.ID, Side: "debit", Amount: 600000},
 		{AccountID: kolekte.ID, Side: "credit", Amount: 700000},
@@ -223,14 +228,14 @@ func (s *InvariantsSuite) TestAccountingInvariants_AllHold() {
 	})
 
 	// 5. Simple transaction - to be voided later
-	tx5 := s.createPostedTransaction(parish.ID, "2026-10-05", []model.PostingInput{
+	tx5 := s.createPostedTransaction("2026-10-05", []model.PostingInput{
 		{AccountID: opExpense.ID, Side: "debit", Amount: 150000},
 		{AccountID: cash.ID, Side: "credit", Amount: 150000},
 	})
 
 	// Void tx3 and tx5
-	s.voidTransaction(parish.ID, tx3.ID)
-	s.voidTransaction(parish.ID, tx5.ID)
+	s.voidTransaction(tx3.ID)
+	s.voidTransaction(tx5.ID)
 
 	// Invariants check
 	err := s.checkAccountingInvariants(parish.ID, "2026-10-31")
@@ -239,13 +244,15 @@ func (s *InvariantsSuite) TestAccountingInvariants_AllHold() {
 
 func (s *InvariantsSuite) TestAccountingInvariants_CorruptedPostingFails() {
 	parish := CreateTestParish(s.T())
+	unit := CreateTestUnit(s.T(), parish.ID, s.User.ID)
 	s.grantRole(parish.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter))
+	s.activate(parish.ID, unit.ID)
 
-	cash := s.createAccount(parish.ID, "1001", "Cash", "asset", true)
-	income := s.createAccount(parish.ID, "4001", "Income", "income", true)
+	cash := s.createAccountWithUnit(parish.ID, unit.ID, "1001", "Cash", "asset", true)
+	income := s.createAccountWithUnit(parish.ID, unit.ID, "4001", "Income", "income", true)
 
 	// Create valid transaction
-	tx := s.createPostedTransaction(parish.ID, "2026-10-01", []model.PostingInput{
+	tx := s.createPostedTransaction("2026-10-01", []model.PostingInput{
 		{AccountID: cash.ID, Side: "debit", Amount: 100000},
 		{AccountID: income.ID, Side: "credit", Amount: 100000},
 	})

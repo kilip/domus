@@ -12,26 +12,29 @@ import (
 	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/posting"
 	"github.com/paroki/domus/api/ent/transaction"
+	entunit "github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/internal/core"
 	"github.com/paroki/domus/api/internal/modules/finance/model"
 	"github.com/paroki/domus/api/internal/platform/database"
 )
 
-func (r TransactionRepository) Void(ctx context.Context, parishID int, id uuid.UUID, reversalDate *time.Time, reason *string) (*model.TransactionResponse, error) {
+func (r TransactionRepository) Void(ctx context.Context, id uuid.UUID, reversalDate *time.Time, reason *string) (*model.TransactionResponse, error) {
 	if r.voidMu != nil {
 		r.voidMu.Lock()
 		defer r.voidMu.Unlock()
 	}
 
+	fc, _ := model.FinanceContextFromContext(ctx)
 	var resp *model.TransactionResponse
 
 	err := database.WithTx(ctx, r.entcli, func(tx *ent.Tx) error {
-		// Atomically move the transaction: Update().Where(IDEQ, parish match, StatusEQ(posted)).SetStatus(void).Save
+		// Atomically move the transaction: Update().Where(IDEQ, parish & unit match, StatusEQ(posted)).SetStatus(void).Save
 		// and require exactly 1 affected row, else 409 or 404.
 		n, err := tx.Transaction.Update().
 			Where(
 				transaction.IDEQ(id),
-				transaction.HasParishWith(parish.IDEQ(parishID)),
+				transaction.HasParishWith(parish.IDEQ(fc.ParishID)),
+				transaction.HasUnitWith(entunit.IDEQ(fc.UnitID)),
 				transaction.StatusEQ(transaction.StatusPosted),
 			).
 			SetStatus(transaction.StatusVoid).
@@ -40,11 +43,12 @@ func (r TransactionRepository) Void(ctx context.Context, parishID int, id uuid.U
 			return err
 		}
 		if n == 0 {
-			// Check if the transaction actually exists in this parish
+			// Check if the transaction actually exists in this parish & unit
 			txExists, err := tx.Transaction.Query().
 				Where(
 					transaction.IDEQ(id),
-					transaction.HasParishWith(parish.IDEQ(parishID)),
+					transaction.HasParishWith(parish.IDEQ(fc.ParishID)),
+					transaction.HasUnitWith(entunit.IDEQ(fc.UnitID)),
 				).
 				Exist(ctx)
 			if err != nil {
@@ -61,7 +65,8 @@ func (r TransactionRepository) Void(ctx context.Context, parishID int, id uuid.U
 			Where(
 				entry.HasTransactionWith(
 					transaction.IDEQ(id),
-					transaction.HasParishWith(parish.IDEQ(parishID)),
+					transaction.HasParishWith(parish.IDEQ(fc.ParishID)),
+					transaction.HasUnitWith(entunit.IDEQ(fc.UnitID)),
 				),
 				entry.Not(entry.HasReverses()),
 				entry.Not(entry.HasReversedBy()),

@@ -26,7 +26,6 @@ type CreateTransactionRequest struct {
 	Date        string         `json:"date" validate:"required"`
 	Kind        string         `json:"kind" validate:"required,oneof=income expense transfer adjustment"`
 	Description *string        `json:"description,omitempty"`
-	UnitID      *int           `json:"unitId,omitempty"`
 	Postings    []PostingInput `json:"postings" validate:"required,min=2,max=200,dive"`
 }
 
@@ -40,7 +39,6 @@ type SearchTransactionRequest struct {
 	To        *string    `json:"to,omitempty"`
 	Kind      *string    `json:"kind,omitempty" validate:"omitempty,oneof=income expense transfer adjustment"`
 	Status    *string    `json:"status,omitempty" validate:"omitempty,oneof=draft submitted approved posted void"`
-	UnitID    *int       `json:"unitId,omitempty"`
 	AccountID *uuid.UUID `json:"accountId,omitempty"`
 	Q         *string    `json:"q,omitempty"`
 	Cursor    *string    `json:"cursor,omitempty"`
