@@ -4,7 +4,6 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent"
 	"github.com/paroki/domus/api/ent/parish"
@@ -37,7 +36,7 @@ func (s ActivateService) Activate(ctx context.Context, userID uuid.UUID, req mod
 		return nil, err
 	}
 	if !parishExists {
-		return nil, fiber.NewError(fiber.StatusBadRequest, "parish not found")
+		return nil, model.ErrParishNotFound
 	}
 
 	// 2. Verify unit exists and belongs to the parish
@@ -51,7 +50,7 @@ func (s ActivateService) Activate(ctx context.Context, userID uuid.UUID, req mod
 		return nil, err
 	}
 	if !unitExists {
-		return nil, fiber.NewError(fiber.StatusBadRequest, "unit not found or does not belong to specified parish")
+		return nil, model.ErrUnitNotFound
 	}
 
 	// 3. Verify user has finance permission in this parish

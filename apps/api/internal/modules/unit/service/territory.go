@@ -4,7 +4,6 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/gofiber/fiber/v3"
 	"github.com/paroki/domus/api/ent"
 	"github.com/paroki/domus/api/internal/modules/unit/model"
 )
@@ -43,7 +42,7 @@ func (s TerritoryService) Create(c context.Context, req model.CreateTerritoryReq
 			return nil, err
 		}
 		if parent.Edges.Parish == nil || parent.Edges.Parish.ID != req.ParishID {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "parent territory belongs to a different parish")
+			return nil, model.ErrTerritoryDifferentParish
 		}
 	}
 
@@ -53,7 +52,7 @@ func (s TerritoryService) Create(c context.Context, req model.CreateTerritoryReq
 func (s TerritoryService) Update(c context.Context, id int, req model.UpdateTerritoryRequest) (*model.TerritoryResponse, error) {
 	if req.ParentID != nil {
 		if *req.ParentID == id {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "territory cannot be its own parent")
+			return nil, model.ErrTerritorySelfParent
 		}
 
 		parent, err := s.repo.GetEntByID(c, *req.ParentID)
@@ -61,7 +60,7 @@ func (s TerritoryService) Update(c context.Context, id int, req model.UpdateTerr
 			return nil, err
 		}
 		if parent.Edges.Parish == nil || parent.Edges.Parish.ID != req.ParishID {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "parent territory belongs to a different parish")
+			return nil, model.ErrTerritoryDifferentParish
 		}
 
 		// Detect cycles: walk up parent ancestry
@@ -69,7 +68,7 @@ func (s TerritoryService) Update(c context.Context, id int, req model.UpdateTerr
 		visited := map[int]bool{id: true}
 		for {
 			if visited[currID] {
-				return nil, fiber.NewError(fiber.StatusBadRequest, "cycle detected: territory cannot have its descendant as parent")
+				return nil, model.ErrTerritoryCycleDetected
 			}
 			visited[currID] = true
 
@@ -93,9 +92,8 @@ func (s TerritoryService) Delete(c context.Context, id int) error {
 		return err
 	}
 	if hasChildren {
-		return fiber.NewError(fiber.StatusBadRequest, "cannot delete territory with children; deactivate it instead")
+		return model.ErrTerritoryDeleteWithChildren
 	}
 
 	return s.repo.Delete(c, id)
 }
-

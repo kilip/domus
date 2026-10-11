@@ -4,4 +4,3 @@ type PaginatedResult[T any] struct {
 	Data       []T
 	NextCursor string
 }
-

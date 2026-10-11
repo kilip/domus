@@ -265,4 +265,3 @@ func (r TerritoryRepository) Delete(c context.Context, id int) error {
 		return tx.Territory.DeleteOneID(id).Exec(c)
 	})
 }
-

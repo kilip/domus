@@ -43,4 +43,3 @@ func (s ParishService) Update(c context.Context, id int, req model.UpdateParishR
 func (s ParishService) Delete(c context.Context, id int) error {
 	return s.repo.Delete(c, id)
 }
-

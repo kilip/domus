@@ -194,4 +194,3 @@ func (r ParishRepository) Delete(c context.Context, id int) error {
 		return tx.Parish.DeleteOneID(id).Exec(c)
 	})
 }
-

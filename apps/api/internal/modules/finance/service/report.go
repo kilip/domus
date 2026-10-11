@@ -5,7 +5,6 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent"
 	"github.com/paroki/domus/api/internal/modules/finance/model"
@@ -34,33 +33,33 @@ func NewReportService(repo ReportRepository, log *slog.Logger) ReportService {
 
 func (s ReportService) GetLedger(ctx context.Context, query model.LedgerQuery) (model.LedgerResponse, string, error) {
 	if query.AccountID == uuid.Nil {
-		return model.LedgerResponse{}, "", fiber.NewError(fiber.StatusBadRequest, "accountId is required")
+		return model.LedgerResponse{}, "", model.ErrAccountIdRequired
 	}
 
 	acc, err := s.repo.GetAccount(ctx, query.AccountID)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			return model.LedgerResponse{}, "", fiber.NewError(fiber.StatusNotFound, "account not found in this parish")
+			return model.LedgerResponse{}, "", model.ErrAccountNotFoundInParish
 		}
 		return model.LedgerResponse{}, "", err
 	}
 
 	if query.From == "" || query.To == "" {
-		return model.LedgerResponse{}, "", fiber.NewError(fiber.StatusBadRequest, "from and to dates are required")
+		return model.LedgerResponse{}, "", model.ErrDatesRequired
 	}
 
 	fromDate, err := model.ParseDate(query.From)
 	if err != nil {
-		return model.LedgerResponse{}, "", fiber.NewError(fiber.StatusBadRequest, "invalid from date: "+err.Error())
+		return model.LedgerResponse{}, "", model.ErrInvalidFromDate
 	}
 
 	toDate, err := model.ParseDate(query.To)
 	if err != nil {
-		return model.LedgerResponse{}, "", fiber.NewError(fiber.StatusBadRequest, "invalid to date: "+err.Error())
+		return model.LedgerResponse{}, "", model.ErrInvalidToDate
 	}
 
 	if fromDate.After(toDate) {
-		return model.LedgerResponse{}, "", fiber.NewError(fiber.StatusBadRequest, "from date must be before or equal to to date")
+		return model.LedgerResponse{}, "", model.ErrFromDateAfterToDate
 	}
 
 	limit := 50
@@ -76,7 +75,7 @@ func (s ReportService) GetLedger(ctx context.Context, query model.LedgerQuery) (
 	if query.Cursor != "" {
 		cd, cid, err := repository.DecodeCursor(query.Cursor)
 		if err != nil {
-			return model.LedgerResponse{}, "", fiber.NewError(fiber.StatusBadRequest, "invalid cursor: "+err.Error())
+			return model.LedgerResponse{}, "", model.ErrInvalidCursor
 		}
 		cursorDate = &cd
 		cursorPostingID = &cid
@@ -87,12 +86,12 @@ func (s ReportService) GetLedger(ctx context.Context, query model.LedgerQuery) (
 
 func (s ReportService) GetTrialBalance(ctx context.Context, query model.TrialBalanceQuery) (model.TrialBalanceResponse, error) {
 	if query.AsOf == "" {
-		return model.TrialBalanceResponse{}, fiber.NewError(fiber.StatusBadRequest, "asOf date is required")
+		return model.TrialBalanceResponse{}, model.ErrAsOfDateRequired
 	}
 
 	asOfDate, err := model.ParseDate(query.AsOf)
 	if err != nil {
-		return model.TrialBalanceResponse{}, fiber.NewError(fiber.StatusBadRequest, "invalid asOf date: "+err.Error())
+		return model.TrialBalanceResponse{}, model.ErrInvalidAsOfDate
 	}
 
 	return s.repo.GetTrialBalance(ctx, asOfDate)
@@ -100,26 +99,26 @@ func (s ReportService) GetTrialBalance(ctx context.Context, query model.TrialBal
 
 func (s ReportService) GetCollections(ctx context.Context, query model.CollectionsQuery) (model.CollectionsResponse, error) {
 	if query.From == "" || query.To == "" {
-		return model.CollectionsResponse{}, fiber.NewError(fiber.StatusBadRequest, "from and to dates are required")
+		return model.CollectionsResponse{}, model.ErrDatesRequired
 	}
 
 	fromDate, err := model.ParseDate(query.From)
 	if err != nil {
-		return model.CollectionsResponse{}, fiber.NewError(fiber.StatusBadRequest, "invalid from date: "+err.Error())
+		return model.CollectionsResponse{}, model.ErrInvalidFromDate
 	}
 
 	toDate, err := model.ParseDate(query.To)
 	if err != nil {
-		return model.CollectionsResponse{}, fiber.NewError(fiber.StatusBadRequest, "invalid to date: "+err.Error())
+		return model.CollectionsResponse{}, model.ErrInvalidToDate
 	}
 
 	if fromDate.After(toDate) {
-		return model.CollectionsResponse{}, fiber.NewError(fiber.StatusBadRequest, "from date must be before or equal to to date")
+		return model.CollectionsResponse{}, model.ErrFromDateAfterToDate
 	}
 
 	// Range <= 366 days
 	if toDate.Sub(fromDate) > 366*24*time.Hour {
-		return model.CollectionsResponse{}, fiber.NewError(fiber.StatusBadRequest, "date range exceeds 366 days")
+		return model.CollectionsResponse{}, model.ErrDateRangeExceedsLimit
 	}
 
 	var allowedAccountIDs map[uuid.UUID]bool
@@ -141,11 +140,11 @@ func (s ReportService) GetCollections(ctx context.Context, query model.Collectio
 		}
 
 		if parentAcc == nil {
-			return model.CollectionsResponse{}, fiber.NewError(fiber.StatusNotFound, "parent account not found in this parish")
+			return model.CollectionsResponse{}, model.ErrParentAccountNotFound
 		}
 
 		if parentAcc.Postable {
-			return model.CollectionsResponse{}, fiber.NewError(fiber.StatusBadRequest, "parent account must be a header account")
+			return model.CollectionsResponse{}, model.ErrParentMustBeHeader
 		}
 
 		allowedAccountIDs = make(map[uuid.UUID]bool)

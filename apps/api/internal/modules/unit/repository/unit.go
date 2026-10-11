@@ -280,4 +280,3 @@ func (r UnitRepository) Delete(c context.Context, id int) error {
 		return tx.Unit.DeleteOneID(id).Exec(c)
 	})
 }
-

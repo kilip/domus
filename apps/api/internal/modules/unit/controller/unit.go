@@ -163,4 +163,3 @@ func (uc UnitController) Delete(c fiber.Ctx) error {
 	}
 	return c.SendStatus(fiber.StatusNoContent)
 }
-

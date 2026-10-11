@@ -10,7 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent"
 	"github.com/paroki/domus/api/ent/account"
@@ -192,7 +191,7 @@ func (r TransactionRepository) Create(ctx context.Context, req model.CreateTrans
 			if err != nil {
 				if ent.IsConstraintError(err) {
 					if number != "" {
-						return fiber.NewError(fiber.StatusConflict, "transaction number already exists in this parish")
+						return model.ErrTxNumberExists
 					}
 					return errConflictRetry
 				}
@@ -262,7 +261,7 @@ func (r TransactionRepository) Create(ctx context.Context, req model.CreateTrans
 		return nil, err
 	}
 
-	return nil, fiber.NewError(fiber.StatusConflict, "could not allocate transaction number after retries")
+	return nil, model.ErrTxNumberAllocationFailed
 }
 
 func (r TransactionRepository) GetByID(ctx context.Context, id uuid.UUID) (*model.TransactionResponse, error) {
@@ -306,7 +305,7 @@ func (r TransactionRepository) Search(ctx context.Context, req model.SearchTrans
 	if req.From != nil && *req.From != "" {
 		fromDate, err := model.ParseDate(*req.From)
 		if err != nil {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "invalid from date: "+err.Error())
+			return nil, model.ErrInvalidFromDate
 		}
 		q = q.Where(transaction.DateGTE(fromDate))
 	}
@@ -314,7 +313,7 @@ func (r TransactionRepository) Search(ctx context.Context, req model.SearchTrans
 	if req.To != nil && *req.To != "" {
 		toDate, err := model.ParseDate(*req.To)
 		if err != nil {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "invalid to date: "+err.Error())
+			return nil, model.ErrInvalidToDate
 		}
 		q = q.Where(transaction.DateLTE(toDate))
 	}

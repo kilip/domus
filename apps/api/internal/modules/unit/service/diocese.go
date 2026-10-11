@@ -44,4 +44,3 @@ func (s DioceseService) Update(c context.Context, updaterID uuid.UUID, id int, r
 func (s DioceseService) Delete(c context.Context, id int) error {
 	return s.repo.Delete(c, id)
 }
-

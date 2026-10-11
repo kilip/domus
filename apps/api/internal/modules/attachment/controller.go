@@ -38,7 +38,7 @@ func (ctl Controller) Upload(ownerType string) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		fileHeader, err := c.FormFile("file")
 		if err != nil {
-			return fiber.NewError(fiber.StatusBadRequest, "file field is required")
+			return ErrFileRequired
 		}
 		resp, err := ctl.svc.Upload(c, ownerType, ownerFrom(c), fileHeader)
 		if err != nil {

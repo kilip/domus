@@ -226,8 +226,7 @@ func (s *VoidSuite) TestVoid_ConcurrentRequests() {
 		if err == nil {
 			successCount++
 		} else {
-			var fiberErr *fiber.Error
-			if assert.ErrorAs(s.T(), err, &fiberErr) && fiberErr.Code == fiber.StatusConflict {
+			if assert.ErrorIs(s.T(), err, model.ErrTxNotPosted) {
 				conflictCount++
 			}
 		}

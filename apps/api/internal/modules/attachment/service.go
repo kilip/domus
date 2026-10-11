@@ -14,7 +14,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/internal/core"
 	"github.com/paroki/domus/api/internal/platform/storage"
@@ -46,17 +45,17 @@ func NewService(repo Repository, storage storage.Storage, bucket string, log *sl
 
 func (s Service) Upload(ctx context.Context, ownerType string, owner Owner, fileHeader *multipart.FileHeader) (*Response, error) {
 	if fileHeader == nil {
-		return nil, fiber.NewError(fiber.StatusBadRequest, "file is required")
+		return nil, ErrFileHeaderRequired
 	}
 
 	// 1. Size check
 	if fileHeader.Size > maxSize {
-		return nil, fiber.NewError(fiber.StatusRequestEntityTooLarge, "attachment exceeds maximum size of 10 MiB")
+		return nil, ErrFileTooLarge
 	}
 
 	file, err := fileHeader.Open()
 	if err != nil {
-		return nil, fiber.NewError(fiber.StatusBadRequest, "failed to open uploaded file")
+		return nil, ErrFileOpenFailed
 	}
 	defer file.Close()
 
@@ -64,7 +63,7 @@ func (s Service) Upload(ctx context.Context, ownerType string, owner Owner, file
 	buf := make([]byte, 512)
 	n, err := io.ReadFull(file, buf)
 	if err != nil && err != io.EOF && err != io.ErrUnexpectedEOF {
-		return nil, fiber.NewError(fiber.StatusBadRequest, "failed to read file content")
+		return nil, ErrFileReadFailed
 	}
 
 	sniffedMIME := http.DetectContentType(buf[:n])
@@ -73,7 +72,7 @@ func (s Service) Upload(ctx context.Context, ownerType string, owner Owner, file
 	case "application/pdf", "image/jpeg", "image/png":
 		// Allowed
 	default:
-		return nil, fiber.NewError(fiber.StatusBadRequest, fmt.Sprintf("unsupported file type: %s", baseMIME))
+		return nil, ErrUnsupportedFileType
 	}
 
 	// 3. Filename sanitization

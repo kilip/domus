@@ -314,4 +314,3 @@ func (s *TerritorySuite) TestForbidden_NoPermission() {
 func TestTerritorySuite(t *testing.T) {
 	suite.Run(t, new(TerritorySuite))
 }
-

@@ -4,7 +4,6 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent"
 	"github.com/paroki/domus/api/ent/account"
@@ -248,7 +247,7 @@ func (r AccountRepository) Create(ctx context.Context, req model.CreateAccountRe
 		acc, err := builder.Save(ctx)
 		if err != nil {
 			if ent.IsConstraintError(err) {
-				return fiber.NewError(fiber.StatusConflict, "account code already exists in this parish")
+				return model.ErrAccountCodeExists
 			}
 			return err
 		}
@@ -315,7 +314,7 @@ func (r AccountRepository) Update(ctx context.Context, id uuid.UUID, req model.U
 		_, err = builder.Save(ctx)
 		if err != nil {
 			if ent.IsConstraintError(err) {
-				return fiber.NewError(fiber.StatusConflict, "account code already exists in this parish")
+				return model.ErrAccountCodeExists
 			}
 			return err
 		}

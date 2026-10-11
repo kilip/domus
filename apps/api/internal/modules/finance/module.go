@@ -112,7 +112,7 @@ func (m Module) InitRoutes(r fiber.Router) {
 		ParishFunc: func(c fiber.Ctx) (int, error) {
 			fc, ok := model.FinanceContextFromContext(c)
 			if !ok || fc.ParishID <= 0 {
-				return 0, fiber.NewError(fiber.StatusBadRequest, "finance context is not active")
+				return 0, ErrContextNotActive
 			}
 			return fc.ParishID, nil
 		},

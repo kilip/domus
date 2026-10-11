@@ -51,7 +51,7 @@ func (rc ReportController) GetLedger(c fiber.Ctx) error {
 	if accIDStr := c.Query("accountId"); accIDStr != "" {
 		parsedID, err := uuid.Parse(accIDStr)
 		if err != nil {
-			return fiber.NewError(fiber.StatusBadRequest, "invalid accountId: "+err.Error())
+			return model.ErrInvalidAccountIDParam
 		}
 		query.AccountID = parsedID
 	}
@@ -139,7 +139,7 @@ func (rc ReportController) GetCollections(c fiber.Ctx) error {
 	if parentIDStr := c.Query("parentAccountId"); parentIDStr != "" {
 		pID, err := uuid.Parse(parentIDStr)
 		if err != nil {
-			return fiber.NewError(fiber.StatusBadRequest, "invalid parentAccountId: "+err.Error())
+			return model.ErrInvalidParentAccountIDParam
 		}
 		query.ParentAccountID = &pID
 	}

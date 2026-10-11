@@ -42,4 +42,3 @@ type UpdateTerritoryRequest struct {
 	ParishID    int     `json:"parishId" validate:"required"`
 	ParentID    *int    `json:"parentId,omitempty"`
 }
-

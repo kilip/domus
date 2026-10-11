@@ -4,7 +4,6 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/gofiber/fiber/v3"
 	"github.com/paroki/domus/api/ent"
 	"github.com/paroki/domus/api/internal/modules/unit/model"
 )
@@ -43,10 +42,10 @@ func (s UnitService) GetByID(c context.Context, id int) (*model.UnitResponse, er
 
 func (s UnitService) Create(c context.Context, req model.CreateUnitRequest) (*model.UnitResponse, error) {
 	if req.Kind == "territorial" && req.TerritoryID == nil {
-		return nil, fiber.NewError(fiber.StatusBadRequest, "territorial unit requires a territory")
+		return nil, model.ErrUnitRequiresTerritory
 	}
 	if req.Kind != "territorial" && req.TerritoryID != nil {
-		return nil, fiber.NewError(fiber.StatusBadRequest, "non-territorial unit cannot have a territory")
+		return nil, model.ErrUnitNonTerritorialHasTerritory
 	}
 
 	if req.TerritoryID != nil {
@@ -55,7 +54,7 @@ func (s UnitService) Create(c context.Context, req model.CreateUnitRequest) (*mo
 			return nil, err
 		}
 		if t.Edges.Parish == nil || t.Edges.Parish.ID != req.ParishID {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "territory belongs to a different parish")
+			return nil, model.ErrUnitTerritoryDifferentParish
 		}
 	}
 
@@ -65,7 +64,7 @@ func (s UnitService) Create(c context.Context, req model.CreateUnitRequest) (*mo
 			return nil, err
 		}
 		if parent.Edges.Parish == nil || parent.Edges.Parish.ID != req.ParishID {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "parent unit belongs to a different parish")
+			return nil, model.ErrUnitParentDifferentParish
 		}
 	}
 
@@ -74,10 +73,10 @@ func (s UnitService) Create(c context.Context, req model.CreateUnitRequest) (*mo
 
 func (s UnitService) Update(c context.Context, id int, req model.UpdateUnitRequest) (*model.UnitResponse, error) {
 	if req.Kind == "territorial" && req.TerritoryID == nil {
-		return nil, fiber.NewError(fiber.StatusBadRequest, "territorial unit requires a territory")
+		return nil, model.ErrUnitRequiresTerritory
 	}
 	if req.Kind != "territorial" && req.TerritoryID != nil {
-		return nil, fiber.NewError(fiber.StatusBadRequest, "non-territorial unit cannot have a territory")
+		return nil, model.ErrUnitNonTerritorialHasTerritory
 	}
 
 	if req.TerritoryID != nil {
@@ -86,13 +85,13 @@ func (s UnitService) Update(c context.Context, id int, req model.UpdateUnitReque
 			return nil, err
 		}
 		if t.Edges.Parish == nil || t.Edges.Parish.ID != req.ParishID {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "territory belongs to a different parish")
+			return nil, model.ErrUnitTerritoryDifferentParish
 		}
 	}
 
 	if req.ParentID != nil {
 		if *req.ParentID == id {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "unit cannot be its own parent")
+			return nil, model.ErrUnitSelfParent
 		}
 
 		parent, err := s.repo.GetEntByID(c, *req.ParentID)
@@ -100,7 +99,7 @@ func (s UnitService) Update(c context.Context, id int, req model.UpdateUnitReque
 			return nil, err
 		}
 		if parent.Edges.Parish == nil || parent.Edges.Parish.ID != req.ParishID {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "parent unit belongs to a different parish")
+			return nil, model.ErrUnitParentDifferentParish
 		}
 
 		// Detect cycles: walk up parent ancestry
@@ -108,7 +107,7 @@ func (s UnitService) Update(c context.Context, id int, req model.UpdateUnitReque
 		visited := map[int]bool{id: true}
 		for {
 			if visited[currID] {
-				return nil, fiber.NewError(fiber.StatusBadRequest, "cycle detected: unit cannot have its descendant as parent")
+				return nil, model.ErrUnitCycleDetected
 			}
 			visited[currID] = true
 
@@ -132,9 +131,8 @@ func (s UnitService) Delete(c context.Context, id int) error {
 		return err
 	}
 	if hasChildren {
-		return fiber.NewError(fiber.StatusBadRequest, "cannot delete unit with children; deactivate it instead")
+		return model.ErrUnitDeleteWithChildren
 	}
 
 	return s.repo.Delete(c, id)
 }
-

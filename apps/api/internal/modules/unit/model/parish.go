@@ -30,4 +30,3 @@ type UpdateParishRequest struct {
 	Email     *string `json:"email,omitempty" validate:"omitempty,email"`
 	DioceseID *int    `json:"dioceseId,omitempty"`
 }
-

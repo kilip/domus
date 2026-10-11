@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent"
 	"github.com/paroki/domus/api/ent/entry"
@@ -57,7 +56,7 @@ func (r TransactionRepository) Void(ctx context.Context, id uuid.UUID, reversalD
 			if !txExists {
 				return core.ErrItemNotFound
 			}
-			return fiber.NewError(fiber.StatusConflict, "transaction is not in posted status")
+			return model.ErrTxNotPosted
 		}
 
 		// 2. Find the active entry (the one that is not a reversal and has no reversed_by).

@@ -163,4 +163,3 @@ func (tc TerritoryController) Delete(c fiber.Ctx) error {
 	}
 	return c.SendStatus(fiber.StatusNoContent)
 }
-

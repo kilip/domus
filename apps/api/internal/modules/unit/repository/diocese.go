@@ -169,4 +169,3 @@ func (r DioceseRepository) Delete(c context.Context, id int) error {
 		return tx.Diocese.DeleteOneID(id).Exec(c)
 	})
 }
-

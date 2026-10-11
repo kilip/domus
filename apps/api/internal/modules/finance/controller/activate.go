@@ -44,7 +44,7 @@ func NewActivateController(svc service.ActivateService, cookieName string) Activ
 func (ac ActivateController) Activate(c fiber.Ctx) error {
 	user := core.UserFromContext(c)
 	if user.ID == uuid.Nil {
-		return fiber.NewError(fiber.StatusUnauthorized, "unauthorized")
+		return core.ErrUnauthorized
 	}
 
 	var req model.ActivateFinanceRequest

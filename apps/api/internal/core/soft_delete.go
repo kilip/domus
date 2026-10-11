@@ -23,4 +23,3 @@ func HasSkipSoftDelete(ctx context.Context) bool {
 	skip, _ := ctx.Value(softDeleteKey{}).(bool)
 	return skip
 }
-

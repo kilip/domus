@@ -2,11 +2,9 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"time"
 
-	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent"
 	"github.com/paroki/domus/api/ent/account"
@@ -49,12 +47,12 @@ func (s TransactionService) Create(ctx context.Context, req model.CreateTransact
 	// Rule 1: Parse date and validate number pattern if supplied.
 	txDate, err := model.ParseDate(req.Date)
 	if err != nil {
-		return nil, fiber.NewError(fiber.StatusBadRequest, "invalid date format: "+err.Error())
+		return nil, model.ErrInvalidDateFormat
 	}
 
 	if req.Number != nil && *req.Number != "" {
 		if !model.TransactionNumberRegex.MatchString(*req.Number) {
-			return nil, fiber.NewError(fiber.StatusUnprocessableEntity, "invalid transaction number format")
+			return nil, model.ErrInvalidTxNumberFormat
 		}
 	}
 
@@ -70,16 +68,16 @@ func (s TransactionService) Create(ctx context.Context, req model.CreateTransact
 			creditSum += p.Amount
 			creditCount++
 		default:
-			return nil, fiber.NewError(fiber.StatusBadRequest, "invalid posting side: must be debit or credit")
+			return nil, model.ErrInvalidPostingSide
 		}
 	}
 
 	if debitCount == 0 || creditCount == 0 {
-		return nil, fiber.NewError(fiber.StatusBadRequest, "transaction must have at least one debit posting and one credit posting")
+		return nil, model.ErrTxMissingPostings
 	}
 
 	if debitSum != creditSum || debitSum <= 0 {
-		return nil, fiber.NewError(fiber.StatusBadRequest, "transaction is unbalanced: sum of debits must equal sum of credits and be greater than zero")
+		return nil, model.ErrTxUnbalanced
 	}
 
 	// Rule 3: Load distinct accounts via GetEntsByIDs(ids). Any missing account -> 400.
@@ -97,16 +95,16 @@ func (s TransactionService) Create(ctx context.Context, req model.CreateTransact
 		return nil, err
 	}
 	if len(accounts) != len(distinctAccountIDs) {
-		return nil, fiber.NewError(fiber.StatusBadRequest, "one or more accounts not found in this parish")
+		return nil, model.ErrAccountsNotFound
 	}
 
 	// Rule 4: Every referenced account must have status = active and postable = true -> else 400.
 	for _, acc := range accounts {
 		if acc.Status != account.StatusActive {
-			return nil, fiber.NewError(fiber.StatusBadRequest, fmt.Sprintf("account %s is not active", acc.Code))
+			return nil, model.ErrAccountNotActive
 		}
 		if !acc.Postable {
-			return nil, fiber.NewError(fiber.StatusBadRequest, fmt.Sprintf("account %s is a header account and cannot accept postings", acc.Code))
+			return nil, model.ErrAccountIsHeader
 		}
 	}
 
@@ -126,12 +124,12 @@ func (s TransactionService) GetByID(ctx context.Context, id uuid.UUID) (*model.T
 func (s TransactionService) Search(ctx context.Context, req model.SearchTransactionRequest) (*model.PaginatedResult[model.TransactionSummary], error) {
 	if req.From != nil && *req.From != "" {
 		if _, err := model.ParseDate(*req.From); err != nil {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "invalid from date: "+err.Error())
+			return nil, model.ErrInvalidFromDate
 		}
 	}
 	if req.To != nil && *req.To != "" {
 		if _, err := model.ParseDate(*req.To); err != nil {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "invalid to date: "+err.Error())
+			return nil, model.ErrInvalidToDate
 		}
 	}
 	return s.txRepo.Search(ctx, req)
@@ -142,7 +140,7 @@ func (s TransactionService) Void(ctx context.Context, id uuid.UUID, req model.Vo
 	if req.Date != nil && *req.Date != "" {
 		parsedDate, err := model.ParseDate(*req.Date)
 		if err != nil {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "invalid date format: "+err.Error())
+			return nil, model.ErrInvalidDateFormat
 		}
 		reversalDate = &parsedDate
 	}

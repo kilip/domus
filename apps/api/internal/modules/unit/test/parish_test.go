@@ -262,4 +262,3 @@ func (s *ParishSuite) TestForbidden_NoPermission() {
 func TestParishSuite(t *testing.T) {
 	suite.Run(t, new(ParishSuite))
 }
-

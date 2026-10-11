@@ -46,4 +46,3 @@ type UpdateUnitRequest struct {
 	ParentID    *int    `json:"parentId,omitempty"`
 	TerritoryID *int    `json:"territoryId,omitempty"`
 }
-

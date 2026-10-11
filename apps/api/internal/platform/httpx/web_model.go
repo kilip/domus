@@ -1,6 +1,10 @@
 package httpx
 
-import "time"
+import (
+	"time"
+
+	"github.com/paroki/domus/api/internal/core"
+)
 
 type WebResponse[T any] struct {
 	Data T    `json:"data,omitempty"`
@@ -23,10 +27,7 @@ type Meta struct {
 	Cursor    string    `json:"cursor,omitempty"`
 }
 
-type FieldError struct {
-	Field string `json:"field"`
-	Rule  string `json:"rule"`
-}
+type FieldError = core.FieldError
 
 type ErrorBody struct {
 	Code    string       `json:"code"`

@@ -4,7 +4,6 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent"
 	"github.com/paroki/domus/api/internal/modules/finance/model"
@@ -46,13 +45,13 @@ func (s AccountService) Create(ctx context.Context, req model.CreateAccountReque
 	if req.ParentID != nil {
 		parent, err := s.repo.GetEntByID(ctx, *req.ParentID)
 		if err != nil {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "parent account does not exist in this parish")
+			return nil, model.ErrParentAccountNotExist
 		}
 		if parent.Postable {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "parent account must not be postable")
+			return nil, model.ErrParentAccountPostable
 		}
 		if string(parent.Type) != req.Type {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "child account type must match parent account type")
+			return nil, model.ErrAccountTypeMismatch
 		}
 	}
 
@@ -67,18 +66,18 @@ func (s AccountService) Update(ctx context.Context, id uuid.UUID, req model.Upda
 
 	if req.ParentID != nil {
 		if *req.ParentID == id {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "account cannot be its own parent")
+			return nil, model.ErrAccountSelfParent
 		}
 
 		parent, err := s.repo.GetEntByID(ctx, *req.ParentID)
 		if err != nil {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "parent account does not exist in this parish")
+			return nil, model.ErrParentAccountNotExist
 		}
 		if parent.Postable {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "parent account must not be postable")
+			return nil, model.ErrParentAccountPostable
 		}
 		if string(parent.Type) != req.Type {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "child account type must match parent account type")
+			return nil, model.ErrAccountTypeMismatch
 		}
 
 		// Detect cycles: walk up parent ancestry
@@ -86,7 +85,7 @@ func (s AccountService) Update(ctx context.Context, id uuid.UUID, req model.Upda
 		visited := map[uuid.UUID]bool{id: true}
 		for {
 			if visited[currID] {
-				return nil, fiber.NewError(fiber.StatusBadRequest, "cycle detected: account cannot have its descendant as parent")
+				return nil, model.ErrAccountCycleDetected
 			}
 			visited[currID] = true
 
@@ -108,10 +107,10 @@ func (s AccountService) Update(ctx context.Context, id uuid.UUID, req model.Upda
 
 	if hasPostings {
 		if string(existing.Type) != req.Type {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "cannot change type of account with postings")
+			return nil, model.ErrAccountTypeWithPostings
 		}
 		if req.Postable != nil && *req.Postable != existing.Postable {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "cannot change postable of account with postings")
+			return nil, model.ErrAccountPostableWithPostings
 		}
 	}
 
@@ -122,7 +121,7 @@ func (s AccountService) Update(ctx context.Context, id uuid.UUID, req model.Upda
 			return nil, err
 		}
 		if hasDescPostings {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "cannot change type of account when descendant has postings")
+			return nil, model.ErrAccountDescendantHasPostings
 		}
 		updateChildrenType = true
 	}
@@ -133,7 +132,7 @@ func (s AccountService) Update(ctx context.Context, id uuid.UUID, req model.Upda
 			return nil, err
 		}
 		if hasChildren {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "cannot make account postable when it has children")
+			return nil, model.ErrAccountPostableWithChildren
 		}
 	}
 
@@ -152,7 +151,7 @@ func (s AccountService) Delete(ctx context.Context, id uuid.UUID) error {
 		return err
 	}
 	if hasChildren {
-		return fiber.NewError(fiber.StatusBadRequest, "cannot delete account with children; deactivate it instead")
+		return model.ErrAccountDeleteWithChildren
 	}
 
 	hasPostings, err := s.repo.HasPostings(ctx, id)
@@ -160,7 +159,7 @@ func (s AccountService) Delete(ctx context.Context, id uuid.UUID) error {
 		return err
 	}
 	if hasPostings {
-		return fiber.NewError(fiber.StatusBadRequest, "cannot delete account with postings; deactivate it instead")
+		return model.ErrAccountDeleteWithPostings
 	}
 
 	return s.repo.Delete(ctx, id)

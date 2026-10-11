@@ -19,7 +19,7 @@ func RequireFinanceContext(cookieName string) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		raw := c.Cookies(cookieName)
 		if raw == "" {
-			return fiber.NewError(fiber.StatusBadRequest, "finance context is not active, please activate first")
+			return ErrContextNotActive
 		}
 
 		// Support URL-encoded JSON or raw JSON in cookie
@@ -30,11 +30,11 @@ func RequireFinanceContext(cookieName string) fiber.Handler {
 
 		var fc model.FinanceContext
 		if err := json.Unmarshal([]byte(unescaped), &fc); err != nil {
-			return fiber.NewError(fiber.StatusBadRequest, "finance context is not active, please activate first")
+			return ErrContextNotActive
 		}
 
 		if fc.ParishID <= 0 || fc.UnitID <= 0 {
-			return fiber.NewError(fiber.StatusBadRequest, "finance context is not active, please activate first")
+			return ErrContextNotActive
 		}
 
 		c.Locals(model.FinanceContextKey, fc)

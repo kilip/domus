@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 
-	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent"
 	"github.com/paroki/domus/api/ent/parish"
@@ -35,7 +34,7 @@ func NewTransactionOwnerResolver(cli *ent.Client) attachment.OwnerResolver {
 			return nil, err
 		}
 		if tx.Edges.Unit == nil {
-			return nil, fiber.NewError(fiber.StatusUnprocessableEntity, "transaction has no unit; attachments require a unit")
+			return nil, model.ErrTransactionHasNoUnit
 		}
 		return &attachment.Owner{ID: tx.ID, ParishID: parishID, UnitID: tx.Edges.Unit.ID}, nil
 	}

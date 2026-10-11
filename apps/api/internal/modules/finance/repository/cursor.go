@@ -5,10 +5,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent"
 	"github.com/paroki/domus/api/internal/core"
+	"github.com/paroki/domus/api/internal/modules/finance/model"
 )
 
 // EncodeCursor produces an opaque base64url-encoded string from date and UUID.
@@ -21,30 +21,30 @@ func EncodeCursor(date time.Time, id uuid.UUID) string {
 // If the cursor is invalid or malformed, it returns an HTTP 400 fiber.Error.
 func DecodeCursor(cursor string) (time.Time, uuid.UUID, error) {
 	if cursor == "" {
-		return time.Time{}, uuid.Nil, fiber.NewError(fiber.StatusBadRequest, "invalid cursor: empty cursor")
+		return time.Time{}, uuid.Nil, model.ErrInvalidCursor
 	}
 
 	decoded, err := base64.RawURLEncoding.DecodeString(cursor)
 	if err != nil {
-		return time.Time{}, uuid.Nil, fiber.NewError(fiber.StatusBadRequest, "invalid cursor: base64 decode failed")
+		return time.Time{}, uuid.Nil, model.ErrInvalidCursor
 	}
 
 	parts := strings.SplitN(string(decoded), "|", 2)
 	if len(parts) != 2 {
-		return time.Time{}, uuid.Nil, fiber.NewError(fiber.StatusBadRequest, "invalid cursor: malformed structure")
+		return time.Time{}, uuid.Nil, model.ErrInvalidCursor
 	}
 
 	date, err := time.Parse(time.RFC3339Nano, parts[0])
 	if err != nil {
 		date, err = time.Parse(time.RFC3339, parts[0])
 		if err != nil {
-			return time.Time{}, uuid.Nil, fiber.NewError(fiber.StatusBadRequest, "invalid cursor: invalid date component")
+			return time.Time{}, uuid.Nil, model.ErrInvalidCursor
 		}
 	}
 
 	id, err := uuid.Parse(parts[1])
 	if err != nil {
-		return time.Time{}, uuid.Nil, fiber.NewError(fiber.StatusBadRequest, "invalid cursor: invalid id component")
+		return time.Time{}, uuid.Nil, model.ErrInvalidCursor
 	}
 
 	return date.UTC(), id, nil
