@@ -1,5 +1,35 @@
 components:
   schemas:
+    attachment.DownloadResponse:
+      properties:
+        expiresAt:
+          type: string
+        url:
+          type: string
+      type: object
+    attachment.Response:
+      properties:
+        checksum:
+          type: string
+        createdAt:
+          type: string
+        createdBy:
+          $ref: '#/components/schemas/core.User'
+        filename:
+          type: string
+        id:
+          type: string
+        mimeType:
+          type: string
+        ownerId:
+          type: string
+        ownerType:
+          type: string
+        size:
+          type: integer
+        unitId:
+          type: integer
+      type: object
     core.AuthenticatedUser:
       properties:
         avatar:
@@ -78,21 +108,21 @@ components:
         timestamp:
           type: string
       type: object
-    httpx.WebResponse-array_model_AccountResponse:
+    httpx.WebResponse-array_attachment_Response:
       properties:
         data:
           items:
-            $ref: '#/components/schemas/model.AccountResponse'
+            $ref: '#/components/schemas/attachment.Response'
           type: array
           uniqueItems: false
         meta:
           $ref: '#/components/schemas/httpx.Meta'
       type: object
-    httpx.WebResponse-array_model_AttachmentResponse:
+    httpx.WebResponse-array_model_AccountResponse:
       properties:
         data:
           items:
-            $ref: '#/components/schemas/model.AttachmentResponse'
+            $ref: '#/components/schemas/model.AccountResponse'
           type: array
           uniqueItems: false
         meta:
@@ -148,6 +178,20 @@ components:
         meta:
           $ref: '#/components/schemas/httpx.Meta'
       type: object
+    httpx.WebResponse-attachment_DownloadResponse:
+      properties:
+        data:
+          $ref: '#/components/schemas/attachment.DownloadResponse'
+        meta:
+          $ref: '#/components/schemas/httpx.Meta'
+      type: object
+    httpx.WebResponse-attachment_Response:
+      properties:
+        data:
+          $ref: '#/components/schemas/attachment.Response'
+        meta:
+          $ref: '#/components/schemas/httpx.Meta'
+      type: object
     httpx.WebResponse-core_AuthenticatedUser:
       properties:
         data:
@@ -162,13 +206,6 @@ components:
         meta:
           $ref: '#/components/schemas/httpx.Meta'
       type: object
-    httpx.WebResponse-model_AttachmentResponse:
-      properties:
-        data:
-          $ref: '#/components/schemas/model.AttachmentResponse'
-        meta:
-          $ref: '#/components/schemas/httpx.Meta'
-      type: object
     httpx.WebResponse-model_CollectionsResponse:
       properties:
         data:
@@ -180,13 +217,6 @@ components:
       properties:
         data:
           $ref: '#/components/schemas/model.DioceseResponse'
-        meta:
-          $ref: '#/components/schemas/httpx.Meta'
-      type: object
-    httpx.WebResponse-model_DownloadResponse:
-      properties:
-        data:
-          $ref: '#/components/schemas/model.DownloadResponse'
         meta:
           $ref: '#/components/schemas/httpx.Meta'
       type: object
@@ -259,25 +289,6 @@ components:
         unitId:
           type: integer
         updatedAt:
-          type: string
-      type: object
-    model.AttachmentResponse:
-      properties:
-        checksum:
-          type: string
-        createdAt:
-          type: string
-        createdBy:
-          $ref: '#/components/schemas/core.User'
-        filename:
-          type: string
-        id:
-          type: string
-        mimeType:
-          type: string
-        size:
-          type: integer
-        transactionId:
           type: string
       type: object
     model.CollectionsResponse:
@@ -469,13 +480,6 @@ components:
           type: string
         updatedBy:
           $ref: '#/components/schemas/core.User'
-      type: object
-    model.DownloadResponse:
-      properties:
-        expiresAt:
-          type: string
-        url:
-          type: string
       type: object
     model.EntryResponse:
       properties:
@@ -693,7 +697,7 @@ components:
       properties:
         attachments:
           items:
-            $ref: '#/components/schemas/model.AttachmentResponse'
+            $ref: '#/components/schemas/attachment.Response'
           type: array
           uniqueItems: false
         createdAt:
@@ -2030,7 +2034,7 @@ paths:
       - Finance Transaction
   /parishes/{parishId}/finance/transactions/{id}/attachments:
     get:
-      description: List all attachments for a transaction
+      description: List all attachments of an owner record
       parameters:
       - description: Parish ID
         in: path
@@ -2038,7 +2042,7 @@ paths:
         required: true
         schema:
           type: integer
-      - description: Transaction ID
+      - description: Owner (transaction) ID
         in: path
         name: id
         required: true
@@ -2054,7 +2058,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/httpx.WebResponse-array_model_AttachmentResponse'
+                $ref: '#/components/schemas/httpx.WebResponse-array_attachment_Response'
           description: OK
         "400":
           content:
@@ -2082,12 +2086,13 @@ paths:
           description: Not Found
       security:
       - BearerAuth: []
-      summary: List transaction attachments
+      summary: List attachments
       tags:
-      - Finance Attachment
+      - Attachment
     post:
-      description: Upload a file attachment for a transaction (PDF, JPEG, PNG, max
-        10 MiB)
+      description: Upload a file (PDF, JPEG, PNG, max 10 MiB) attached to an owner
+        record, e.g. a finance transaction. Permission is checked at the owner's unit
+        scope.
       parameters:
       - description: Parish ID
         in: path
@@ -2095,7 +2100,7 @@ paths:
         required: true
         schema:
           type: integer
-      - description: Transaction ID
+      - description: Owner (transaction) ID
         in: path
         name: id
         required: true
@@ -2120,7 +2125,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/httpx.WebResponse-model_AttachmentResponse'
+                $ref: '#/components/schemas/httpx.WebResponse-attachment_Response'
           description: Created
         "400":
           content:
@@ -2160,9 +2165,9 @@ paths:
           description: Unprocessable Entity
       security:
       - BearerAuth: []
-      summary: Upload transaction attachment
+      summary: Upload attachment
       tags:
-      - Finance Attachment
+      - Attachment
   /parishes/{parishId}/finance/transactions/{id}/attachments/{attachmentId}/download:
     get:
       description: Generate a presigned GET URL valid for 5 minutes to download an
@@ -2174,7 +2179,7 @@ paths:
         required: true
         schema:
           type: integer
-      - description: Transaction ID
+      - description: Owner (transaction) ID
         in: path
         name: id
         required: true
@@ -2196,7 +2201,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/httpx.WebResponse-model_DownloadResponse'
+                $ref: '#/components/schemas/httpx.WebResponse-attachment_DownloadResponse'
           description: OK
         "400":
           content:
@@ -2226,7 +2231,7 @@ paths:
       - BearerAuth: []
       summary: Get presigned download URL for attachment
       tags:
-      - Finance Attachment
+      - Attachment
   /parishes/{parishId}/finance/transactions/{id}/void:
     post:
       description: Void a posted transaction by creating a reversal entry and setting

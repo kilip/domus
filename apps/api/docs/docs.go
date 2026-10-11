@@ -8,6 +8,52 @@ const docTemplate = `{
     "schemes": {{ marshal .Schemes }},
     "components": {
         "schemas": {
+            "attachment.DownloadResponse": {
+                "properties": {
+                    "expiresAt": {
+                        "type": "string"
+                    },
+                    "url": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "attachment.Response": {
+                "properties": {
+                    "checksum": {
+                        "type": "string"
+                    },
+                    "createdAt": {
+                        "type": "string"
+                    },
+                    "createdBy": {
+                        "$ref": "#/components/schemas/core.User"
+                    },
+                    "filename": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "mimeType": {
+                        "type": "string"
+                    },
+                    "ownerId": {
+                        "type": "string"
+                    },
+                    "ownerType": {
+                        "type": "string"
+                    },
+                    "size": {
+                        "type": "integer"
+                    },
+                    "unitId": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
             "core.AuthenticatedUser": {
                 "properties": {
                     "avatar": {
@@ -125,11 +171,11 @@ const docTemplate = `{
                 },
                 "type": "object"
             },
-            "httpx.WebResponse-array_model_AccountResponse": {
+            "httpx.WebResponse-array_attachment_Response": {
                 "properties": {
                     "data": {
                         "items": {
-                            "$ref": "#/components/schemas/model.AccountResponse"
+                            "$ref": "#/components/schemas/attachment.Response"
                         },
                         "type": "array",
                         "uniqueItems": false
@@ -140,11 +186,11 @@ const docTemplate = `{
                 },
                 "type": "object"
             },
-            "httpx.WebResponse-array_model_AttachmentResponse": {
+            "httpx.WebResponse-array_model_AccountResponse": {
                 "properties": {
                     "data": {
                         "items": {
-                            "$ref": "#/components/schemas/model.AttachmentResponse"
+                            "$ref": "#/components/schemas/model.AccountResponse"
                         },
                         "type": "array",
                         "uniqueItems": false
@@ -230,6 +276,28 @@ const docTemplate = `{
                 },
                 "type": "object"
             },
+            "httpx.WebResponse-attachment_DownloadResponse": {
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/attachment.DownloadResponse"
+                    },
+                    "meta": {
+                        "$ref": "#/components/schemas/httpx.Meta"
+                    }
+                },
+                "type": "object"
+            },
+            "httpx.WebResponse-attachment_Response": {
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/attachment.Response"
+                    },
+                    "meta": {
+                        "$ref": "#/components/schemas/httpx.Meta"
+                    }
+                },
+                "type": "object"
+            },
             "httpx.WebResponse-core_AuthenticatedUser": {
                 "properties": {
                     "data": {
@@ -252,17 +320,6 @@ const docTemplate = `{
                 },
                 "type": "object"
             },
-            "httpx.WebResponse-model_AttachmentResponse": {
-                "properties": {
-                    "data": {
-                        "$ref": "#/components/schemas/model.AttachmentResponse"
-                    },
-                    "meta": {
-                        "$ref": "#/components/schemas/httpx.Meta"
-                    }
-                },
-                "type": "object"
-            },
             "httpx.WebResponse-model_CollectionsResponse": {
                 "properties": {
                     "data": {
@@ -278,17 +335,6 @@ const docTemplate = `{
                 "properties": {
                     "data": {
                         "$ref": "#/components/schemas/model.DioceseResponse"
-                    },
-                    "meta": {
-                        "$ref": "#/components/schemas/httpx.Meta"
-                    }
-                },
-                "type": "object"
-            },
-            "httpx.WebResponse-model_DownloadResponse": {
-                "properties": {
-                    "data": {
-                        "$ref": "#/components/schemas/model.DownloadResponse"
                     },
                     "meta": {
                         "$ref": "#/components/schemas/httpx.Meta"
@@ -401,35 +447,6 @@ const docTemplate = `{
                         "type": "integer"
                     },
                     "updatedAt": {
-                        "type": "string"
-                    }
-                },
-                "type": "object"
-            },
-            "model.AttachmentResponse": {
-                "properties": {
-                    "checksum": {
-                        "type": "string"
-                    },
-                    "createdAt": {
-                        "type": "string"
-                    },
-                    "createdBy": {
-                        "$ref": "#/components/schemas/core.User"
-                    },
-                    "filename": {
-                        "type": "string"
-                    },
-                    "id": {
-                        "type": "string"
-                    },
-                    "mimeType": {
-                        "type": "string"
-                    },
-                    "size": {
-                        "type": "integer"
-                    },
-                    "transactionId": {
                         "type": "string"
                     }
                 },
@@ -706,17 +723,6 @@ const docTemplate = `{
                     },
                     "updatedBy": {
                         "$ref": "#/components/schemas/core.User"
-                    }
-                },
-                "type": "object"
-            },
-            "model.DownloadResponse": {
-                "properties": {
-                    "expiresAt": {
-                        "type": "string"
-                    },
-                    "url": {
-                        "type": "string"
                     }
                 },
                 "type": "object"
@@ -1040,7 +1046,7 @@ const docTemplate = `{
                 "properties": {
                     "attachments": {
                         "items": {
-                            "$ref": "#/components/schemas/model.AttachmentResponse"
+                            "$ref": "#/components/schemas/attachment.Response"
                         },
                         "type": "array",
                         "uniqueItems": false
@@ -3292,7 +3298,7 @@ const docTemplate = `{
         },
         "/parishes/{parishId}/finance/transactions/{id}/attachments": {
             "get": {
-                "description": "List all attachments for a transaction",
+                "description": "List all attachments of an owner record",
                 "parameters": [
                     {
                         "description": "Parish ID",
@@ -3304,7 +3310,7 @@ const docTemplate = `{
                         }
                     },
                     {
-                        "description": "Transaction ID",
+                        "description": "Owner (transaction) ID",
                         "in": "path",
                         "name": "id",
                         "required": true,
@@ -3327,7 +3333,7 @@ const docTemplate = `{
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/httpx.WebResponse-array_model_AttachmentResponse"
+                                    "$ref": "#/components/schemas/httpx.WebResponse-array_attachment_Response"
                                 }
                             }
                         },
@@ -3379,13 +3385,13 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "summary": "List transaction attachments",
+                "summary": "List attachments",
                 "tags": [
-                    "Finance Attachment"
+                    "Attachment"
                 ]
             },
             "post": {
-                "description": "Upload a file attachment for a transaction (PDF, JPEG, PNG, max 10 MiB)",
+                "description": "Upload a file (PDF, JPEG, PNG, max 10 MiB) attached to an owner record, e.g. a finance transaction. Permission is checked at the owner's unit scope.",
                 "parameters": [
                     {
                         "description": "Parish ID",
@@ -3397,7 +3403,7 @@ const docTemplate = `{
                         }
                     },
                     {
-                        "description": "Transaction ID",
+                        "description": "Owner (transaction) ID",
                         "in": "path",
                         "name": "id",
                         "required": true,
@@ -3432,7 +3438,7 @@ const docTemplate = `{
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/httpx.WebResponse-model_AttachmentResponse"
+                                    "$ref": "#/components/schemas/httpx.WebResponse-attachment_Response"
                                 }
                             }
                         },
@@ -3504,9 +3510,9 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "summary": "Upload transaction attachment",
+                "summary": "Upload attachment",
                 "tags": [
-                    "Finance Attachment"
+                    "Attachment"
                 ]
             }
         },
@@ -3524,7 +3530,7 @@ const docTemplate = `{
                         }
                     },
                     {
-                        "description": "Transaction ID",
+                        "description": "Owner (transaction) ID",
                         "in": "path",
                         "name": "id",
                         "required": true,
@@ -3556,7 +3562,7 @@ const docTemplate = `{
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/httpx.WebResponse-model_DownloadResponse"
+                                    "$ref": "#/components/schemas/httpx.WebResponse-attachment_DownloadResponse"
                                 }
                             }
                         },
@@ -3610,7 +3616,7 @@ const docTemplate = `{
                 ],
                 "summary": "Get presigned download URL for attachment",
                 "tags": [
-                    "Finance Attachment"
+                    "Attachment"
                 ]
             }
         },

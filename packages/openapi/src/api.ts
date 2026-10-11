@@ -1647,8 +1647,8 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * List transaction attachments
-     * @description List all attachments for a transaction
+     * List attachments
+     * @description List all attachments of an owner record
      */
     get: {
       parameters: {
@@ -1657,7 +1657,7 @@ export interface paths {
         path: {
           /** @description Parish ID */
           parishId: number;
-          /** @description Transaction ID */
+          /** @description Owner (transaction) ID */
           id: string;
         };
         cookie?: never;
@@ -1674,7 +1674,7 @@ export interface paths {
             [name: string]: unknown;
           };
           content: {
-            "application/json": components["schemas"]["httpx.WebResponse-array_model_AttachmentResponse"];
+            "application/json": components["schemas"]["httpx.WebResponse-array_attachment_Response"];
           };
         };
         /** @description Bad Request */
@@ -1717,8 +1717,8 @@ export interface paths {
     };
     put?: never;
     /**
-     * Upload transaction attachment
-     * @description Upload a file attachment for a transaction (PDF, JPEG, PNG, max 10 MiB)
+     * Upload attachment
+     * @description Upload a file (PDF, JPEG, PNG, max 10 MiB) attached to an owner record, e.g. a finance transaction. Permission is checked at the owner's unit scope.
      */
     post: {
       parameters: {
@@ -1727,7 +1727,7 @@ export interface paths {
         path: {
           /** @description Parish ID */
           parishId: number;
-          /** @description Transaction ID */
+          /** @description Owner (transaction) ID */
           id: string;
         };
         cookie?: never;
@@ -1751,7 +1751,7 @@ export interface paths {
             [name: string]: unknown;
           };
           content: {
-            "application/json": components["schemas"]["httpx.WebResponse-model_AttachmentResponse"];
+            "application/json": components["schemas"]["httpx.WebResponse-attachment_Response"];
           };
         };
         /** @description Bad Request */
@@ -1834,7 +1834,7 @@ export interface paths {
         path: {
           /** @description Parish ID */
           parishId: number;
-          /** @description Transaction ID */
+          /** @description Owner (transaction) ID */
           id: string;
           /** @description Attachment ID */
           attachmentId: string;
@@ -1853,7 +1853,7 @@ export interface paths {
             [name: string]: unknown;
           };
           content: {
-            "application/json": components["schemas"]["httpx.WebResponse-model_DownloadResponse"];
+            "application/json": components["schemas"]["httpx.WebResponse-attachment_DownloadResponse"];
           };
         };
         /** @description Bad Request */
@@ -2809,6 +2809,22 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    "attachment.DownloadResponse": {
+      expiresAt?: string;
+      url?: string;
+    };
+    "attachment.Response": {
+      checksum?: string;
+      createdAt?: string;
+      createdBy?: components["schemas"]["core.User"];
+      filename?: string;
+      id?: string;
+      mimeType?: string;
+      ownerId?: string;
+      ownerType?: string;
+      size?: number;
+      unitId?: number;
+    };
     "core.AuthenticatedUser": {
       avatar?: string;
       email?: string;
@@ -2845,12 +2861,12 @@ export interface components {
       requestId?: string;
       timestamp?: string;
     };
-    "httpx.WebResponse-array_model_AccountResponse": {
-      data?: components["schemas"]["model.AccountResponse"][];
+    "httpx.WebResponse-array_attachment_Response": {
+      data?: components["schemas"]["attachment.Response"][];
       meta?: components["schemas"]["httpx.Meta"];
     };
-    "httpx.WebResponse-array_model_AttachmentResponse": {
-      data?: components["schemas"]["model.AttachmentResponse"][];
+    "httpx.WebResponse-array_model_AccountResponse": {
+      data?: components["schemas"]["model.AccountResponse"][];
       meta?: components["schemas"]["httpx.Meta"];
     };
     "httpx.WebResponse-array_model_DioceseResponse": {
@@ -2873,6 +2889,14 @@ export interface components {
       data?: components["schemas"]["model.UnitResponse"][];
       meta?: components["schemas"]["httpx.Meta"];
     };
+    "httpx.WebResponse-attachment_DownloadResponse": {
+      data?: components["schemas"]["attachment.DownloadResponse"];
+      meta?: components["schemas"]["httpx.Meta"];
+    };
+    "httpx.WebResponse-attachment_Response": {
+      data?: components["schemas"]["attachment.Response"];
+      meta?: components["schemas"]["httpx.Meta"];
+    };
     "httpx.WebResponse-core_AuthenticatedUser": {
       data?: components["schemas"]["core.AuthenticatedUser"];
       meta?: components["schemas"]["httpx.Meta"];
@@ -2881,20 +2905,12 @@ export interface components {
       data?: components["schemas"]["model.AccountResponse"];
       meta?: components["schemas"]["httpx.Meta"];
     };
-    "httpx.WebResponse-model_AttachmentResponse": {
-      data?: components["schemas"]["model.AttachmentResponse"];
-      meta?: components["schemas"]["httpx.Meta"];
-    };
     "httpx.WebResponse-model_CollectionsResponse": {
       data?: components["schemas"]["model.CollectionsResponse"];
       meta?: components["schemas"]["httpx.Meta"];
     };
     "httpx.WebResponse-model_DioceseResponse": {
       data?: components["schemas"]["model.DioceseResponse"];
-      meta?: components["schemas"]["httpx.Meta"];
-    };
-    "httpx.WebResponse-model_DownloadResponse": {
-      data?: components["schemas"]["model.DownloadResponse"];
       meta?: components["schemas"]["httpx.Meta"];
     };
     "httpx.WebResponse-model_LedgerResponse": {
@@ -2935,16 +2951,6 @@ export interface components {
       type?: string;
       unitId?: number;
       updatedAt?: string;
-    };
-    "model.AttachmentResponse": {
-      checksum?: string;
-      createdAt?: string;
-      createdBy?: components["schemas"]["core.User"];
-      filename?: string;
-      id?: string;
-      mimeType?: string;
-      size?: number;
-      transactionId?: string;
     };
     "model.CollectionsResponse": {
       from?: string;
@@ -3022,10 +3028,6 @@ export interface components {
       name?: string;
       updatedAt?: string;
       updatedBy?: components["schemas"]["core.User"];
-    };
-    "model.DownloadResponse": {
-      expiresAt?: string;
-      url?: string;
     };
     "model.EntryResponse": {
       date?: string;
@@ -3128,7 +3130,7 @@ export interface components {
       unitId?: number;
     };
     "model.TransactionResponse": {
-      attachments?: components["schemas"]["model.AttachmentResponse"][];
+      attachments?: components["schemas"]["attachment.Response"][];
       createdAt?: string;
       createdBy?: components["schemas"]["core.User"];
       date?: string;
