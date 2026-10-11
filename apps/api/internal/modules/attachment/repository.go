@@ -19,15 +19,21 @@ type CreateInput struct {
 	Checksum  string
 }
 
-type Repository struct {
+type Repository interface {
+	Create(ctx context.Context, ownerType string, owner Owner, in CreateInput) (*Response, error)
+	ListByOwner(ctx context.Context, ownerType string, owner Owner) ([]Response, error)
+	GetByID(ctx context.Context, ownerType string, owner Owner, id uuid.UUID) (*ent.Attachment, error)
+}
+
+type attachmentRepository struct {
 	entcli *ent.Client
 }
 
 func NewRepository(entcli *ent.Client) Repository {
-	return Repository{entcli: entcli}
+	return attachmentRepository{entcli: entcli}
 }
 
-func (r Repository) Create(ctx context.Context, ownerType string, owner Owner, in CreateInput) (*Response, error) {
+func (r attachmentRepository) Create(ctx context.Context, ownerType string, owner Owner, in CreateInput) (*Response, error) {
 	created, err := r.entcli.Attachment.Create().
 		SetID(in.ID).
 		SetOwnerType(ownerType).
@@ -57,7 +63,7 @@ func (r Repository) Create(ctx context.Context, ownerType string, owner Owner, i
 	return &resp, nil
 }
 
-func (r Repository) ListByOwner(ctx context.Context, ownerType string, owner Owner) ([]Response, error) {
+func (r attachmentRepository) ListByOwner(ctx context.Context, ownerType string, owner Owner) ([]Response, error) {
 	m, err := LoadByOwners(ctx, r.entcli, ownerType, []uuid.UUID{owner.ID})
 	if err != nil {
 		return nil, err
@@ -69,7 +75,7 @@ func (r Repository) ListByOwner(ctx context.Context, ownerType string, owner Own
 	return res, nil
 }
 
-func (r Repository) GetByID(ctx context.Context, ownerType string, owner Owner, id uuid.UUID) (*ent.Attachment, error) {
+func (r attachmentRepository) GetByID(ctx context.Context, ownerType string, owner Owner, id uuid.UUID) (*ent.Attachment, error) {
 	att, err := r.entcli.Attachment.Query().
 		Where(
 			entattachment.IDEQ(id),

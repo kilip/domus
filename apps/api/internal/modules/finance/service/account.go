@@ -22,13 +22,12 @@ type AccountRepository interface {
 }
 
 type AccountService struct {
-	repo   AccountRepository
-	entcli *ent.Client
-	log    *slog.Logger
+	repo AccountRepository
+	log  *slog.Logger
 }
 
-func NewAccountService(repo AccountRepository, entcli *ent.Client, log *slog.Logger) AccountService {
-	return AccountService{repo: repo, entcli: entcli, log: log}
+func NewAccountService(repo AccountRepository, log *slog.Logger) AccountService {
+	return AccountService{repo: repo, log: log}
 }
 
 func (s AccountService) List(ctx context.Context, filter model.ListAccountsQuery) ([]model.AccountResponse, error) {

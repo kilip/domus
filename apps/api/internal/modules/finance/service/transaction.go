@@ -25,20 +25,17 @@ type AccountLookupRepository interface {
 type TransactionService struct {
 	txRepo      TransactionRepository
 	accountRepo AccountLookupRepository
-	entcli      *ent.Client
 	log         *slog.Logger
 }
 
 func NewTransactionService(
 	txRepo TransactionRepository,
 	accountRepo AccountLookupRepository,
-	entcli *ent.Client,
 	log *slog.Logger,
 ) TransactionService {
 	return TransactionService{
 		txRepo:      txRepo,
 		accountRepo: accountRepo,
-		entcli:      entcli,
 		log:         log,
 	}
 }

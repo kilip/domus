@@ -87,4 +87,3 @@ func (s *FinanceUnitTestSuite) TestGetAccessibleUnits_InactiveUnitExcluded() {
 func TestFinanceUnitTestSuite(t *testing.T) {
 	suite.Run(t, new(FinanceUnitTestSuite))
 }
-

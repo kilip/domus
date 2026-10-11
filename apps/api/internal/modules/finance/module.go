@@ -43,18 +43,20 @@ func New(config Config) Module {
 		config.CookieName = DefaultCookieName
 	}
 
-	unitSvc := service.NewFinanceUnitService(config.EntCli, config.Log)
+	unitRepo := repository.NewFinanceUnitRepository(config.EntCli, config.Log)
+	unitSvc := service.NewFinanceUnitService(unitRepo, config.Log)
 	unitCtrl := controller.NewFinanceUnitController(unitSvc)
 
-	activateSvc := service.NewActivateService(config.EntCli, config.Authz, config.Log)
+	activateRepo := repository.NewActivateRepository(config.EntCli, config.Log)
+	activateSvc := service.NewActivateService(activateRepo, config.Authz, config.Log)
 	activateCtrl := controller.NewActivateController(activateSvc, config.CookieName)
 
 	accountRepo := repository.NewAccountRepository(config.EntCli, config.Log)
-	accountSvc := service.NewAccountService(accountRepo, config.EntCli, config.Log)
+	accountSvc := service.NewAccountService(accountRepo, config.Log)
 	accountCtrl := controller.NewAccountController(accountSvc)
 
 	txRepo := repository.NewTransactionRepository(config.EntCli, config.Log)
-	txSvc := service.NewTransactionService(txRepo, accountRepo, config.EntCli, config.Log)
+	txSvc := service.NewTransactionService(txRepo, accountRepo, config.Log)
 	txCtrl := controller.NewTransactionController(txSvc)
 
 	attMod := attachment.New(attachment.Config{
