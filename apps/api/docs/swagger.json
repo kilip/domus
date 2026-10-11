@@ -144,6 +144,36 @@
         },
         "type": "object"
       },
+      "httpx.WebResponse-array_model_TerritoryResponse": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/model.TerritoryResponse"
+            },
+            "type": "array",
+            "uniqueItems": false
+          },
+          "meta": {
+            "$ref": "#/components/schemas/httpx.Meta"
+          }
+        },
+        "type": "object"
+      },
+      "httpx.WebResponse-array_model_UnitResponse": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/model.UnitResponse"
+            },
+            "type": "array",
+            "uniqueItems": false
+          },
+          "meta": {
+            "$ref": "#/components/schemas/httpx.Meta"
+          }
+        },
+        "type": "object"
+      },
       "httpx.WebResponse-core_AuthenticatedUser": {
         "properties": {
           "data": {
@@ -170,6 +200,28 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/model.ParishResponse"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/httpx.Meta"
+          }
+        },
+        "type": "object"
+      },
+      "httpx.WebResponse-model_TerritoryResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/model.TerritoryResponse"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/httpx.Meta"
+          }
+        },
+        "type": "object"
+      },
+      "httpx.WebResponse-model_UnitResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/model.UnitResponse"
           },
           "meta": {
             "$ref": "#/components/schemas/httpx.Meta"
@@ -214,6 +266,72 @@
           }
         },
         "required": ["name"],
+        "type": "object"
+      },
+      "model.CreateTerritoryRequest": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "integer"
+          },
+          "parishId": {
+            "type": "integer"
+          },
+          "status": {
+            "enum": ["active", "inactive"],
+            "type": "string"
+          }
+        },
+        "required": ["kind", "name", "parishId"],
+        "type": "object"
+      },
+      "model.CreateUnitRequest": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "council",
+              "territorial",
+              "category",
+              "section",
+              "committee"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "integer"
+          },
+          "parishId": {
+            "type": "integer"
+          },
+          "status": {
+            "enum": ["active", "inactive"],
+            "type": "string"
+          },
+          "territoryId": {
+            "type": "integer"
+          }
+        },
+        "required": ["kind", "name", "parishId"],
         "type": "object"
       },
       "model.DioceseResponse": {
@@ -271,6 +389,134 @@
         },
         "type": "object"
       },
+      "model.SearchTerritoryRequest": {
+        "properties": {
+          "cursor": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "parentId": {
+            "type": "integer"
+          },
+          "parishId": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "model.SearchUnitRequest": {
+        "properties": {
+          "cursor": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "parentId": {
+            "type": "integer"
+          },
+          "parishId": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "territoryId": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "model.TerritoryResponse": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parent": {
+            "$ref": "#/components/schemas/model.TerritoryResponse"
+          },
+          "parentId": {
+            "type": "integer"
+          },
+          "parish": {
+            "$ref": "#/components/schemas/model.ParishResponse"
+          },
+          "parishId": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "unitId": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "model.UnitResponse": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parent": {
+            "$ref": "#/components/schemas/model.UnitResponse"
+          },
+          "parentId": {
+            "type": "integer"
+          },
+          "parish": {
+            "$ref": "#/components/schemas/model.ParishResponse"
+          },
+          "parishId": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "territory": {
+            "$ref": "#/components/schemas/model.TerritoryResponse"
+          },
+          "territoryId": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "model.UpdateDioceseRequest": {
         "properties": {
           "active": {
@@ -308,6 +554,72 @@
           }
         },
         "required": ["name"],
+        "type": "object"
+      },
+      "model.UpdateTerritoryRequest": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "integer"
+          },
+          "parishId": {
+            "type": "integer"
+          },
+          "status": {
+            "enum": ["active", "inactive"],
+            "type": "string"
+          }
+        },
+        "required": ["kind", "name", "parishId"],
+        "type": "object"
+      },
+      "model.UpdateUnitRequest": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "council",
+              "territorial",
+              "category",
+              "section",
+              "committee"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "integer"
+          },
+          "parishId": {
+            "type": "integer"
+          },
+          "status": {
+            "enum": ["active", "inactive"],
+            "type": "string"
+          },
+          "territoryId": {
+            "type": "integer"
+          }
+        },
+        "required": ["kind", "name", "parishId"],
         "type": "object"
       }
     },
@@ -1083,6 +1395,788 @@
         ],
         "summary": "Health check ping",
         "tags": ["Health"]
+      }
+    },
+    "/territories": {
+      "post": {
+        "description": "Create a new territory",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/model.CreateTerritoryRequest",
+                "summary": "request",
+                "description": "Create territory request"
+              }
+            }
+          },
+          "description": "Create territory request",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.WebResponse-model_TerritoryResponse"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Create territory",
+        "tags": ["Territory"]
+      }
+    },
+    "/territories/search": {
+      "post": {
+        "description": "Search territories with filters and cursor pagination",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/model.SearchTerritoryRequest",
+                "summary": "request",
+                "description": "Search territory request"
+              }
+            }
+          },
+          "description": "Search territory request",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.WebResponse-array_model_TerritoryResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Search territories",
+        "tags": ["Territory"]
+      }
+    },
+    "/territories/{id}": {
+      "delete": {
+        "description": "Delete territory by ID",
+        "parameters": [
+          {
+            "description": "Territory ID",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Delete territory",
+        "tags": ["Territory"]
+      },
+      "get": {
+        "description": "Get territory details by ID",
+        "parameters": [
+          {
+            "description": "Territory ID",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.WebResponse-model_TerritoryResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Get territory by ID",
+        "tags": ["Territory"]
+      },
+      "put": {
+        "description": "Update territory by ID",
+        "parameters": [
+          {
+            "description": "Territory ID",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/model.UpdateTerritoryRequest",
+                "summary": "request",
+                "description": "Update territory request"
+              }
+            }
+          },
+          "description": "Update territory request",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.WebResponse-model_TerritoryResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Update territory",
+        "tags": ["Territory"]
+      }
+    },
+    "/units": {
+      "post": {
+        "description": "Create a new unit",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/model.CreateUnitRequest",
+                "summary": "request",
+                "description": "Create unit request"
+              }
+            }
+          },
+          "description": "Create unit request",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.WebResponse-model_UnitResponse"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Create unit",
+        "tags": ["Unit"]
+      }
+    },
+    "/units/search": {
+      "post": {
+        "description": "Search units with filters and cursor pagination",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/model.SearchUnitRequest",
+                "summary": "request",
+                "description": "Search unit request"
+              }
+            }
+          },
+          "description": "Search unit request",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.WebResponse-array_model_UnitResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Search units",
+        "tags": ["Unit"]
+      }
+    },
+    "/units/{id}": {
+      "delete": {
+        "description": "Delete unit by ID",
+        "parameters": [
+          {
+            "description": "Unit ID",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Delete unit",
+        "tags": ["Unit"]
+      },
+      "get": {
+        "description": "Get unit details by ID",
+        "parameters": [
+          {
+            "description": "Unit ID",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.WebResponse-model_UnitResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Get unit by ID",
+        "tags": ["Unit"]
+      },
+      "put": {
+        "description": "Update unit by ID",
+        "parameters": [
+          {
+            "description": "Unit ID",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/model.UpdateUnitRequest",
+                "summary": "request",
+                "description": "Update unit request"
+              }
+            }
+          },
+          "description": "Update unit request",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.WebResponse-model_UnitResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Update unit",
+        "tags": ["Unit"]
       }
     }
   },

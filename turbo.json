@@ -38,6 +38,7 @@
     "e2e": {
       "cache": false
     },
-    "typecheck": {}
+    "typecheck": {},
+    "build": {}
   }
 }

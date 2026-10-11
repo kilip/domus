@@ -15,4 +15,15 @@ export const systemRoutes: RouteConfigEntry[] = prefix("sys", [
   route("parish/create", "features/System/Parish/ParishCreatePage.tsx"),
   route("parish/update/:id", "features/System/Parish/ParishUpdatePage.tsx"),
   route("territorial", "features/System/Territorial/TerritorialListPage.tsx"),
+  route(
+    "territorial/create",
+    "features/System/Territorial/TerritorialCreatePage.tsx",
+  ),
+  route(
+    "territorial/update/:id",
+    "features/System/Territorial/TerritorialUpdatePage.tsx",
+  ),
+  route("unit", "features/System/Unit/UnitListPage.tsx"),
+  route("unit/create", "features/System/Unit/UnitCreatePage.tsx"),
+  route("unit/update/:id", "features/System/Unit/UnitUpdatePage.tsx"),
 ]);

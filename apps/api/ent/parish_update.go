@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -14,6 +15,8 @@ import (
 	"github.com/paroki/domus/api/ent/internal"
 	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/predicate"
+	"github.com/paroki/domus/api/ent/territory"
+	"github.com/paroki/domus/api/ent/unit"
 )
 
 // ParishUpdate is the builder for updating Parish entities.
@@ -26,6 +29,26 @@ type ParishUpdate struct {
 // Where appends a list predicates to the ParishUpdate builder.
 func (_u *ParishUpdate) Where(ps ...predicate.Parish) *ParishUpdate {
 	_u.mutation.Where(ps...)
+	return _u
+}
+
+// SetDeletedAt sets the "deletedAt" field.
+func (_u *ParishUpdate) SetDeletedAt(v time.Time) *ParishUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deletedAt" field if the given value is not nil.
+func (_u *ParishUpdate) SetNillableDeletedAt(v *time.Time) *ParishUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (_u *ParishUpdate) ClearDeletedAt() *ParishUpdate {
+	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
@@ -156,6 +179,36 @@ func (_u *ParishUpdate) SetDiocese(v *Diocese) *ParishUpdate {
 	return _u.SetDioceseID(v.ID)
 }
 
+// AddTerritoryIDs adds the "territories" edge to the Territory entity by IDs.
+func (_u *ParishUpdate) AddTerritoryIDs(ids ...int) *ParishUpdate {
+	_u.mutation.AddTerritoryIDs(ids...)
+	return _u
+}
+
+// AddTerritories adds the "territories" edges to the Territory entity.
+func (_u *ParishUpdate) AddTerritories(v ...*Territory) *ParishUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddTerritoryIDs(ids...)
+}
+
+// AddUnitIDs adds the "units" edge to the Unit entity by IDs.
+func (_u *ParishUpdate) AddUnitIDs(ids ...int) *ParishUpdate {
+	_u.mutation.AddUnitIDs(ids...)
+	return _u
+}
+
+// AddUnits adds the "units" edges to the Unit entity.
+func (_u *ParishUpdate) AddUnits(v ...*Unit) *ParishUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddUnitIDs(ids...)
+}
+
 // Mutation returns the ParishMutation object of the builder.
 func (_u *ParishUpdate) Mutation() *ParishMutation {
 	return _u.mutation
@@ -165,6 +218,48 @@ func (_u *ParishUpdate) Mutation() *ParishMutation {
 func (_u *ParishUpdate) ClearDiocese() *ParishUpdate {
 	_u.mutation.ClearDiocese()
 	return _u
+}
+
+// ClearTerritories clears all "territories" edges to the Territory entity.
+func (_u *ParishUpdate) ClearTerritories() *ParishUpdate {
+	_u.mutation.ClearTerritories()
+	return _u
+}
+
+// RemoveTerritoryIDs removes the "territories" edge to Territory entities by IDs.
+func (_u *ParishUpdate) RemoveTerritoryIDs(ids ...int) *ParishUpdate {
+	_u.mutation.RemoveTerritoryIDs(ids...)
+	return _u
+}
+
+// RemoveTerritories removes "territories" edges to Territory entities.
+func (_u *ParishUpdate) RemoveTerritories(v ...*Territory) *ParishUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveTerritoryIDs(ids...)
+}
+
+// ClearUnits clears all "units" edges to the Unit entity.
+func (_u *ParishUpdate) ClearUnits() *ParishUpdate {
+	_u.mutation.ClearUnits()
+	return _u
+}
+
+// RemoveUnitIDs removes the "units" edge to Unit entities by IDs.
+func (_u *ParishUpdate) RemoveUnitIDs(ids ...int) *ParishUpdate {
+	_u.mutation.RemoveUnitIDs(ids...)
+	return _u
+}
+
+// RemoveUnits removes "units" edges to Unit entities.
+func (_u *ParishUpdate) RemoveUnits(v ...*Unit) *ParishUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveUnitIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -202,6 +297,12 @@ func (_u *ParishUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(parish.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(parish.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(parish.FieldName, field.TypeString, value)
@@ -264,6 +365,102 @@ func (_u *ParishUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.TerritoriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   parish.TerritoriesTable,
+			Columns: []string{parish.TerritoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(territory.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Territory
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedTerritoriesIDs(); len(nodes) > 0 && !_u.mutation.TerritoriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   parish.TerritoriesTable,
+			Columns: []string{parish.TerritoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(territory.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Territory
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TerritoriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   parish.TerritoriesTable,
+			Columns: []string{parish.TerritoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(territory.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Territory
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.UnitsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   parish.UnitsTable,
+			Columns: []string{parish.UnitsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Unit
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedUnitsIDs(); len(nodes) > 0 && !_u.mutation.UnitsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   parish.UnitsTable,
+			Columns: []string{parish.UnitsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Unit
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.UnitsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   parish.UnitsTable,
+			Columns: []string{parish.UnitsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Unit
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	_spec.Node.Schema = _u.schemaConfig.Parish
 	ctx = internal.NewSchemaConfigContext(ctx, _u.schemaConfig)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -284,6 +481,26 @@ type ParishUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *ParishMutation
+}
+
+// SetDeletedAt sets the "deletedAt" field.
+func (_u *ParishUpdateOne) SetDeletedAt(v time.Time) *ParishUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deletedAt" field if the given value is not nil.
+func (_u *ParishUpdateOne) SetNillableDeletedAt(v *time.Time) *ParishUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (_u *ParishUpdateOne) ClearDeletedAt() *ParishUpdateOne {
+	_u.mutation.ClearDeletedAt()
+	return _u
 }
 
 // SetName sets the "name" field.
@@ -413,6 +630,36 @@ func (_u *ParishUpdateOne) SetDiocese(v *Diocese) *ParishUpdateOne {
 	return _u.SetDioceseID(v.ID)
 }
 
+// AddTerritoryIDs adds the "territories" edge to the Territory entity by IDs.
+func (_u *ParishUpdateOne) AddTerritoryIDs(ids ...int) *ParishUpdateOne {
+	_u.mutation.AddTerritoryIDs(ids...)
+	return _u
+}
+
+// AddTerritories adds the "territories" edges to the Territory entity.
+func (_u *ParishUpdateOne) AddTerritories(v ...*Territory) *ParishUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddTerritoryIDs(ids...)
+}
+
+// AddUnitIDs adds the "units" edge to the Unit entity by IDs.
+func (_u *ParishUpdateOne) AddUnitIDs(ids ...int) *ParishUpdateOne {
+	_u.mutation.AddUnitIDs(ids...)
+	return _u
+}
+
+// AddUnits adds the "units" edges to the Unit entity.
+func (_u *ParishUpdateOne) AddUnits(v ...*Unit) *ParishUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddUnitIDs(ids...)
+}
+
 // Mutation returns the ParishMutation object of the builder.
 func (_u *ParishUpdateOne) Mutation() *ParishMutation {
 	return _u.mutation
@@ -422,6 +669,48 @@ func (_u *ParishUpdateOne) Mutation() *ParishMutation {
 func (_u *ParishUpdateOne) ClearDiocese() *ParishUpdateOne {
 	_u.mutation.ClearDiocese()
 	return _u
+}
+
+// ClearTerritories clears all "territories" edges to the Territory entity.
+func (_u *ParishUpdateOne) ClearTerritories() *ParishUpdateOne {
+	_u.mutation.ClearTerritories()
+	return _u
+}
+
+// RemoveTerritoryIDs removes the "territories" edge to Territory entities by IDs.
+func (_u *ParishUpdateOne) RemoveTerritoryIDs(ids ...int) *ParishUpdateOne {
+	_u.mutation.RemoveTerritoryIDs(ids...)
+	return _u
+}
+
+// RemoveTerritories removes "territories" edges to Territory entities.
+func (_u *ParishUpdateOne) RemoveTerritories(v ...*Territory) *ParishUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveTerritoryIDs(ids...)
+}
+
+// ClearUnits clears all "units" edges to the Unit entity.
+func (_u *ParishUpdateOne) ClearUnits() *ParishUpdateOne {
+	_u.mutation.ClearUnits()
+	return _u
+}
+
+// RemoveUnitIDs removes the "units" edge to Unit entities by IDs.
+func (_u *ParishUpdateOne) RemoveUnitIDs(ids ...int) *ParishUpdateOne {
+	_u.mutation.RemoveUnitIDs(ids...)
+	return _u
+}
+
+// RemoveUnits removes "units" edges to Unit entities.
+func (_u *ParishUpdateOne) RemoveUnits(v ...*Unit) *ParishUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveUnitIDs(ids...)
 }
 
 // Where appends a list predicates to the ParishUpdate builder.
@@ -490,6 +779,12 @@ func (_u *ParishUpdateOne) sqlSave(ctx context.Context) (_node *Parish, err erro
 			}
 		}
 	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(parish.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(parish.FieldDeletedAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(parish.FieldName, field.TypeString, value)
 	}
@@ -546,6 +841,102 @@ func (_u *ParishUpdateOne) sqlSave(ctx context.Context) (_node *Parish, err erro
 			},
 		}
 		edge.Schema = _u.schemaConfig.Parish
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.TerritoriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   parish.TerritoriesTable,
+			Columns: []string{parish.TerritoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(territory.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Territory
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedTerritoriesIDs(); len(nodes) > 0 && !_u.mutation.TerritoriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   parish.TerritoriesTable,
+			Columns: []string{parish.TerritoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(territory.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Territory
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TerritoriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   parish.TerritoriesTable,
+			Columns: []string{parish.TerritoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(territory.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Territory
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.UnitsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   parish.UnitsTable,
+			Columns: []string{parish.UnitsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Unit
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedUnitsIDs(); len(nodes) > 0 && !_u.mutation.UnitsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   parish.UnitsTable,
+			Columns: []string{parish.UnitsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Unit
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.UnitsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   parish.UnitsTable,
+			Columns: []string{parish.UnitsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Unit
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}

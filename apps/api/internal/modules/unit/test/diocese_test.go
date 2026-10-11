@@ -1,6 +1,7 @@
 package test
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -144,6 +145,11 @@ func (s *DioceseSuite) TestDelete_Success() {
 
 	s.Request(fmt.Sprintf("/dioceses/%d", created.ID), fiber.MethodGet, nil)
 	s.AssertStatus(fiber.StatusNotFound)
+
+	// Verify that the record is soft-deleted in DB (still exists with deleted_at set)
+	d, err := testutil.GetState().Ent.Diocese.Get(core.SkipSoftDelete(context.Background()), created.ID)
+	s.Require().NoError(err)
+	s.Assert().NotNil(d.DeletedAt)
 }
 
 func (s *DioceseSuite) TestDelete_NotFound() {

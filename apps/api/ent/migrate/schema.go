@@ -13,6 +13,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "active", Type: field.TypeBool, Default: true},
 		{Name: "created_by", Type: field.TypeUUID},
@@ -26,13 +27,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "dioceses_users_creator",
-				Columns:    []*schema.Column{DiocesesColumns[5]},
+				Columns:    []*schema.Column{DiocesesColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "dioceses_users_updater",
-				Columns:    []*schema.Column{DiocesesColumns[6]},
+				Columns:    []*schema.Column{DiocesesColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -73,6 +74,7 @@ var (
 	// ParishesColumns holds the columns for the "parishes" table.
 	ParishesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "church", Type: field.TypeString, Nullable: true},
 		{Name: "address", Type: field.TypeString, Nullable: true},
@@ -89,7 +91,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "parishes_dioceses_parishes",
-				Columns:    []*schema.Column{ParishesColumns[7]},
+				Columns:    []*schema.Column{ParishesColumns[8]},
 				RefColumns: []*schema.Column{DiocesesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -105,13 +107,85 @@ var (
 		Columns:    ParishionersColumns,
 		PrimaryKey: []*schema.Column{ParishionersColumns[0]},
 	}
+	// TerritoriesColumns holds the columns for the "territories" table.
+	TerritoriesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "code", Type: field.TypeString, Nullable: true},
+		{Name: "kind", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString, Nullable: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"active", "inactive"}, Default: "active"},
+		{Name: "parish_territories", Type: field.TypeInt},
+		{Name: "created_by", Type: field.TypeUUID},
+		{Name: "updated_by", Type: field.TypeUUID},
+		{Name: "territory_children", Type: field.TypeInt, Nullable: true},
+		{Name: "unit_territory", Type: field.TypeInt, Unique: true, Nullable: true},
+	}
+	// TerritoriesTable holds the schema information for the "territories" table.
+	TerritoriesTable = &schema.Table{
+		Name:       "territories",
+		Columns:    TerritoriesColumns,
+		PrimaryKey: []*schema.Column{TerritoriesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "territories_parishes_territories",
+				Columns:    []*schema.Column{TerritoriesColumns[9]},
+				RefColumns: []*schema.Column{ParishesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "territories_users_creator",
+				Columns:    []*schema.Column{TerritoriesColumns[10]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "territories_users_updater",
+				Columns:    []*schema.Column{TerritoriesColumns[11]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "territories_territories_children",
+				Columns:    []*schema.Column{TerritoriesColumns[12]},
+				RefColumns: []*schema.Column{TerritoriesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "territories_units_territory",
+				Columns:    []*schema.Column{TerritoriesColumns[13]},
+				RefColumns: []*schema.Column{UnitsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "territory_code_parish_territories",
+				Unique:  true,
+				Columns: []*schema.Column{TerritoriesColumns[5], TerritoriesColumns[9]},
+			},
+			{
+				Name:    "territory_kind_name_parish_territories",
+				Unique:  true,
+				Columns: []*schema.Column{TerritoriesColumns[6], TerritoriesColumns[4], TerritoriesColumns[9]},
+			},
+		},
+	}
 	// UnitsColumns holds the columns for the "units" table.
 	UnitsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "name", Type: field.TypeString},
-		{Name: "description", Type: field.TypeString},
+		{Name: "code", Type: field.TypeString, Nullable: true},
+		{Name: "kind", Type: field.TypeEnum, Enums: []string{"council", "territorial", "category", "section", "committee"}},
+		{Name: "description", Type: field.TypeString, Nullable: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"active", "inactive"}, Default: "active"},
+		{Name: "parish_units", Type: field.TypeInt},
 		{Name: "created_by", Type: field.TypeUUID},
 		{Name: "updated_by", Type: field.TypeUUID},
 		{Name: "unit_children", Type: field.TypeInt, Nullable: true},
@@ -123,28 +197,42 @@ var (
 		PrimaryKey: []*schema.Column{UnitsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
+				Symbol:     "units_parishes_units",
+				Columns:    []*schema.Column{UnitsColumns[9]},
+				RefColumns: []*schema.Column{ParishesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
 				Symbol:     "units_users_creator",
-				Columns:    []*schema.Column{UnitsColumns[5]},
+				Columns:    []*schema.Column{UnitsColumns[10]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "units_users_updater",
-				Columns:    []*schema.Column{UnitsColumns[6]},
+				Columns:    []*schema.Column{UnitsColumns[11]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "units_units_children",
-				Columns:    []*schema.Column{UnitsColumns[7]},
+				Columns:    []*schema.Column{UnitsColumns[12]},
 				RefColumns: []*schema.Column{UnitsColumns[0]},
 				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "unit_code_parish_units",
+				Unique:  true,
+				Columns: []*schema.Column{UnitsColumns[5], UnitsColumns[9]},
 			},
 		},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "email", Type: field.TypeString},
 		{Name: "avatar", Type: field.TypeString, Nullable: true},
@@ -161,6 +249,7 @@ var (
 		MembershipsTable,
 		ParishesTable,
 		ParishionersTable,
+		TerritoriesTable,
 		UnitsTable,
 		UsersTable,
 	}
@@ -170,7 +259,13 @@ func init() {
 	DiocesesTable.ForeignKeys[0].RefTable = UsersTable
 	DiocesesTable.ForeignKeys[1].RefTable = UsersTable
 	ParishesTable.ForeignKeys[0].RefTable = DiocesesTable
-	UnitsTable.ForeignKeys[0].RefTable = UsersTable
+	TerritoriesTable.ForeignKeys[0].RefTable = ParishesTable
+	TerritoriesTable.ForeignKeys[1].RefTable = UsersTable
+	TerritoriesTable.ForeignKeys[2].RefTable = UsersTable
+	TerritoriesTable.ForeignKeys[3].RefTable = TerritoriesTable
+	TerritoriesTable.ForeignKeys[4].RefTable = UnitsTable
+	UnitsTable.ForeignKeys[0].RefTable = ParishesTable
 	UnitsTable.ForeignKeys[1].RefTable = UsersTable
-	UnitsTable.ForeignKeys[2].RefTable = UnitsTable
+	UnitsTable.ForeignKeys[2].RefTable = UsersTable
+	UnitsTable.ForeignKeys[3].RefTable = UnitsTable
 }

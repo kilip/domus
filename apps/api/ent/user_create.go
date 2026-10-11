@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -21,6 +22,20 @@ type UserCreate struct {
 	mutation *UserMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
+}
+
+// SetDeletedAt sets the "deletedAt" field.
+func (_c *UserCreate) SetDeletedAt(v time.Time) *UserCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deletedAt" field if the given value is not nil.
+func (_c *UserCreate) SetNillableDeletedAt(v *time.Time) *UserCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
+	}
+	return _c
 }
 
 // SetName sets the "name" field.
@@ -159,6 +174,10 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(user.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(user.FieldName, field.TypeString, value)
 		_node.Name = value
@@ -178,7 +197,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.User.Create().
-//		SetName(v).
+//		SetDeletedAt(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -187,7 +206,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.UserUpsert) {
-//			SetName(v+v).
+//			SetDeletedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (_c *UserCreate) OnConflict(opts ...sql.ConflictOption) *UserUpsertOne {
@@ -222,6 +241,24 @@ type (
 		*sql.UpdateSet
 	}
 )
+
+// SetDeletedAt sets the "deletedAt" field.
+func (u *UserUpsert) SetDeletedAt(v time.Time) *UserUpsert {
+	u.Set(user.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateDeletedAt sets the "deletedAt" field to the value that was provided on create.
+func (u *UserUpsert) UpdateDeletedAt() *UserUpsert {
+	u.SetExcluded(user.FieldDeletedAt)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (u *UserUpsert) ClearDeletedAt() *UserUpsert {
+	u.SetNull(user.FieldDeletedAt)
+	return u
+}
 
 // SetName sets the "name" field.
 func (u *UserUpsert) SetName(v string) *UserUpsert {
@@ -311,6 +348,27 @@ func (u *UserUpsertOne) Update(set func(*UserUpsert)) *UserUpsertOne {
 		set(&UserUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetDeletedAt sets the "deletedAt" field.
+func (u *UserUpsertOne) SetDeletedAt(v time.Time) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deletedAt" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateDeletedAt() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (u *UserUpsertOne) ClearDeletedAt() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearDeletedAt()
+	})
 }
 
 // SetName sets the "name" field.
@@ -498,7 +556,7 @@ func (_c *UserCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.UserUpsert) {
-//			SetName(v+v).
+//			SetDeletedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (_c *UserCreateBulk) OnConflict(opts ...sql.ConflictOption) *UserUpsertBulk {
@@ -575,6 +633,27 @@ func (u *UserUpsertBulk) Update(set func(*UserUpsert)) *UserUpsertBulk {
 		set(&UserUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetDeletedAt sets the "deletedAt" field.
+func (u *UserUpsertBulk) SetDeletedAt(v time.Time) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deletedAt" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateDeletedAt() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (u *UserUpsertBulk) ClearDeletedAt() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearDeletedAt()
+	})
 }
 
 // SetName sets the "name" field.

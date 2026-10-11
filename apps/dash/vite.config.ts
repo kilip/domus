@@ -8,4 +8,7 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
   },
+  preview: {
+    host: "127.0.0.1",
+  },
 });

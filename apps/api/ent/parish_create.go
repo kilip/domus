@@ -6,12 +6,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/paroki/domus/api/ent/diocese"
 	"github.com/paroki/domus/api/ent/parish"
+	"github.com/paroki/domus/api/ent/territory"
+	"github.com/paroki/domus/api/ent/unit"
 )
 
 // ParishCreate is the builder for creating a Parish entity.
@@ -20,6 +23,20 @@ type ParishCreate struct {
 	mutation *ParishMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
+}
+
+// SetDeletedAt sets the "deletedAt" field.
+func (_c *ParishCreate) SetDeletedAt(v time.Time) *ParishCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deletedAt" field if the given value is not nil.
+func (_c *ParishCreate) SetNillableDeletedAt(v *time.Time) *ParishCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
+	}
+	return _c
 }
 
 // SetName sets the "name" field.
@@ -123,6 +140,36 @@ func (_c *ParishCreate) SetDiocese(v *Diocese) *ParishCreate {
 	return _c.SetDioceseID(v.ID)
 }
 
+// AddTerritoryIDs adds the "territories" edge to the Territory entity by IDs.
+func (_c *ParishCreate) AddTerritoryIDs(ids ...int) *ParishCreate {
+	_c.mutation.AddTerritoryIDs(ids...)
+	return _c
+}
+
+// AddTerritories adds the "territories" edges to the Territory entity.
+func (_c *ParishCreate) AddTerritories(v ...*Territory) *ParishCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddTerritoryIDs(ids...)
+}
+
+// AddUnitIDs adds the "units" edge to the Unit entity by IDs.
+func (_c *ParishCreate) AddUnitIDs(ids ...int) *ParishCreate {
+	_c.mutation.AddUnitIDs(ids...)
+	return _c
+}
+
+// AddUnits adds the "units" edges to the Unit entity.
+func (_c *ParishCreate) AddUnits(v ...*Unit) *ParishCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddUnitIDs(ids...)
+}
+
 // Mutation returns the ParishMutation object of the builder.
 func (_c *ParishCreate) Mutation() *ParishMutation {
 	return _c.mutation
@@ -206,6 +253,10 @@ func (_c *ParishCreate) createSpec() (*Parish, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(parish.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(parish.FieldName, field.TypeString, value)
 		_node.Name = value
@@ -248,6 +299,40 @@ func (_c *ParishCreate) createSpec() (*Parish, *sqlgraph.CreateSpec) {
 		_node.diocese_parishes = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := _c.mutation.TerritoriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   parish.TerritoriesTable,
+			Columns: []string{parish.TerritoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(territory.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _c.schemaConfig.Territory
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.UnitsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   parish.UnitsTable,
+			Columns: []string{parish.UnitsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _c.schemaConfig.Unit
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	return _node, _spec
 }
 
@@ -255,7 +340,7 @@ func (_c *ParishCreate) createSpec() (*Parish, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.Parish.Create().
-//		SetName(v).
+//		SetDeletedAt(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -264,7 +349,7 @@ func (_c *ParishCreate) createSpec() (*Parish, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.ParishUpsert) {
-//			SetName(v+v).
+//			SetDeletedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (_c *ParishCreate) OnConflict(opts ...sql.ConflictOption) *ParishUpsertOne {
@@ -299,6 +384,24 @@ type (
 		*sql.UpdateSet
 	}
 )
+
+// SetDeletedAt sets the "deletedAt" field.
+func (u *ParishUpsert) SetDeletedAt(v time.Time) *ParishUpsert {
+	u.Set(parish.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateDeletedAt sets the "deletedAt" field to the value that was provided on create.
+func (u *ParishUpsert) UpdateDeletedAt() *ParishUpsert {
+	u.SetExcluded(parish.FieldDeletedAt)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (u *ParishUpsert) ClearDeletedAt() *ParishUpsert {
+	u.SetNull(parish.FieldDeletedAt)
+	return u
+}
 
 // SetName sets the "name" field.
 func (u *ParishUpsert) SetName(v string) *ParishUpsert {
@@ -442,6 +545,27 @@ func (u *ParishUpsertOne) Update(set func(*ParishUpsert)) *ParishUpsertOne {
 		set(&ParishUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetDeletedAt sets the "deletedAt" field.
+func (u *ParishUpsertOne) SetDeletedAt(v time.Time) *ParishUpsertOne {
+	return u.Update(func(s *ParishUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deletedAt" field to the value that was provided on create.
+func (u *ParishUpsertOne) UpdateDeletedAt() *ParishUpsertOne {
+	return u.Update(func(s *ParishUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (u *ParishUpsertOne) ClearDeletedAt() *ParishUpsertOne {
+	return u.Update(func(s *ParishUpsert) {
+		s.ClearDeletedAt()
+	})
 }
 
 // SetName sets the "name" field.
@@ -691,7 +815,7 @@ func (_c *ParishCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.ParishUpsert) {
-//			SetName(v+v).
+//			SetDeletedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (_c *ParishCreateBulk) OnConflict(opts ...sql.ConflictOption) *ParishUpsertBulk {
@@ -768,6 +892,27 @@ func (u *ParishUpsertBulk) Update(set func(*ParishUpsert)) *ParishUpsertBulk {
 		set(&ParishUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetDeletedAt sets the "deletedAt" field.
+func (u *ParishUpsertBulk) SetDeletedAt(v time.Time) *ParishUpsertBulk {
+	return u.Update(func(s *ParishUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deletedAt" field to the value that was provided on create.
+func (u *ParishUpsertBulk) UpdateDeletedAt() *ParishUpsertBulk {
+	return u.Update(func(s *ParishUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (u *ParishUpsertBulk) ClearDeletedAt() *ParishUpsertBulk {
+	return u.Update(func(s *ParishUpsert) {
+		s.ClearDeletedAt()
+	})
 }
 
 // SetName sets the "name" field.

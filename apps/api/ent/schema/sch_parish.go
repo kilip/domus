@@ -11,6 +11,12 @@ type Parish struct {
 	ent.Schema
 }
 
+func (Parish) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		SoftDeleteMixin{},
+	}
+}
+
 // Fields of the Parish.
 func (Parish) Fields() []ent.Field {
 	return []ent.Field{
@@ -30,5 +36,9 @@ func (Parish) Edges() []ent.Edge {
 		edge.From("diocese", Diocese.Type).
 			Ref("parishes").
 			Unique(),
+		// Geographic structure of the parish.
+		edge.To("territories", Territory.Type),
+		// Organizational bodies of the parish.
+		edge.To("units", Unit.Type),
 	}
 }

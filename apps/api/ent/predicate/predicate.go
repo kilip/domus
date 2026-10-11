@@ -18,6 +18,9 @@ type Parish func(*sql.Selector)
 // Parishioner is the predicate function for parishioner builders.
 type Parishioner func(*sql.Selector)
 
+// Territory is the predicate function for territory builders.
+type Territory func(*sql.Selector)
+
 // Unit is the predicate function for unit builders.
 type Unit func(*sql.Selector)
 

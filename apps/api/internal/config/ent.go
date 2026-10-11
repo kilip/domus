@@ -62,6 +62,7 @@ func initEntCliInjector(cli *ent.Client) {
 func ConfigureEntCli(cli *ent.Client) {
 	initEntCliHook(cli)
 	initEntCliInjector(cli)
+	initEntCliSoftDelete(cli)
 }
 
 func GetEntClient(cfg Config) *ent.Client {

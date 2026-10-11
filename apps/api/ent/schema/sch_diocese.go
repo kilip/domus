@@ -14,6 +14,7 @@ type Diocese struct {
 func (Diocese) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		AuditMixins{},
+		SoftDeleteMixin{},
 	}
 }
 

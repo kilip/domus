@@ -12,6 +12,8 @@ const (
 	Label = "parish"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldDeletedAt holds the string denoting the deletedat field in the database.
+	FieldDeletedAt = "deleted_at"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// FieldChurch holds the string denoting the church field in the database.
@@ -26,6 +28,10 @@ const (
 	FieldActive = "active"
 	// EdgeDiocese holds the string denoting the diocese edge name in mutations.
 	EdgeDiocese = "diocese"
+	// EdgeTerritories holds the string denoting the territories edge name in mutations.
+	EdgeTerritories = "territories"
+	// EdgeUnits holds the string denoting the units edge name in mutations.
+	EdgeUnits = "units"
 	// Table holds the table name of the parish in the database.
 	Table = "parishes"
 	// DioceseTable is the table that holds the diocese relation/edge.
@@ -35,11 +41,26 @@ const (
 	DioceseInverseTable = "dioceses"
 	// DioceseColumn is the table column denoting the diocese relation/edge.
 	DioceseColumn = "diocese_parishes"
+	// TerritoriesTable is the table that holds the territories relation/edge.
+	TerritoriesTable = "territories"
+	// TerritoriesInverseTable is the table name for the Territory entity.
+	// It exists in this package in order to avoid circular dependency with the "territory" package.
+	TerritoriesInverseTable = "territories"
+	// TerritoriesColumn is the table column denoting the territories relation/edge.
+	TerritoriesColumn = "parish_territories"
+	// UnitsTable is the table that holds the units relation/edge.
+	UnitsTable = "units"
+	// UnitsInverseTable is the table name for the Unit entity.
+	// It exists in this package in order to avoid circular dependency with the "unit" package.
+	UnitsInverseTable = "units"
+	// UnitsColumn is the table column denoting the units relation/edge.
+	UnitsColumn = "parish_units"
 )
 
 // Columns holds all SQL columns for parish fields.
 var Columns = []string{
 	FieldID,
+	FieldDeletedAt,
 	FieldName,
 	FieldChurch,
 	FieldAddress,
@@ -82,6 +103,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
+// ByDeletedAt orders the results by the deletedAt field.
+func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
 // ByName orders the results by the name field.
 func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
@@ -118,10 +144,52 @@ func ByDioceseField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newDioceseStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByTerritoriesCount orders the results by territories count.
+func ByTerritoriesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newTerritoriesStep(), opts...)
+	}
+}
+
+// ByTerritories orders the results by territories terms.
+func ByTerritories(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTerritoriesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByUnitsCount orders the results by units count.
+func ByUnitsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newUnitsStep(), opts...)
+	}
+}
+
+// ByUnits orders the results by units terms.
+func ByUnits(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newUnitsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newDioceseStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(DioceseInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, DioceseTable, DioceseColumn),
+	)
+}
+func newTerritoriesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TerritoriesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, TerritoriesTable, TerritoriesColumn),
+	)
+}
+func newUnitsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(UnitsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, UnitsTable, UnitsColumn),
 	)
 }

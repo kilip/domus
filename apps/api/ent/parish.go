@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -17,6 +18,8 @@ type Parish struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// DeletedAt holds the value of the "deletedAt" field.
+	DeletedAt *time.Time `json:"deletedAt,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Church holds the value of the "church" field.
@@ -40,9 +43,13 @@ type Parish struct {
 type ParishEdges struct {
 	// Diocese holds the value of the diocese edge.
 	Diocese *Diocese `json:"diocese,omitempty"`
+	// Territories holds the value of the territories edge.
+	Territories []*Territory `json:"territories,omitempty"`
+	// Units holds the value of the units edge.
+	Units []*Unit `json:"units,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [3]bool
 }
 
 // DioceseOrErr returns the Diocese value or an error if the edge
@@ -56,6 +63,24 @@ func (e ParishEdges) DioceseOrErr() (*Diocese, error) {
 	return nil, &NotLoadedError{edge: "diocese"}
 }
 
+// TerritoriesOrErr returns the Territories value or an error if the edge
+// was not loaded in eager-loading.
+func (e ParishEdges) TerritoriesOrErr() ([]*Territory, error) {
+	if e.loadedTypes[1] {
+		return e.Territories, nil
+	}
+	return nil, &NotLoadedError{edge: "territories"}
+}
+
+// UnitsOrErr returns the Units value or an error if the edge
+// was not loaded in eager-loading.
+func (e ParishEdges) UnitsOrErr() ([]*Unit, error) {
+	if e.loadedTypes[2] {
+		return e.Units, nil
+	}
+	return nil, &NotLoadedError{edge: "units"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Parish) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -67,6 +92,8 @@ func (*Parish) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case parish.FieldName, parish.FieldChurch, parish.FieldAddress, parish.FieldPhone, parish.FieldEmail:
 			values[i] = new(sql.NullString)
+		case parish.FieldDeletedAt:
+			values[i] = new(sql.NullTime)
 		case parish.ForeignKeys[0]: // diocese_parishes
 			values[i] = new(sql.NullInt64)
 		default:
@@ -90,6 +117,13 @@ func (_m *Parish) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			_m.ID = int(value.Int64)
+		case parish.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deletedAt", values[i])
+			} else if value.Valid {
+				_m.DeletedAt = new(time.Time)
+				*_m.DeletedAt = value.Time
+			}
 		case parish.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
@@ -155,6 +189,16 @@ func (_m *Parish) QueryDiocese() *DioceseQuery {
 	return NewParishClient(_m.config).QueryDiocese(_m)
 }
 
+// QueryTerritories queries the "territories" edge of the Parish entity.
+func (_m *Parish) QueryTerritories() *TerritoryQuery {
+	return NewParishClient(_m.config).QueryTerritories(_m)
+}
+
+// QueryUnits queries the "units" edge of the Parish entity.
+func (_m *Parish) QueryUnits() *UnitQuery {
+	return NewParishClient(_m.config).QueryUnits(_m)
+}
+
 // Update returns a builder for updating this Parish.
 // Note that you need to call Parish.Unwrap() before calling this method if this Parish
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -178,6 +222,11 @@ func (_m *Parish) String() string {
 	var builder strings.Builder
 	builder.WriteString("Parish(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
+	if v := _m.DeletedAt; v != nil {
+		builder.WriteString("deletedAt=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
 	builder.WriteString(", ")

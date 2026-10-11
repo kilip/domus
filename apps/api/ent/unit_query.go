@@ -14,7 +14,9 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent/internal"
+	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/predicate"
+	"github.com/paroki/domus/api/ent/territory"
 	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
 )
@@ -22,15 +24,17 @@ import (
 // UnitQuery is the builder for querying Unit entities.
 type UnitQuery struct {
 	config
-	ctx          *QueryContext
-	order        []unit.OrderOption
-	inters       []Interceptor
-	predicates   []predicate.Unit
-	withCreator  *UserQuery
-	withUpdater  *UserQuery
-	withParent   *UnitQuery
-	withChildren *UnitQuery
-	withFKs      bool
+	ctx           *QueryContext
+	order         []unit.OrderOption
+	inters        []Interceptor
+	predicates    []predicate.Unit
+	withCreator   *UserQuery
+	withUpdater   *UserQuery
+	withParish    *ParishQuery
+	withParent    *UnitQuery
+	withChildren  *UnitQuery
+	withTerritory *TerritoryQuery
+	withFKs       bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -117,6 +121,31 @@ func (_q *UnitQuery) QueryUpdater() *UserQuery {
 	return query
 }
 
+// QueryParish chains the current query on the "parish" edge.
+func (_q *UnitQuery) QueryParish() *ParishQuery {
+	query := (&ParishClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(unit.Table, unit.FieldID, selector),
+			sqlgraph.To(parish.Table, parish.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, unit.ParishTable, unit.ParishColumn),
+		)
+		schemaConfig := _q.schemaConfig
+		step.To.Schema = schemaConfig.Parish
+		step.Edge.Schema = schemaConfig.Unit
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // QueryParent chains the current query on the "parent" edge.
 func (_q *UnitQuery) QueryParent() *UnitQuery {
 	query := (&UnitClient{config: _q.config}).Query()
@@ -161,6 +190,31 @@ func (_q *UnitQuery) QueryChildren() *UnitQuery {
 		schemaConfig := _q.schemaConfig
 		step.To.Schema = schemaConfig.Unit
 		step.Edge.Schema = schemaConfig.Unit
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryTerritory chains the current query on the "territory" edge.
+func (_q *UnitQuery) QueryTerritory() *TerritoryQuery {
+	query := (&TerritoryClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(unit.Table, unit.FieldID, selector),
+			sqlgraph.To(territory.Table, territory.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, unit.TerritoryTable, unit.TerritoryColumn),
+		)
+		schemaConfig := _q.schemaConfig
+		step.To.Schema = schemaConfig.Territory
+		step.Edge.Schema = schemaConfig.Territory
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
@@ -354,15 +408,17 @@ func (_q *UnitQuery) Clone() *UnitQuery {
 		return nil
 	}
 	return &UnitQuery{
-		config:       _q.config,
-		ctx:          _q.ctx.Clone(),
-		order:        append([]unit.OrderOption{}, _q.order...),
-		inters:       append([]Interceptor{}, _q.inters...),
-		predicates:   append([]predicate.Unit{}, _q.predicates...),
-		withCreator:  _q.withCreator.Clone(),
-		withUpdater:  _q.withUpdater.Clone(),
-		withParent:   _q.withParent.Clone(),
-		withChildren: _q.withChildren.Clone(),
+		config:        _q.config,
+		ctx:           _q.ctx.Clone(),
+		order:         append([]unit.OrderOption{}, _q.order...),
+		inters:        append([]Interceptor{}, _q.inters...),
+		predicates:    append([]predicate.Unit{}, _q.predicates...),
+		withCreator:   _q.withCreator.Clone(),
+		withUpdater:   _q.withUpdater.Clone(),
+		withParish:    _q.withParish.Clone(),
+		withParent:    _q.withParent.Clone(),
+		withChildren:  _q.withChildren.Clone(),
+		withTerritory: _q.withTerritory.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -391,6 +447,17 @@ func (_q *UnitQuery) WithUpdater(opts ...func(*UserQuery)) *UnitQuery {
 	return _q
 }
 
+// WithParish tells the query-builder to eager-load the nodes that are connected to
+// the "parish" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UnitQuery) WithParish(opts ...func(*ParishQuery)) *UnitQuery {
+	query := (&ParishClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withParish = query
+	return _q
+}
+
 // WithParent tells the query-builder to eager-load the nodes that are connected to
 // the "parent" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UnitQuery) WithParent(opts ...func(*UnitQuery)) *UnitQuery {
@@ -410,6 +477,17 @@ func (_q *UnitQuery) WithChildren(opts ...func(*UnitQuery)) *UnitQuery {
 		opt(query)
 	}
 	_q.withChildren = query
+	return _q
+}
+
+// WithTerritory tells the query-builder to eager-load the nodes that are connected to
+// the "territory" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UnitQuery) WithTerritory(opts ...func(*TerritoryQuery)) *UnitQuery {
+	query := (&TerritoryClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withTerritory = query
 	return _q
 }
 
@@ -492,14 +570,16 @@ func (_q *UnitQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Unit, e
 		nodes       = []*Unit{}
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [6]bool{
 			_q.withCreator != nil,
 			_q.withUpdater != nil,
+			_q.withParish != nil,
 			_q.withParent != nil,
 			_q.withChildren != nil,
+			_q.withTerritory != nil,
 		}
 	)
-	if _q.withParent != nil {
+	if _q.withParish != nil || _q.withParent != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -537,6 +617,12 @@ func (_q *UnitQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Unit, e
 			return nil, err
 		}
 	}
+	if query := _q.withParish; query != nil {
+		if err := _q.loadParish(ctx, query, nodes, nil,
+			func(n *Unit, e *Parish) { n.Edges.Parish = e }); err != nil {
+			return nil, err
+		}
+	}
 	if query := _q.withParent; query != nil {
 		if err := _q.loadParent(ctx, query, nodes, nil,
 			func(n *Unit, e *Unit) { n.Edges.Parent = e }); err != nil {
@@ -547,6 +633,12 @@ func (_q *UnitQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Unit, e
 		if err := _q.loadChildren(ctx, query, nodes,
 			func(n *Unit) { n.Edges.Children = []*Unit{} },
 			func(n *Unit, e *Unit) { n.Edges.Children = append(n.Edges.Children, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withTerritory; query != nil {
+		if err := _q.loadTerritory(ctx, query, nodes, nil,
+			func(n *Unit, e *Territory) { n.Edges.Territory = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -604,6 +696,38 @@ func (_q *UnitQuery) loadUpdater(ctx context.Context, query *UserQuery, nodes []
 		nodes, ok := nodeids[n.ID]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "updatedBy" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (_q *UnitQuery) loadParish(ctx context.Context, query *ParishQuery, nodes []*Unit, init func(*Unit), assign func(*Unit, *Parish)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Unit)
+	for i := range nodes {
+		if nodes[i].parish_units == nil {
+			continue
+		}
+		fk := *nodes[i].parish_units
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(parish.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "parish_units" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -669,6 +793,34 @@ func (_q *UnitQuery) loadChildren(ctx context.Context, query *UnitQuery, nodes [
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "unit_children" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UnitQuery) loadTerritory(ctx context.Context, query *TerritoryQuery, nodes []*Unit, init func(*Unit), assign func(*Unit, *Territory)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Unit)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	query.withFKs = true
+	query.Where(predicate.Territory(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(unit.TerritoryColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.unit_territory
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "unit_territory" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "unit_territory" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

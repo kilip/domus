@@ -65,6 +65,20 @@ func (_c *DioceseCreate) SetNillableUpdatedAt(v *time.Time) *DioceseCreate {
 	return _c
 }
 
+// SetDeletedAt sets the "deletedAt" field.
+func (_c *DioceseCreate) SetDeletedAt(v time.Time) *DioceseCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deletedAt" field if the given value is not nil.
+func (_c *DioceseCreate) SetNillableDeletedAt(v *time.Time) *DioceseCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
+	}
+	return _c
+}
+
 // SetName sets the "name" field.
 func (_c *DioceseCreate) SetName(v string) *DioceseCreate {
 	_c.mutation.SetName(v)
@@ -250,6 +264,10 @@ func (_c *DioceseCreate) createSpec() (*Diocese, *sqlgraph.CreateSpec) {
 		_spec.SetField(diocese.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(diocese.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(diocese.FieldName, field.TypeString, value)
 		_node.Name = value
@@ -399,6 +417,24 @@ func (u *DioceseUpsert) UpdateUpdatedAt() *DioceseUpsert {
 	return u
 }
 
+// SetDeletedAt sets the "deletedAt" field.
+func (u *DioceseUpsert) SetDeletedAt(v time.Time) *DioceseUpsert {
+	u.Set(diocese.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateDeletedAt sets the "deletedAt" field to the value that was provided on create.
+func (u *DioceseUpsert) UpdateDeletedAt() *DioceseUpsert {
+	u.SetExcluded(diocese.FieldDeletedAt)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (u *DioceseUpsert) ClearDeletedAt() *DioceseUpsert {
+	u.SetNull(diocese.FieldDeletedAt)
+	return u
+}
+
 // SetName sets the "name" field.
 func (u *DioceseUpsert) SetName(v string) *DioceseUpsert {
 	u.Set(diocese.FieldName, v)
@@ -513,6 +549,27 @@ func (u *DioceseUpsertOne) SetUpdatedAt(v time.Time) *DioceseUpsertOne {
 func (u *DioceseUpsertOne) UpdateUpdatedAt() *DioceseUpsertOne {
 	return u.Update(func(s *DioceseUpsert) {
 		s.UpdateUpdatedAt()
+	})
+}
+
+// SetDeletedAt sets the "deletedAt" field.
+func (u *DioceseUpsertOne) SetDeletedAt(v time.Time) *DioceseUpsertOne {
+	return u.Update(func(s *DioceseUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deletedAt" field to the value that was provided on create.
+func (u *DioceseUpsertOne) UpdateDeletedAt() *DioceseUpsertOne {
+	return u.Update(func(s *DioceseUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (u *DioceseUpsertOne) ClearDeletedAt() *DioceseUpsertOne {
+	return u.Update(func(s *DioceseUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 
@@ -800,6 +857,27 @@ func (u *DioceseUpsertBulk) SetUpdatedAt(v time.Time) *DioceseUpsertBulk {
 func (u *DioceseUpsertBulk) UpdateUpdatedAt() *DioceseUpsertBulk {
 	return u.Update(func(s *DioceseUpsert) {
 		s.UpdateUpdatedAt()
+	})
+}
+
+// SetDeletedAt sets the "deletedAt" field.
+func (u *DioceseUpsertBulk) SetDeletedAt(v time.Time) *DioceseUpsertBulk {
+	return u.Update(func(s *DioceseUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deletedAt" field to the value that was provided on create.
+func (u *DioceseUpsertBulk) UpdateDeletedAt() *DioceseUpsertBulk {
+	return u.Update(func(s *DioceseUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deletedAt" field.
+func (u *DioceseUpsertBulk) ClearDeletedAt() *DioceseUpsertBulk {
+	return u.Update(func(s *DioceseUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 
