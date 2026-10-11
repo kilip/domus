@@ -179,6 +179,9 @@
       },
       "model.CreateDioceseRequest": {
         "properties": {
+          "active": {
+            "type": "boolean"
+          },
           "name": {
             "type": "string"
           }
@@ -188,6 +191,9 @@
       },
       "model.CreateParishRequest": {
         "properties": {
+          "active": {
+            "type": "boolean"
+          },
           "address": {
             "type": "string"
           },
@@ -212,6 +218,9 @@
       },
       "model.DioceseResponse": {
         "properties": {
+          "active": {
+            "type": "boolean"
+          },
           "createdAt": {
             "type": "string"
           },
@@ -235,6 +244,9 @@
       },
       "model.ParishResponse": {
         "properties": {
+          "active": {
+            "type": "boolean"
+          },
           "address": {
             "type": "string"
           },
@@ -261,6 +273,9 @@
       },
       "model.UpdateDioceseRequest": {
         "properties": {
+          "active": {
+            "type": "boolean"
+          },
           "name": {
             "type": "string"
           }
@@ -270,6 +285,9 @@
       },
       "model.UpdateParishRequest": {
         "properties": {
+          "active": {
+            "type": "boolean"
+          },
           "address": {
             "type": "string"
           },

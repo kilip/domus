@@ -20,6 +20,7 @@ func (Parish) Fields() []ent.Field {
 		field.String("address").Optional().Nillable(),
 		field.String("phone").Optional().Nillable(),
 		field.String("email").Optional().Nillable(),
+		field.Bool("active").Default(true),
 	}
 }
 

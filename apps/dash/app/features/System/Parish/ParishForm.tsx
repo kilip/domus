@@ -1,11 +1,20 @@
 import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
-import { Button, Form, type FormInstance, Input, Select, Space } from "antd";
+import {
+  Button,
+  Form,
+  type FormInstance,
+  Input,
+  Select,
+  Space,
+  Switch,
+} from "antd";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useDiocesesListQuery } from "../Diocese/useDioceseQueries";
 
 export interface ParishFormValues {
   name: string;
+  active?: boolean;
   church?: string;
   dioceseId?: number;
   address?: string;
@@ -76,6 +85,18 @@ export function ParishForm({
           autoFocus={autoFocus}
           maxLength={200}
           placeholder={t("parish.nameLabel")}
+        />
+      </Form.Item>
+
+      <Form.Item
+        name="active"
+        label={t("common.status")}
+        valuePropName="checked"
+        initialValue={true}
+      >
+        <Switch
+          checkedChildren={t("common.active")}
+          unCheckedChildren={t("common.inactive")}
         />
       </Form.Item>
 

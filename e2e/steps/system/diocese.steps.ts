@@ -11,8 +11,8 @@ Given(
       throw new Error("No active user to associate with created diocese");
     }
     await authDB.execute(
-      sql`INSERT INTO public.dioceses (name, created_at, updated_at, created_by, updated_by)
-          VALUES (${name}, NOW(), NOW(), ${userId}, ${userId})`,
+      sql`INSERT INTO public.dioceses (name, active, created_at, updated_at, created_by, updated_by)
+          VALUES (${name}, true, NOW(), NOW(), ${userId}, ${userId})`,
     );
   },
 );
@@ -25,6 +25,15 @@ When(
   "I fill the diocese name with {string}",
   async function (this: DomusWorld, name: string) {
     await this.diocesePage.fillName(name);
+  },
+);
+
+When(
+  "I set the diocese status to {string}",
+  async function (this: DomusWorld, status: string) {
+    const checked =
+      status.toLowerCase() === "aktif" || status.toLowerCase() === "active";
+    await this.diocesePage.setActive(checked);
   },
 );
 
@@ -61,6 +70,13 @@ Then(
   "I should see diocese {string} in the list",
   async function (this: DomusWorld, name: string) {
     await this.diocesePage.expectDioceseVisible(name);
+  },
+);
+
+Then(
+  "I should see diocese {string} with status {string} in the list",
+  async function (this: DomusWorld, name: string, status: string) {
+    await this.diocesePage.expectDioceseWithStatusVisible(name, status);
   },
 );
 

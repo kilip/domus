@@ -1,5 +1,5 @@
 import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
-import { Button, Card, Form, Input, message, Space } from "antd";
+import { Button, Card, Form, Input, message, Space, Switch } from "antd";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
@@ -19,15 +19,18 @@ export function meta() {
 export default function DioceseCreatePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [form] = Form.useForm<{ name: string }>();
+  const [form] = Form.useForm<{ name: string; active?: boolean }>();
   const [messageApi, messageContext] = message.useMessage();
   const createMutation = useCreateDioceseMutation();
   const [formError, setFormError] = useState<string | null>(null);
 
-  async function handleFinish(values: { name: string }) {
+  async function handleFinish(values: { name: string; active?: boolean }) {
     setFormError(null);
     try {
-      await createMutation.mutateAsync({ name: values.name.trim() });
+      await createMutation.mutateAsync({
+        name: values.name.trim(),
+        active: values.active ?? true,
+      });
       messageApi.success(t("diocese.created"));
       // Beri sedikit jeda agar toast sempat terbaca atau langsung navigasi
       navigate(modulePath("sys", "diocese"));
@@ -93,6 +96,17 @@ export default function DioceseCreatePage() {
                 autoFocus
                 maxLength={200}
                 placeholder={t("diocese.nameLabel")}
+              />
+            </Form.Item>
+            <Form.Item
+              name="active"
+              label={t("common.status")}
+              valuePropName="checked"
+              initialValue={true}
+            >
+              <Switch
+                checkedChildren={t("common.active")}
+                unCheckedChildren={t("common.inactive")}
               />
             </Form.Item>
             <Form.Item className="mb-0">

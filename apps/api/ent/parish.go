@@ -27,6 +27,8 @@ type Parish struct {
 	Phone *string `json:"phone,omitempty"`
 	// Email holds the value of the "email" field.
 	Email *string `json:"email,omitempty"`
+	// Active holds the value of the "active" field.
+	Active bool `json:"active,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ParishQuery when eager-loading is set.
 	Edges            ParishEdges `json:"edges"`
@@ -59,6 +61,8 @@ func (*Parish) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case parish.FieldActive:
+			values[i] = new(sql.NullBool)
 		case parish.FieldID:
 			values[i] = new(sql.NullInt64)
 		case parish.FieldName, parish.FieldChurch, parish.FieldAddress, parish.FieldPhone, parish.FieldEmail:
@@ -119,6 +123,12 @@ func (_m *Parish) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Email = new(string)
 				*_m.Email = value.String
+			}
+		case parish.FieldActive:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field active", values[i])
+			} else if value.Valid {
+				_m.Active = value.Bool
 			}
 		case parish.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -190,6 +200,9 @@ func (_m *Parish) String() string {
 		builder.WriteString("email=")
 		builder.WriteString(*v)
 	}
+	builder.WriteString(", ")
+	builder.WriteString("active=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Active))
 	builder.WriteByte(')')
 	return builder.String()
 }

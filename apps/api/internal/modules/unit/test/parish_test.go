@@ -51,6 +51,7 @@ func (s *ParishSuite) TestCreate_Success() {
 	res := s.GetResponse()
 	s.Greater(res.Data.ID, 0)
 	s.Equal("Paroki Katedral Jakarta", res.Data.Name)
+	s.True(res.Data.Active)
 	s.NotNil(res.Data.Church)
 	s.Equal(church, *res.Data.Church)
 	s.NotNil(res.Data.Address)
@@ -62,6 +63,22 @@ func (s *ParishSuite) TestCreate_Success() {
 	s.NotNil(res.Data.Diocese)
 	s.Equal(diocese.ID, res.Data.Diocese.ID)
 	s.Equal("Keuskupan Agung Jakarta", res.Data.Diocese.Name)
+}
+
+func (s *ParishSuite) TestCreate_WithActiveFalse() {
+	active := false
+	req := model.CreateParishRequest{
+		Name:   "Paroki Inaktif",
+		Active: &active,
+	}
+
+	s.Request("/parishes", fiber.MethodPost, req)
+	s.Created()
+
+	res := s.GetResponse()
+	s.Greater(res.Data.ID, 0)
+	s.Equal("Paroki Inaktif", res.Data.Name)
+	s.False(res.Data.Active)
 }
 
 func (s *ParishSuite) TestCreate_WithoutDiocese_Success() {
@@ -175,8 +192,10 @@ func (s *ParishSuite) TestUpdate_Success() {
 	phone2 := "031-5678999"
 	email2 := "katedral@sby.org"
 
+	activeFalse := false
 	updateReq := model.UpdateParishRequest{
 		Name:      "Paroki Hati Kudus Yesus",
+		Active:    &activeFalse,
 		Church:    &church2,
 		Address:   &addr2,
 		Phone:     &phone2,
@@ -189,6 +208,7 @@ func (s *ParishSuite) TestUpdate_Success() {
 	res := s.GetResponse()
 	s.Equal(created.ID, res.Data.ID)
 	s.Equal("Paroki Hati Kudus Yesus", res.Data.Name)
+	s.False(res.Data.Active)
 	s.NotNil(res.Data.Church)
 	s.Equal(church2, *res.Data.Church)
 	s.NotNil(res.Data.Address)

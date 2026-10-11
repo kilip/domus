@@ -29,6 +29,8 @@ type Diocese struct {
 	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Active holds the value of the "active" field.
+	Active bool `json:"active,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the DioceseQuery when eager-loading is set.
 	Edges        DioceseEdges `json:"edges"`
@@ -84,6 +86,8 @@ func (*Diocese) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case diocese.FieldActive:
+			values[i] = new(sql.NullBool)
 		case diocese.FieldID:
 			values[i] = new(sql.NullInt64)
 		case diocese.FieldName:
@@ -142,6 +146,12 @@ func (_m *Diocese) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				_m.Name = value.String
+			}
+		case diocese.FieldActive:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field active", values[i])
+			} else if value.Valid {
+				_m.Active = value.Bool
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -208,6 +218,9 @@ func (_m *Diocese) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
+	builder.WriteString(", ")
+	builder.WriteString("active=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Active))
 	builder.WriteByte(')')
 	return builder.String()
 }

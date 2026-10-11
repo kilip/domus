@@ -84,6 +84,20 @@ func (_c *ParishCreate) SetNillableEmail(v *string) *ParishCreate {
 	return _c
 }
 
+// SetActive sets the "active" field.
+func (_c *ParishCreate) SetActive(v bool) *ParishCreate {
+	_c.mutation.SetActive(v)
+	return _c
+}
+
+// SetNillableActive sets the "active" field if the given value is not nil.
+func (_c *ParishCreate) SetNillableActive(v *bool) *ParishCreate {
+	if v != nil {
+		_c.SetActive(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *ParishCreate) SetID(v int) *ParishCreate {
 	_c.mutation.SetID(v)
@@ -116,6 +130,7 @@ func (_c *ParishCreate) Mutation() *ParishMutation {
 
 // Save creates the Parish in the database.
 func (_c *ParishCreate) Save(ctx context.Context) (*Parish, error) {
+	_c.defaults()
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -141,10 +156,21 @@ func (_c *ParishCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_c *ParishCreate) defaults() {
+	if _, ok := _c.mutation.Active(); !ok {
+		v := parish.DefaultActive
+		_c.mutation.SetActive(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (_c *ParishCreate) check() error {
 	if _, ok := _c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Parish.name"`)}
+	}
+	if _, ok := _c.mutation.Active(); !ok {
+		return &ValidationError{Name: "active", err: errors.New(`ent: missing required field "Parish.active"`)}
 	}
 	return nil
 }
@@ -199,6 +225,10 @@ func (_c *ParishCreate) createSpec() (*Parish, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Email(); ok {
 		_spec.SetField(parish.FieldEmail, field.TypeString, value)
 		_node.Email = &value
+	}
+	if value, ok := _c.mutation.Active(); ok {
+		_spec.SetField(parish.FieldActive, field.TypeBool, value)
+		_node.Active = value
 	}
 	if nodes := _c.mutation.DioceseIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -354,6 +384,18 @@ func (u *ParishUpsert) ClearEmail() *ParishUpsert {
 	return u
 }
 
+// SetActive sets the "active" field.
+func (u *ParishUpsert) SetActive(v bool) *ParishUpsert {
+	u.Set(parish.FieldActive, v)
+	return u
+}
+
+// UpdateActive sets the "active" field to the value that was provided on create.
+func (u *ParishUpsert) UpdateActive() *ParishUpsert {
+	u.SetExcluded(parish.FieldActive)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -500,6 +542,20 @@ func (u *ParishUpsertOne) ClearEmail() *ParishUpsertOne {
 	})
 }
 
+// SetActive sets the "active" field.
+func (u *ParishUpsertOne) SetActive(v bool) *ParishUpsertOne {
+	return u.Update(func(s *ParishUpsert) {
+		s.SetActive(v)
+	})
+}
+
+// UpdateActive sets the "active" field to the value that was provided on create.
+func (u *ParishUpsertOne) UpdateActive() *ParishUpsertOne {
+	return u.Update(func(s *ParishUpsert) {
+		s.UpdateActive()
+	})
+}
+
 // Exec executes the query.
 func (u *ParishUpsertOne) Exec(ctx context.Context) error {
 	if len(u.create.conflict) == 0 {
@@ -552,6 +608,7 @@ func (_c *ParishCreateBulk) Save(ctx context.Context) ([]*Parish, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ParishMutation)
 				if !ok {
@@ -808,6 +865,20 @@ func (u *ParishUpsertBulk) UpdateEmail() *ParishUpsertBulk {
 func (u *ParishUpsertBulk) ClearEmail() *ParishUpsertBulk {
 	return u.Update(func(s *ParishUpsert) {
 		s.ClearEmail()
+	})
+}
+
+// SetActive sets the "active" field.
+func (u *ParishUpsertBulk) SetActive(v bool) *ParishUpsertBulk {
+	return u.Update(func(s *ParishUpsert) {
+		s.SetActive(v)
+	})
+}
+
+// UpdateActive sets the "active" field to the value that was provided on create.
+func (u *ParishUpsertBulk) UpdateActive() *ParishUpsertBulk {
+	return u.Update(func(s *ParishUpsert) {
+		s.UpdateActive()
 	})
 }
 

@@ -29,6 +29,7 @@ export default function ParishCreatePage() {
     try {
       await createMutation.mutateAsync({
         name: values.name.trim(),
+        active: values.active ?? true,
         church: values.church?.trim() || undefined,
         dioceseId: values.dioceseId ? Number(values.dioceseId) : undefined,
         address: values.address?.trim() || undefined,

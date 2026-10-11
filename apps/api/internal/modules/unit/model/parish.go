@@ -3,6 +3,7 @@ package model
 type ParishResponse struct {
 	ID      int              `json:"id"`
 	Name    string           `json:"name"`
+	Active  bool             `json:"active"`
 	Church  *string          `json:"church,omitempty"`
 	Address *string          `json:"address,omitempty"`
 	Phone   *string          `json:"phone,omitempty"`
@@ -12,6 +13,7 @@ type ParishResponse struct {
 
 type CreateParishRequest struct {
 	Name      string  `json:"name" validate:"required"`
+	Active    *bool   `json:"active,omitempty"`
 	Church    *string `json:"church,omitempty"`
 	Address   *string `json:"address,omitempty"`
 	Phone     *string `json:"phone,omitempty"`
@@ -21,6 +23,7 @@ type CreateParishRequest struct {
 
 type UpdateParishRequest struct {
 	Name      string  `json:"name" validate:"required"`
+	Active    *bool   `json:"active,omitempty"`
 	Church    *string `json:"church,omitempty"`
 	Address   *string `json:"address,omitempty"`
 	Phone     *string `json:"phone,omitempty"`

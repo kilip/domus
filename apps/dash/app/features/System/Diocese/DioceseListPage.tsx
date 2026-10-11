@@ -1,5 +1,5 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
-import { Button, message, Popconfirm, Space, Table, Tooltip } from "antd";
+import { Button, message, Popconfirm, Space, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -63,6 +63,16 @@ export default function DioceseListPage() {
       dataIndex: "name",
       sorter: (a, b) => (a.name ?? "").localeCompare(b.name ?? ""),
       defaultSortOrder: "ascend",
+    },
+    {
+      title: t("common.status"),
+      dataIndex: "active",
+      width: 120,
+      render: (active?: boolean) => (
+        <Tag color={active ? "success" : "default"}>
+          {active ? t("common.active") : t("common.inactive")}
+        </Tag>
+      ),
     },
     {
       title: t("diocese.updatedAt"),

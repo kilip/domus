@@ -24,6 +24,7 @@ func toParishResponse(p *ent.Parish) model.ParishResponse {
 	resp := model.ParishResponse{
 		ID:      p.ID,
 		Name:    p.Name,
+		Active:  p.Active,
 		Church:  p.Church,
 		Address: p.Address,
 		Phone:   p.Phone,
@@ -76,6 +77,11 @@ func (r ParishRepository) Create(c context.Context, req model.CreateParishReques
 	err := database.WithTx(c, r.entcli, func(tx *ent.Tx) error {
 		builder := tx.Parish.Create().
 			SetName(req.Name)
+		if req.Active != nil {
+			builder.SetActive(*req.Active)
+		} else {
+			builder.SetActive(true)
+		}
 		if req.Church != nil && *req.Church != "" {
 			builder.SetChurch(*req.Church)
 		}
@@ -126,6 +132,9 @@ func (r ParishRepository) Update(c context.Context, id int, req model.UpdatePari
 
 		builder := tx.Parish.UpdateOneID(id).
 			SetName(req.Name)
+		if req.Active != nil {
+			builder.SetActive(*req.Active)
+		}
 		if req.Church != nil && *req.Church != "" {
 			builder.SetChurch(*req.Church)
 		} else {

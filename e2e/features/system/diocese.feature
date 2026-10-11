@@ -12,7 +12,25 @@ Feature: Diocese CRUD
     And I submit the diocese form
     Then I should be on "/sys/diocese"
     And I should see a success notification "Keuskupan ditambahkan."
-    And I should see diocese "E2E Keuskupan Surabaya" in the list
+    And I should see diocese "E2E Keuskupan Surabaya" with status "Aktif" in the list
+
+  Scenario: Create an inactive diocese and toggle active on edit
+    Given I am logged in as an admin
+    And I open "/sys/diocese"
+    When I click the add diocese button
+    Then I should be on "/sys/diocese/create"
+    When I fill the diocese name with "E2E Keuskupan Pangkalpinang"
+    And I set the diocese status to "Nonaktif"
+    And I submit the diocese form
+    Then I should be on "/sys/diocese"
+    And I should see a success notification "Keuskupan ditambahkan."
+    And I should see diocese "E2E Keuskupan Pangkalpinang" with status "Nonaktif" in the list
+    When I click edit for diocese "E2E Keuskupan Pangkalpinang"
+    And I set the diocese status to "Aktif"
+    And I submit the diocese form
+    Then I should be on "/sys/diocese"
+    And I should see a success notification "Keuskupan diperbarui."
+    And I should see diocese "E2E Keuskupan Pangkalpinang" with status "Aktif" in the list
 
   Scenario: Diocese form validation
     Given I am logged in as an admin

@@ -17,6 +17,25 @@ Feature: Parish CRUD
     Then I should be on "/sys/parish"
     And I should see a success notification "Paroki ditambahkan."
     And I should see parish "E2E Paroki Katedral Surabaya" with church "Hati Kudus Yesus" in the list
+    And I should see parish "E2E Paroki Katedral Surabaya" with status "Aktif" in the list
+
+  Scenario: Create an inactive parish and toggle active on edit
+    Given I am logged in as an admin
+    And I open "/sys/parish"
+    When I click the add parish button
+    Then I should be on "/sys/parish/create"
+    When I fill the parish name with "E2E Paroki Nonaktif"
+    And I set the parish status to "Nonaktif"
+    And I submit the parish form
+    Then I should be on "/sys/parish"
+    And I should see a success notification "Paroki ditambahkan."
+    And I should see parish "E2E Paroki Nonaktif" with status "Nonaktif" in the list
+    When I click edit for parish "E2E Paroki Nonaktif"
+    And I set the parish status to "Aktif"
+    And I submit the parish form
+    Then I should be on "/sys/parish"
+    And I should see a success notification "Paroki diperbarui."
+    And I should see parish "E2E Paroki Nonaktif" with status "Aktif" in the list
 
   Scenario: Parish form validation
     Given I am logged in as an admin

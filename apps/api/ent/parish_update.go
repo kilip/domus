@@ -123,6 +123,20 @@ func (_u *ParishUpdate) ClearEmail() *ParishUpdate {
 	return _u
 }
 
+// SetActive sets the "active" field.
+func (_u *ParishUpdate) SetActive(v bool) *ParishUpdate {
+	_u.mutation.SetActive(v)
+	return _u
+}
+
+// SetNillableActive sets the "active" field if the given value is not nil.
+func (_u *ParishUpdate) SetNillableActive(v *bool) *ParishUpdate {
+	if v != nil {
+		_u.SetActive(*v)
+	}
+	return _u
+}
+
 // SetDioceseID sets the "diocese" edge to the Diocese entity by ID.
 func (_u *ParishUpdate) SetDioceseID(id int) *ParishUpdate {
 	_u.mutation.SetDioceseID(id)
@@ -215,6 +229,9 @@ func (_u *ParishUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.EmailCleared() {
 		_spec.ClearField(parish.FieldEmail, field.TypeString)
+	}
+	if value, ok := _u.mutation.Active(); ok {
+		_spec.SetField(parish.FieldActive, field.TypeBool, value)
 	}
 	if _u.mutation.DioceseCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -363,6 +380,20 @@ func (_u *ParishUpdateOne) ClearEmail() *ParishUpdateOne {
 	return _u
 }
 
+// SetActive sets the "active" field.
+func (_u *ParishUpdateOne) SetActive(v bool) *ParishUpdateOne {
+	_u.mutation.SetActive(v)
+	return _u
+}
+
+// SetNillableActive sets the "active" field if the given value is not nil.
+func (_u *ParishUpdateOne) SetNillableActive(v *bool) *ParishUpdateOne {
+	if v != nil {
+		_u.SetActive(*v)
+	}
+	return _u
+}
+
 // SetDioceseID sets the "diocese" edge to the Diocese entity by ID.
 func (_u *ParishUpdateOne) SetDioceseID(id int) *ParishUpdateOne {
 	_u.mutation.SetDioceseID(id)
@@ -485,6 +516,9 @@ func (_u *ParishUpdateOne) sqlSave(ctx context.Context) (_node *Parish, err erro
 	}
 	if _u.mutation.EmailCleared() {
 		_spec.ClearField(parish.FieldEmail, field.TypeString)
+	}
+	if value, ok := _u.mutation.Active(); ok {
+		_spec.SetField(parish.FieldActive, field.TypeBool, value)
 	}
 	if _u.mutation.DioceseCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -14,6 +14,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString},
+		{Name: "active", Type: field.TypeBool, Default: true},
 		{Name: "created_by", Type: field.TypeUUID},
 		{Name: "updated_by", Type: field.TypeUUID},
 	}
@@ -25,13 +26,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "dioceses_users_creator",
-				Columns:    []*schema.Column{DiocesesColumns[4]},
+				Columns:    []*schema.Column{DiocesesColumns[5]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "dioceses_users_updater",
-				Columns:    []*schema.Column{DiocesesColumns[5]},
+				Columns:    []*schema.Column{DiocesesColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -77,6 +78,7 @@ var (
 		{Name: "address", Type: field.TypeString, Nullable: true},
 		{Name: "phone", Type: field.TypeString, Nullable: true},
 		{Name: "email", Type: field.TypeString, Nullable: true},
+		{Name: "active", Type: field.TypeBool, Default: true},
 		{Name: "diocese_parishes", Type: field.TypeInt, Nullable: true},
 	}
 	// ParishesTable holds the schema information for the "parishes" table.
@@ -87,7 +89,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "parishes_dioceses_parishes",
-				Columns:    []*schema.Column{ParishesColumns[6]},
+				Columns:    []*schema.Column{ParishesColumns[7]},
 				RefColumns: []*schema.Column{DiocesesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

@@ -46,6 +46,7 @@ type DioceseMutation struct {
 	createdAt       *time.Time
 	updatedAt       *time.Time
 	name            *string
+	active          *bool
 	clearedFields   map[string]struct{}
 	creator         *uuid.UUID
 	clearedcreator  bool
@@ -343,6 +344,42 @@ func (m *DioceseMutation) ResetName() {
 	m.name = nil
 }
 
+// SetActive sets the "active" field.
+func (m *DioceseMutation) SetActive(b bool) {
+	m.active = &b
+}
+
+// Active returns the value of the "active" field in the mutation.
+func (m *DioceseMutation) Active() (r bool, exists bool) {
+	v := m.active
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldActive returns the old "active" field's value of the Diocese entity.
+// If the Diocese object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DioceseMutation) OldActive(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldActive is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldActive requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldActive: %w", err)
+	}
+	return oldValue.Active, nil
+}
+
+// ResetActive resets all changes to the "active" field.
+func (m *DioceseMutation) ResetActive() {
+	m.active = nil
+}
+
 // SetCreatorID sets the "creator" edge to the User entity by id.
 func (m *DioceseMutation) SetCreatorID(id uuid.UUID) {
 	m.creator = &id
@@ -511,7 +548,7 @@ func (m *DioceseMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DioceseMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.creator != nil {
 		fields = append(fields, diocese.FieldCreatedBy)
 	}
@@ -526,6 +563,9 @@ func (m *DioceseMutation) Fields() []string {
 	}
 	if m.name != nil {
 		fields = append(fields, diocese.FieldName)
+	}
+	if m.active != nil {
+		fields = append(fields, diocese.FieldActive)
 	}
 	return fields
 }
@@ -545,6 +585,8 @@ func (m *DioceseMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case diocese.FieldName:
 		return m.Name()
+	case diocese.FieldActive:
+		return m.Active()
 	}
 	return nil, false
 }
@@ -564,6 +606,8 @@ func (m *DioceseMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldUpdatedAt(ctx)
 	case diocese.FieldName:
 		return m.OldName(ctx)
+	case diocese.FieldActive:
+		return m.OldActive(ctx)
 	}
 	return nil, fmt.Errorf("unknown Diocese field %s", name)
 }
@@ -607,6 +651,13 @@ func (m *DioceseMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
+		return nil
+	case diocese.FieldActive:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetActive(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Diocese field %s", name)
@@ -671,6 +722,9 @@ func (m *DioceseMutation) ResetField(name string) error {
 		return nil
 	case diocese.FieldName:
 		m.ResetName()
+		return nil
+	case diocese.FieldActive:
+		m.ResetActive()
 		return nil
 	}
 	return fmt.Errorf("unknown Diocese field %s", name)
@@ -1385,6 +1439,7 @@ type ParishMutation struct {
 	address        *string
 	phone          *string
 	email          *string
+	active         *bool
 	clearedFields  map[string]struct{}
 	diocese        *int
 	cleareddiocese bool
@@ -1729,6 +1784,42 @@ func (m *ParishMutation) ResetEmail() {
 	delete(m.clearedFields, parish.FieldEmail)
 }
 
+// SetActive sets the "active" field.
+func (m *ParishMutation) SetActive(b bool) {
+	m.active = &b
+}
+
+// Active returns the value of the "active" field in the mutation.
+func (m *ParishMutation) Active() (r bool, exists bool) {
+	v := m.active
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldActive returns the old "active" field's value of the Parish entity.
+// If the Parish object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ParishMutation) OldActive(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldActive is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldActive requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldActive: %w", err)
+	}
+	return oldValue.Active, nil
+}
+
+// ResetActive resets all changes to the "active" field.
+func (m *ParishMutation) ResetActive() {
+	m.active = nil
+}
+
 // SetDioceseID sets the "diocese" edge to the Diocese entity by id.
 func (m *ParishMutation) SetDioceseID(id int) {
 	m.diocese = &id
@@ -1802,7 +1893,7 @@ func (m *ParishMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ParishMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.name != nil {
 		fields = append(fields, parish.FieldName)
 	}
@@ -1817,6 +1908,9 @@ func (m *ParishMutation) Fields() []string {
 	}
 	if m.email != nil {
 		fields = append(fields, parish.FieldEmail)
+	}
+	if m.active != nil {
+		fields = append(fields, parish.FieldActive)
 	}
 	return fields
 }
@@ -1836,6 +1930,8 @@ func (m *ParishMutation) Field(name string) (ent.Value, bool) {
 		return m.Phone()
 	case parish.FieldEmail:
 		return m.Email()
+	case parish.FieldActive:
+		return m.Active()
 	}
 	return nil, false
 }
@@ -1855,6 +1951,8 @@ func (m *ParishMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldPhone(ctx)
 	case parish.FieldEmail:
 		return m.OldEmail(ctx)
+	case parish.FieldActive:
+		return m.OldActive(ctx)
 	}
 	return nil, fmt.Errorf("unknown Parish field %s", name)
 }
@@ -1898,6 +1996,13 @@ func (m *ParishMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetEmail(v)
+		return nil
+	case parish.FieldActive:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetActive(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Parish field %s", name)
@@ -1989,6 +2094,9 @@ func (m *ParishMutation) ResetField(name string) error {
 		return nil
 	case parish.FieldEmail:
 		m.ResetEmail()
+		return nil
+	case parish.FieldActive:
+		m.ResetActive()
 		return nil
 	}
 	return fmt.Errorf("unknown Parish field %s", name)

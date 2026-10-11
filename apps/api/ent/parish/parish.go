@@ -22,6 +22,8 @@ const (
 	FieldPhone = "phone"
 	// FieldEmail holds the string denoting the email field in the database.
 	FieldEmail = "email"
+	// FieldActive holds the string denoting the active field in the database.
+	FieldActive = "active"
 	// EdgeDiocese holds the string denoting the diocese edge name in mutations.
 	EdgeDiocese = "diocese"
 	// Table holds the table name of the parish in the database.
@@ -43,6 +45,7 @@ var Columns = []string{
 	FieldAddress,
 	FieldPhone,
 	FieldEmail,
+	FieldActive,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "parishes"
@@ -65,6 +68,11 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// DefaultActive holds the default value on creation for the "active" field.
+	DefaultActive bool
+)
 
 // OrderOption defines the ordering options for the Parish queries.
 type OrderOption func(*sql.Selector)
@@ -97,6 +105,11 @@ func ByPhone(opts ...sql.OrderTermOption) OrderOption {
 // ByEmail orders the results by the email field.
 func ByEmail(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldEmail, opts...).ToFunc()
+}
+
+// ByActive orders the results by the active field.
+func ByActive(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldActive, opts...).ToFunc()
 }
 
 // ByDioceseField orders the results by diocese field.

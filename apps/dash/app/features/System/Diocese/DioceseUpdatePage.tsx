@@ -1,5 +1,14 @@
 import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
-import { Button, Card, Form, Input, message, Skeleton, Space } from "antd";
+import {
+  Button,
+  Card,
+  Form,
+  Input,
+  message,
+  Skeleton,
+  Space,
+  Switch,
+} from "antd";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router";
@@ -26,7 +35,7 @@ export default function DioceseUpdatePage() {
   const params = useParams<{ id: string }>();
   const id = Number(params.id);
 
-  const [form] = Form.useForm<{ name: string }>();
+  const [form] = Form.useForm<{ name: string; active?: boolean }>();
   const [messageApi, messageContext] = message.useMessage();
   const {
     data: diocese,
@@ -37,15 +46,21 @@ export default function DioceseUpdatePage() {
   const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (diocese?.name) {
-      form.setFieldsValue({ name: diocese.name });
+    if (diocese) {
+      form.setFieldsValue({
+        name: diocese.name,
+        active: diocese.active ?? true,
+      });
     }
   }, [diocese, form]);
 
-  async function handleFinish(values: { name: string }) {
+  async function handleFinish(values: { name: string; active?: boolean }) {
     setFormError(null);
     try {
-      await updateMutation.mutateAsync({ name: values.name.trim() });
+      await updateMutation.mutateAsync({
+        name: values.name.trim(),
+        active: values.active ?? true,
+      });
       messageApi.success(t("diocese.updated"));
       navigate(modulePath("sys", "diocese"));
     } catch (err: unknown) {
@@ -94,7 +109,10 @@ export default function DioceseUpdatePage() {
               layout="vertical"
               onFinish={handleFinish}
               requiredMark={false}
-              initialValues={{ name: diocese?.name ?? "" }}
+              initialValues={{
+                name: diocese?.name ?? "",
+                active: diocese?.active ?? true,
+              }}
             >
               <Form.Item
                 name="name"
@@ -118,6 +136,16 @@ export default function DioceseUpdatePage() {
                   autoFocus
                   maxLength={200}
                   placeholder={t("diocese.nameLabel")}
+                />
+              </Form.Item>
+              <Form.Item
+                name="active"
+                label={t("common.status")}
+                valuePropName="checked"
+              >
+                <Switch
+                  checkedChildren={t("common.active")}
+                  unCheckedChildren={t("common.inactive")}
                 />
               </Form.Item>
               <Form.Item className="mb-0">

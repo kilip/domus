@@ -17,6 +17,10 @@ export class ParishPage extends BasePage {
     return this.page.locator("#name");
   }
 
+  get activeSwitch() {
+    return this.page.locator("#active");
+  }
+
   get churchInput() {
     return this.page.locator("#church");
   }
@@ -92,6 +96,14 @@ export class ParishPage extends BasePage {
     await this.nameInput.fill(name);
   }
 
+  async setActive(checked: boolean) {
+    const isChecked =
+      (await this.activeSwitch.getAttribute("aria-checked")) === "true";
+    if (isChecked !== checked) {
+      await this.activeSwitch.click();
+    }
+  }
+
   async fillChurch(church: string) {
     await this.churchInput.fill(church);
   }
@@ -141,6 +153,14 @@ export class ParishPage extends BasePage {
 
   async expectParishVisible(name: string) {
     await expect(this.row(name)).toBeVisible();
+  }
+
+  async expectParishWithStatusVisible(name: string, statusText: string) {
+    const rowLocator = this.row(name);
+    await expect(rowLocator).toBeVisible();
+    await expect(
+      rowLocator.getByText(statusText, { exact: true }),
+    ).toBeVisible();
   }
 
   async expectParishWithChurchVisible(name: string, church: string) {

@@ -190,6 +190,9 @@ const docTemplate = `{
             },
             "model.CreateDioceseRequest": {
                 "properties": {
+                    "active": {
+                        "type": "boolean"
+                    },
                     "name": {
                         "type": "string"
                     }
@@ -201,6 +204,9 @@ const docTemplate = `{
             },
             "model.CreateParishRequest": {
                 "properties": {
+                    "active": {
+                        "type": "boolean"
+                    },
                     "address": {
                         "type": "string"
                     },
@@ -227,6 +233,9 @@ const docTemplate = `{
             },
             "model.DioceseResponse": {
                 "properties": {
+                    "active": {
+                        "type": "boolean"
+                    },
                     "createdAt": {
                         "type": "string"
                     },
@@ -250,6 +259,9 @@ const docTemplate = `{
             },
             "model.ParishResponse": {
                 "properties": {
+                    "active": {
+                        "type": "boolean"
+                    },
                     "address": {
                         "type": "string"
                     },
@@ -276,6 +288,9 @@ const docTemplate = `{
             },
             "model.UpdateDioceseRequest": {
                 "properties": {
+                    "active": {
+                        "type": "boolean"
+                    },
                     "name": {
                         "type": "string"
                     }
@@ -287,6 +302,9 @@ const docTemplate = `{
             },
             "model.UpdateParishRequest": {
                 "properties": {
+                    "active": {
+                        "type": "boolean"
+                    },
                     "address": {
                         "type": "string"
                     },

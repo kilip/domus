@@ -17,6 +17,10 @@ export class DiocesePage extends BasePage {
     return this.page.locator("#name");
   }
 
+  get activeSwitch() {
+    return this.page.locator("#active");
+  }
+
   get saveButton() {
     return this.page.getByRole("button", { name: "Simpan" });
   }
@@ -72,6 +76,14 @@ export class DiocesePage extends BasePage {
     await this.nameInput.fill(name);
   }
 
+  async setActive(checked: boolean) {
+    const isChecked =
+      (await this.activeSwitch.getAttribute("aria-checked")) === "true";
+    if (isChecked !== checked) {
+      await this.activeSwitch.click();
+    }
+  }
+
   async submitForm() {
     await this.saveButton.click();
   }
@@ -105,6 +117,14 @@ export class DiocesePage extends BasePage {
 
   async expectDioceseVisible(name: string) {
     await expect(this.row(name)).toBeVisible();
+  }
+
+  async expectDioceseWithStatusVisible(name: string, statusText: string) {
+    const rowLocator = this.row(name);
+    await expect(rowLocator).toBeVisible();
+    await expect(
+      rowLocator.getByText(statusText, { exact: true }),
+    ).toBeVisible();
   }
 
   async expectDioceseNotVisible(name: string) {

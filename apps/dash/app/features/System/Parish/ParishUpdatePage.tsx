@@ -40,6 +40,7 @@ export default function ParishUpdatePage() {
     if (parish) {
       form.setFieldsValue({
         name: parish.name ?? "",
+        active: parish.active ?? true,
         church: parish.church ?? undefined,
         dioceseId: parish.diocese?.id,
         address: parish.address ?? undefined,
@@ -54,6 +55,7 @@ export default function ParishUpdatePage() {
     try {
       await updateMutation.mutateAsync({
         name: values.name.trim(),
+        active: values.active ?? true,
         church: values.church?.trim() || undefined,
         dioceseId: values.dioceseId ? Number(values.dioceseId) : undefined,
         address: values.address?.trim() || undefined,
@@ -109,6 +111,7 @@ export default function ParishUpdatePage() {
               form={form}
               initialValues={{
                 name: parish?.name ?? "",
+                active: parish?.active ?? true,
                 church: parish?.church ?? undefined,
                 dioceseId: parish?.diocese?.id,
                 address: parish?.address ?? undefined,

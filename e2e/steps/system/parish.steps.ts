@@ -7,8 +7,8 @@ Given(
   "parish {string} exists",
   async function (this: DomusWorld, name: string) {
     await authDB.execute(
-      sql`INSERT INTO public.parishes (name)
-          VALUES (${name})`,
+      sql`INSERT INTO public.parishes (name, active)
+          VALUES (${name}, true)`,
     );
   },
 );
@@ -21,14 +21,14 @@ Given(
       throw new Error("No active user to associate with created diocese");
     }
     const result = await authDB.execute(
-      sql`INSERT INTO public.dioceses (name, created_at, updated_at, created_by, updated_by)
-          VALUES (${dioceseName}, NOW(), NOW(), ${userId}, ${userId})
+      sql`INSERT INTO public.dioceses (name, active, created_at, updated_at, created_by, updated_by)
+          VALUES (${dioceseName}, true, NOW(), NOW(), ${userId}, ${userId})
           RETURNING id`,
     );
     const dioceseId = (result.rows[0] as { id: number }).id;
     await authDB.execute(
-      sql`INSERT INTO public.parishes (name, diocese_parishes)
-          VALUES (${parishName}, ${dioceseId})`,
+      sql`INSERT INTO public.parishes (name, active, diocese_parishes)
+          VALUES (${parishName}, true, ${dioceseId})`,
     );
   },
 );
@@ -37,8 +37,8 @@ Given(
   "parish {string} with church {string} exists",
   async function (this: DomusWorld, name: string, church: string) {
     await authDB.execute(
-      sql`INSERT INTO public.parishes (name, church)
-          VALUES (${name}, ${church})`,
+      sql`INSERT INTO public.parishes (name, active, church)
+          VALUES (${name}, true, ${church})`,
     );
   },
 );
@@ -94,6 +94,15 @@ When(
   },
 );
 
+When(
+  "I set the parish status to {string}",
+  async function (this: DomusWorld, status: string) {
+    const checked =
+      status.toLowerCase() === "aktif" || status.toLowerCase() === "active";
+    await this.parishPage.setActive(checked);
+  },
+);
+
 When("I submit the parish form", async function (this: DomusWorld) {
   await this.parishPage.submitForm();
 });
@@ -127,6 +136,13 @@ Then(
   "I should see parish {string} in the list",
   async function (this: DomusWorld, name: string) {
     await this.parishPage.expectParishVisible(name);
+  },
+);
+
+Then(
+  "I should see parish {string} with status {string} in the list",
+  async function (this: DomusWorld, name: string, status: string) {
+    await this.parishPage.expectParishWithStatusVisible(name, status);
   },
 );
 

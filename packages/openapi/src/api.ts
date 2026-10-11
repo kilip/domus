@@ -787,9 +787,11 @@ export interface components {
       meta?: components["schemas"]["httpx.Meta"];
     };
     "model.CreateDioceseRequest": {
+      active?: boolean;
       name: string;
     };
     "model.CreateParishRequest": {
+      active?: boolean;
       address?: string;
       church?: string;
       dioceseId?: number;
@@ -798,6 +800,7 @@ export interface components {
       phone?: string;
     };
     "model.DioceseResponse": {
+      active?: boolean;
       createdAt?: string;
       createdBy?: components["schemas"]["core.User"];
       id?: number;
@@ -806,6 +809,7 @@ export interface components {
       updatedBy?: components["schemas"]["core.User"];
     };
     "model.ParishResponse": {
+      active?: boolean;
       address?: string;
       church?: string;
       diocese?: components["schemas"]["model.DioceseResponse"];
@@ -815,9 +819,11 @@ export interface components {
       phone?: string;
     };
     "model.UpdateDioceseRequest": {
+      active?: boolean;
       name: string;
     };
     "model.UpdateParishRequest": {
+      active?: boolean;
       address?: string;
       church?: string;
       dioceseId?: number;
