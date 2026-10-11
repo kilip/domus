@@ -73,6 +73,10 @@ var (
 	ParishesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
+		{Name: "church", Type: field.TypeString, Nullable: true},
+		{Name: "address", Type: field.TypeString, Nullable: true},
+		{Name: "phone", Type: field.TypeString, Nullable: true},
+		{Name: "email", Type: field.TypeString, Nullable: true},
 		{Name: "diocese_parishes", Type: field.TypeInt, Nullable: true},
 	}
 	// ParishesTable holds the schema information for the "parishes" table.
@@ -83,7 +87,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "parishes_dioceses_parishes",
-				Columns:    []*schema.Column{ParishesColumns[2]},
+				Columns:    []*schema.Column{ParishesColumns[6]},
 				RefColumns: []*schema.Column{DiocesesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

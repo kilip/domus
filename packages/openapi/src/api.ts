@@ -790,8 +790,12 @@ export interface components {
       name: string;
     };
     "model.CreateParishRequest": {
+      address?: string;
+      church?: string;
       dioceseId?: number;
+      email?: string;
       name: string;
+      phone?: string;
     };
     "model.DioceseResponse": {
       createdAt?: string;
@@ -802,16 +806,24 @@ export interface components {
       updatedBy?: components["schemas"]["core.User"];
     };
     "model.ParishResponse": {
+      address?: string;
+      church?: string;
       diocese?: components["schemas"]["model.DioceseResponse"];
+      email?: string;
       id?: number;
       name?: string;
+      phone?: string;
     };
     "model.UpdateDioceseRequest": {
       name: string;
     };
     "model.UpdateParishRequest": {
+      address?: string;
+      church?: string;
       dioceseId?: number;
+      email?: string;
       name: string;
+      phone?: string;
     };
   };
   responses: never;

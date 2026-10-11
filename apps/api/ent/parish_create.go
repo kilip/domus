@@ -28,6 +28,62 @@ func (_c *ParishCreate) SetName(v string) *ParishCreate {
 	return _c
 }
 
+// SetChurch sets the "church" field.
+func (_c *ParishCreate) SetChurch(v string) *ParishCreate {
+	_c.mutation.SetChurch(v)
+	return _c
+}
+
+// SetNillableChurch sets the "church" field if the given value is not nil.
+func (_c *ParishCreate) SetNillableChurch(v *string) *ParishCreate {
+	if v != nil {
+		_c.SetChurch(*v)
+	}
+	return _c
+}
+
+// SetAddress sets the "address" field.
+func (_c *ParishCreate) SetAddress(v string) *ParishCreate {
+	_c.mutation.SetAddress(v)
+	return _c
+}
+
+// SetNillableAddress sets the "address" field if the given value is not nil.
+func (_c *ParishCreate) SetNillableAddress(v *string) *ParishCreate {
+	if v != nil {
+		_c.SetAddress(*v)
+	}
+	return _c
+}
+
+// SetPhone sets the "phone" field.
+func (_c *ParishCreate) SetPhone(v string) *ParishCreate {
+	_c.mutation.SetPhone(v)
+	return _c
+}
+
+// SetNillablePhone sets the "phone" field if the given value is not nil.
+func (_c *ParishCreate) SetNillablePhone(v *string) *ParishCreate {
+	if v != nil {
+		_c.SetPhone(*v)
+	}
+	return _c
+}
+
+// SetEmail sets the "email" field.
+func (_c *ParishCreate) SetEmail(v string) *ParishCreate {
+	_c.mutation.SetEmail(v)
+	return _c
+}
+
+// SetNillableEmail sets the "email" field if the given value is not nil.
+func (_c *ParishCreate) SetNillableEmail(v *string) *ParishCreate {
+	if v != nil {
+		_c.SetEmail(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *ParishCreate) SetID(v int) *ParishCreate {
 	_c.mutation.SetID(v)
@@ -128,6 +184,22 @@ func (_c *ParishCreate) createSpec() (*Parish, *sqlgraph.CreateSpec) {
 		_spec.SetField(parish.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
+	if value, ok := _c.mutation.Church(); ok {
+		_spec.SetField(parish.FieldChurch, field.TypeString, value)
+		_node.Church = &value
+	}
+	if value, ok := _c.mutation.Address(); ok {
+		_spec.SetField(parish.FieldAddress, field.TypeString, value)
+		_node.Address = &value
+	}
+	if value, ok := _c.mutation.Phone(); ok {
+		_spec.SetField(parish.FieldPhone, field.TypeString, value)
+		_node.Phone = &value
+	}
+	if value, ok := _c.mutation.Email(); ok {
+		_spec.SetField(parish.FieldEmail, field.TypeString, value)
+		_node.Email = &value
+	}
 	if nodes := _c.mutation.DioceseIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -210,6 +282,78 @@ func (u *ParishUpsert) UpdateName() *ParishUpsert {
 	return u
 }
 
+// SetChurch sets the "church" field.
+func (u *ParishUpsert) SetChurch(v string) *ParishUpsert {
+	u.Set(parish.FieldChurch, v)
+	return u
+}
+
+// UpdateChurch sets the "church" field to the value that was provided on create.
+func (u *ParishUpsert) UpdateChurch() *ParishUpsert {
+	u.SetExcluded(parish.FieldChurch)
+	return u
+}
+
+// ClearChurch clears the value of the "church" field.
+func (u *ParishUpsert) ClearChurch() *ParishUpsert {
+	u.SetNull(parish.FieldChurch)
+	return u
+}
+
+// SetAddress sets the "address" field.
+func (u *ParishUpsert) SetAddress(v string) *ParishUpsert {
+	u.Set(parish.FieldAddress, v)
+	return u
+}
+
+// UpdateAddress sets the "address" field to the value that was provided on create.
+func (u *ParishUpsert) UpdateAddress() *ParishUpsert {
+	u.SetExcluded(parish.FieldAddress)
+	return u
+}
+
+// ClearAddress clears the value of the "address" field.
+func (u *ParishUpsert) ClearAddress() *ParishUpsert {
+	u.SetNull(parish.FieldAddress)
+	return u
+}
+
+// SetPhone sets the "phone" field.
+func (u *ParishUpsert) SetPhone(v string) *ParishUpsert {
+	u.Set(parish.FieldPhone, v)
+	return u
+}
+
+// UpdatePhone sets the "phone" field to the value that was provided on create.
+func (u *ParishUpsert) UpdatePhone() *ParishUpsert {
+	u.SetExcluded(parish.FieldPhone)
+	return u
+}
+
+// ClearPhone clears the value of the "phone" field.
+func (u *ParishUpsert) ClearPhone() *ParishUpsert {
+	u.SetNull(parish.FieldPhone)
+	return u
+}
+
+// SetEmail sets the "email" field.
+func (u *ParishUpsert) SetEmail(v string) *ParishUpsert {
+	u.Set(parish.FieldEmail, v)
+	return u
+}
+
+// UpdateEmail sets the "email" field to the value that was provided on create.
+func (u *ParishUpsert) UpdateEmail() *ParishUpsert {
+	u.SetExcluded(parish.FieldEmail)
+	return u
+}
+
+// ClearEmail clears the value of the "email" field.
+func (u *ParishUpsert) ClearEmail() *ParishUpsert {
+	u.SetNull(parish.FieldEmail)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -269,6 +413,90 @@ func (u *ParishUpsertOne) SetName(v string) *ParishUpsertOne {
 func (u *ParishUpsertOne) UpdateName() *ParishUpsertOne {
 	return u.Update(func(s *ParishUpsert) {
 		s.UpdateName()
+	})
+}
+
+// SetChurch sets the "church" field.
+func (u *ParishUpsertOne) SetChurch(v string) *ParishUpsertOne {
+	return u.Update(func(s *ParishUpsert) {
+		s.SetChurch(v)
+	})
+}
+
+// UpdateChurch sets the "church" field to the value that was provided on create.
+func (u *ParishUpsertOne) UpdateChurch() *ParishUpsertOne {
+	return u.Update(func(s *ParishUpsert) {
+		s.UpdateChurch()
+	})
+}
+
+// ClearChurch clears the value of the "church" field.
+func (u *ParishUpsertOne) ClearChurch() *ParishUpsertOne {
+	return u.Update(func(s *ParishUpsert) {
+		s.ClearChurch()
+	})
+}
+
+// SetAddress sets the "address" field.
+func (u *ParishUpsertOne) SetAddress(v string) *ParishUpsertOne {
+	return u.Update(func(s *ParishUpsert) {
+		s.SetAddress(v)
+	})
+}
+
+// UpdateAddress sets the "address" field to the value that was provided on create.
+func (u *ParishUpsertOne) UpdateAddress() *ParishUpsertOne {
+	return u.Update(func(s *ParishUpsert) {
+		s.UpdateAddress()
+	})
+}
+
+// ClearAddress clears the value of the "address" field.
+func (u *ParishUpsertOne) ClearAddress() *ParishUpsertOne {
+	return u.Update(func(s *ParishUpsert) {
+		s.ClearAddress()
+	})
+}
+
+// SetPhone sets the "phone" field.
+func (u *ParishUpsertOne) SetPhone(v string) *ParishUpsertOne {
+	return u.Update(func(s *ParishUpsert) {
+		s.SetPhone(v)
+	})
+}
+
+// UpdatePhone sets the "phone" field to the value that was provided on create.
+func (u *ParishUpsertOne) UpdatePhone() *ParishUpsertOne {
+	return u.Update(func(s *ParishUpsert) {
+		s.UpdatePhone()
+	})
+}
+
+// ClearPhone clears the value of the "phone" field.
+func (u *ParishUpsertOne) ClearPhone() *ParishUpsertOne {
+	return u.Update(func(s *ParishUpsert) {
+		s.ClearPhone()
+	})
+}
+
+// SetEmail sets the "email" field.
+func (u *ParishUpsertOne) SetEmail(v string) *ParishUpsertOne {
+	return u.Update(func(s *ParishUpsert) {
+		s.SetEmail(v)
+	})
+}
+
+// UpdateEmail sets the "email" field to the value that was provided on create.
+func (u *ParishUpsertOne) UpdateEmail() *ParishUpsertOne {
+	return u.Update(func(s *ParishUpsert) {
+		s.UpdateEmail()
+	})
+}
+
+// ClearEmail clears the value of the "email" field.
+func (u *ParishUpsertOne) ClearEmail() *ParishUpsertOne {
+	return u.Update(func(s *ParishUpsert) {
+		s.ClearEmail()
 	})
 }
 
@@ -496,6 +724,90 @@ func (u *ParishUpsertBulk) SetName(v string) *ParishUpsertBulk {
 func (u *ParishUpsertBulk) UpdateName() *ParishUpsertBulk {
 	return u.Update(func(s *ParishUpsert) {
 		s.UpdateName()
+	})
+}
+
+// SetChurch sets the "church" field.
+func (u *ParishUpsertBulk) SetChurch(v string) *ParishUpsertBulk {
+	return u.Update(func(s *ParishUpsert) {
+		s.SetChurch(v)
+	})
+}
+
+// UpdateChurch sets the "church" field to the value that was provided on create.
+func (u *ParishUpsertBulk) UpdateChurch() *ParishUpsertBulk {
+	return u.Update(func(s *ParishUpsert) {
+		s.UpdateChurch()
+	})
+}
+
+// ClearChurch clears the value of the "church" field.
+func (u *ParishUpsertBulk) ClearChurch() *ParishUpsertBulk {
+	return u.Update(func(s *ParishUpsert) {
+		s.ClearChurch()
+	})
+}
+
+// SetAddress sets the "address" field.
+func (u *ParishUpsertBulk) SetAddress(v string) *ParishUpsertBulk {
+	return u.Update(func(s *ParishUpsert) {
+		s.SetAddress(v)
+	})
+}
+
+// UpdateAddress sets the "address" field to the value that was provided on create.
+func (u *ParishUpsertBulk) UpdateAddress() *ParishUpsertBulk {
+	return u.Update(func(s *ParishUpsert) {
+		s.UpdateAddress()
+	})
+}
+
+// ClearAddress clears the value of the "address" field.
+func (u *ParishUpsertBulk) ClearAddress() *ParishUpsertBulk {
+	return u.Update(func(s *ParishUpsert) {
+		s.ClearAddress()
+	})
+}
+
+// SetPhone sets the "phone" field.
+func (u *ParishUpsertBulk) SetPhone(v string) *ParishUpsertBulk {
+	return u.Update(func(s *ParishUpsert) {
+		s.SetPhone(v)
+	})
+}
+
+// UpdatePhone sets the "phone" field to the value that was provided on create.
+func (u *ParishUpsertBulk) UpdatePhone() *ParishUpsertBulk {
+	return u.Update(func(s *ParishUpsert) {
+		s.UpdatePhone()
+	})
+}
+
+// ClearPhone clears the value of the "phone" field.
+func (u *ParishUpsertBulk) ClearPhone() *ParishUpsertBulk {
+	return u.Update(func(s *ParishUpsert) {
+		s.ClearPhone()
+	})
+}
+
+// SetEmail sets the "email" field.
+func (u *ParishUpsertBulk) SetEmail(v string) *ParishUpsertBulk {
+	return u.Update(func(s *ParishUpsert) {
+		s.SetEmail(v)
+	})
+}
+
+// UpdateEmail sets the "email" field to the value that was provided on create.
+func (u *ParishUpsertBulk) UpdateEmail() *ParishUpsertBulk {
+	return u.Update(func(s *ParishUpsert) {
+		s.UpdateEmail()
+	})
+}
+
+// ClearEmail clears the value of the "email" field.
+func (u *ParishUpsertBulk) ClearEmail() *ParishUpsertBulk {
+	return u.Update(func(s *ParishUpsert) {
+		s.ClearEmail()
 	})
 }
 

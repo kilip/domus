@@ -3,10 +3,6 @@ import { authDB } from "@domus/better-auth/auth";
 import { sql } from "drizzle-orm";
 import type { DomusWorld } from "../../support/world";
 
-Given("I am logged in as a regular user", async function (this: DomusWorld) {
-  await this.loginAs({ role: "user" });
-});
-
 Given(
   "diocese {string} exists",
   async function (this: DomusWorld, name: string) {
@@ -54,24 +50,12 @@ When(
   },
 );
 
-When("I confirm the deletion", async function (this: DomusWorld) {
-  await this.diocesePage.confirmDelete();
-});
-
-When("I cancel the deletion", async function (this: DomusWorld) {
-  await this.diocesePage.cancelDelete();
-});
-
 When(
   "I search diocese for {string}",
   async function (this: DomusWorld, query: string) {
     await this.diocesePage.search(query);
   },
 );
-
-When("I refresh the page", async function (this: DomusWorld) {
-  await this.page.reload();
-});
 
 Then(
   "I should see diocese {string} in the list",
@@ -91,19 +75,5 @@ Then(
   "I should see a diocese validation error {string}",
   async function (this: DomusWorld, text: string) {
     await this.diocesePage.expectValidationError(text);
-  },
-);
-
-Then(
-  "I should see a success notification {string}",
-  async function (this: DomusWorld, text: string) {
-    await this.diocesePage.expectSuccessMessage(text);
-  },
-);
-
-Then(
-  "I should see an error or forbidden message",
-  async function (this: DomusWorld) {
-    await this.diocesePage.expectForbiddenOrError();
   },
 );

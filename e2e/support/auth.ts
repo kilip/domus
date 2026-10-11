@@ -46,3 +46,13 @@ export async function cleanTestDioceses() {
     console.error("[e2e] Failed to clean test dioceses:", err);
   }
 }
+
+export async function cleanTestParishes() {
+  try {
+    await authDB.execute(
+      sql`DELETE FROM public.parishes WHERE name LIKE 'E2E%'`,
+    );
+  } catch (err) {
+    console.error("[e2e] Failed to clean test parishes:", err);
+  }
+}

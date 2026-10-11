@@ -12,5 +12,7 @@ export const systemRoutes: RouteConfigEntry[] = prefix("sys", [
   route("diocese/create", "features/System/Diocese/DioceseCreatePage.tsx"),
   route("diocese/update/:id", "features/System/Diocese/DioceseUpdatePage.tsx"),
   route("parish", "features/System/Parish/ParishListPage.tsx"),
+  route("parish/create", "features/System/Parish/ParishCreatePage.tsx"),
+  route("parish/update/:id", "features/System/Parish/ParishUpdatePage.tsx"),
   route("territorial", "features/System/Territorial/TerritorialListPage.tsx"),
 ]);

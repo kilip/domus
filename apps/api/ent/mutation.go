@@ -1381,6 +1381,10 @@ type ParishMutation struct {
 	typ            string
 	id             *int
 	name           *string
+	church         *string
+	address        *string
+	phone          *string
+	email          *string
 	clearedFields  map[string]struct{}
 	diocese        *int
 	cleareddiocese bool
@@ -1529,6 +1533,202 @@ func (m *ParishMutation) ResetName() {
 	m.name = nil
 }
 
+// SetChurch sets the "church" field.
+func (m *ParishMutation) SetChurch(s string) {
+	m.church = &s
+}
+
+// Church returns the value of the "church" field in the mutation.
+func (m *ParishMutation) Church() (r string, exists bool) {
+	v := m.church
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChurch returns the old "church" field's value of the Parish entity.
+// If the Parish object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ParishMutation) OldChurch(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChurch is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChurch requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChurch: %w", err)
+	}
+	return oldValue.Church, nil
+}
+
+// ClearChurch clears the value of the "church" field.
+func (m *ParishMutation) ClearChurch() {
+	m.church = nil
+	m.clearedFields[parish.FieldChurch] = struct{}{}
+}
+
+// ChurchCleared returns if the "church" field was cleared in this mutation.
+func (m *ParishMutation) ChurchCleared() bool {
+	_, ok := m.clearedFields[parish.FieldChurch]
+	return ok
+}
+
+// ResetChurch resets all changes to the "church" field.
+func (m *ParishMutation) ResetChurch() {
+	m.church = nil
+	delete(m.clearedFields, parish.FieldChurch)
+}
+
+// SetAddress sets the "address" field.
+func (m *ParishMutation) SetAddress(s string) {
+	m.address = &s
+}
+
+// Address returns the value of the "address" field in the mutation.
+func (m *ParishMutation) Address() (r string, exists bool) {
+	v := m.address
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAddress returns the old "address" field's value of the Parish entity.
+// If the Parish object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ParishMutation) OldAddress(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAddress is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAddress requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAddress: %w", err)
+	}
+	return oldValue.Address, nil
+}
+
+// ClearAddress clears the value of the "address" field.
+func (m *ParishMutation) ClearAddress() {
+	m.address = nil
+	m.clearedFields[parish.FieldAddress] = struct{}{}
+}
+
+// AddressCleared returns if the "address" field was cleared in this mutation.
+func (m *ParishMutation) AddressCleared() bool {
+	_, ok := m.clearedFields[parish.FieldAddress]
+	return ok
+}
+
+// ResetAddress resets all changes to the "address" field.
+func (m *ParishMutation) ResetAddress() {
+	m.address = nil
+	delete(m.clearedFields, parish.FieldAddress)
+}
+
+// SetPhone sets the "phone" field.
+func (m *ParishMutation) SetPhone(s string) {
+	m.phone = &s
+}
+
+// Phone returns the value of the "phone" field in the mutation.
+func (m *ParishMutation) Phone() (r string, exists bool) {
+	v := m.phone
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPhone returns the old "phone" field's value of the Parish entity.
+// If the Parish object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ParishMutation) OldPhone(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPhone is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPhone requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPhone: %w", err)
+	}
+	return oldValue.Phone, nil
+}
+
+// ClearPhone clears the value of the "phone" field.
+func (m *ParishMutation) ClearPhone() {
+	m.phone = nil
+	m.clearedFields[parish.FieldPhone] = struct{}{}
+}
+
+// PhoneCleared returns if the "phone" field was cleared in this mutation.
+func (m *ParishMutation) PhoneCleared() bool {
+	_, ok := m.clearedFields[parish.FieldPhone]
+	return ok
+}
+
+// ResetPhone resets all changes to the "phone" field.
+func (m *ParishMutation) ResetPhone() {
+	m.phone = nil
+	delete(m.clearedFields, parish.FieldPhone)
+}
+
+// SetEmail sets the "email" field.
+func (m *ParishMutation) SetEmail(s string) {
+	m.email = &s
+}
+
+// Email returns the value of the "email" field in the mutation.
+func (m *ParishMutation) Email() (r string, exists bool) {
+	v := m.email
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEmail returns the old "email" field's value of the Parish entity.
+// If the Parish object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ParishMutation) OldEmail(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEmail is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEmail requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEmail: %w", err)
+	}
+	return oldValue.Email, nil
+}
+
+// ClearEmail clears the value of the "email" field.
+func (m *ParishMutation) ClearEmail() {
+	m.email = nil
+	m.clearedFields[parish.FieldEmail] = struct{}{}
+}
+
+// EmailCleared returns if the "email" field was cleared in this mutation.
+func (m *ParishMutation) EmailCleared() bool {
+	_, ok := m.clearedFields[parish.FieldEmail]
+	return ok
+}
+
+// ResetEmail resets all changes to the "email" field.
+func (m *ParishMutation) ResetEmail() {
+	m.email = nil
+	delete(m.clearedFields, parish.FieldEmail)
+}
+
 // SetDioceseID sets the "diocese" edge to the Diocese entity by id.
 func (m *ParishMutation) SetDioceseID(id int) {
 	m.diocese = &id
@@ -1602,9 +1802,21 @@ func (m *ParishMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ParishMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 5)
 	if m.name != nil {
 		fields = append(fields, parish.FieldName)
+	}
+	if m.church != nil {
+		fields = append(fields, parish.FieldChurch)
+	}
+	if m.address != nil {
+		fields = append(fields, parish.FieldAddress)
+	}
+	if m.phone != nil {
+		fields = append(fields, parish.FieldPhone)
+	}
+	if m.email != nil {
+		fields = append(fields, parish.FieldEmail)
 	}
 	return fields
 }
@@ -1616,6 +1828,14 @@ func (m *ParishMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case parish.FieldName:
 		return m.Name()
+	case parish.FieldChurch:
+		return m.Church()
+	case parish.FieldAddress:
+		return m.Address()
+	case parish.FieldPhone:
+		return m.Phone()
+	case parish.FieldEmail:
+		return m.Email()
 	}
 	return nil, false
 }
@@ -1627,6 +1847,14 @@ func (m *ParishMutation) OldField(ctx context.Context, name string) (ent.Value, 
 	switch name {
 	case parish.FieldName:
 		return m.OldName(ctx)
+	case parish.FieldChurch:
+		return m.OldChurch(ctx)
+	case parish.FieldAddress:
+		return m.OldAddress(ctx)
+	case parish.FieldPhone:
+		return m.OldPhone(ctx)
+	case parish.FieldEmail:
+		return m.OldEmail(ctx)
 	}
 	return nil, fmt.Errorf("unknown Parish field %s", name)
 }
@@ -1642,6 +1870,34 @@ func (m *ParishMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
+		return nil
+	case parish.FieldChurch:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChurch(v)
+		return nil
+	case parish.FieldAddress:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAddress(v)
+		return nil
+	case parish.FieldPhone:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPhone(v)
+		return nil
+	case parish.FieldEmail:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEmail(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Parish field %s", name)
@@ -1672,7 +1928,20 @@ func (m *ParishMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *ParishMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(parish.FieldChurch) {
+		fields = append(fields, parish.FieldChurch)
+	}
+	if m.FieldCleared(parish.FieldAddress) {
+		fields = append(fields, parish.FieldAddress)
+	}
+	if m.FieldCleared(parish.FieldPhone) {
+		fields = append(fields, parish.FieldPhone)
+	}
+	if m.FieldCleared(parish.FieldEmail) {
+		fields = append(fields, parish.FieldEmail)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -1685,6 +1954,20 @@ func (m *ParishMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *ParishMutation) ClearField(name string) error {
+	switch name {
+	case parish.FieldChurch:
+		m.ClearChurch()
+		return nil
+	case parish.FieldAddress:
+		m.ClearAddress()
+		return nil
+	case parish.FieldPhone:
+		m.ClearPhone()
+		return nil
+	case parish.FieldEmail:
+		m.ClearEmail()
+		return nil
+	}
 	return fmt.Errorf("unknown Parish nullable field %s", name)
 }
 
@@ -1694,6 +1977,18 @@ func (m *ParishMutation) ResetField(name string) error {
 	switch name {
 	case parish.FieldName:
 		m.ResetName()
+		return nil
+	case parish.FieldChurch:
+		m.ResetChurch()
+		return nil
+	case parish.FieldAddress:
+		m.ResetAddress()
+		return nil
+	case parish.FieldPhone:
+		m.ResetPhone()
+		return nil
+	case parish.FieldEmail:
+		m.ResetEmail()
 		return nil
 	}
 	return fmt.Errorf("unknown Parish field %s", name)

@@ -7,6 +7,7 @@ import type { BrowserContext, Page } from "@playwright/test";
 import { LauncherPage } from "../pages/LauncherPage";
 import { LoginPage } from "../pages/LoginPage";
 import { DiocesePage } from "../pages/system/DiocesePage";
+import { ParishPage } from "../pages/system/ParishPage";
 import { createSession } from "./auth";
 
 export class DomusWorld extends World {
@@ -17,6 +18,7 @@ export class DomusWorld extends World {
   private _loginPage?: LoginPage;
   private _launcherPage?: LauncherPage;
   private _diocesePage?: DiocesePage;
+  private _parishPage?: ParishPage;
 
   constructor(options: IWorldOptions) {
     super(options);
@@ -35,6 +37,11 @@ export class DomusWorld extends World {
   get diocesePage() {
     this._diocesePage ??= new DiocesePage(this.page);
     return this._diocesePage;
+  }
+
+  get parishPage() {
+    this._parishPage ??= new ParishPage(this.page);
+    return this._parishPage;
   }
 
   /** Login tanpa OAuth: bikin user via testUtils lalu pasang cookie sesi. */

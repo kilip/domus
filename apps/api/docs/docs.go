@@ -201,10 +201,22 @@ const docTemplate = `{
             },
             "model.CreateParishRequest": {
                 "properties": {
+                    "address": {
+                        "type": "string"
+                    },
+                    "church": {
+                        "type": "string"
+                    },
                     "dioceseId": {
                         "type": "integer"
                     },
+                    "email": {
+                        "type": "string"
+                    },
                     "name": {
+                        "type": "string"
+                    },
+                    "phone": {
                         "type": "string"
                     }
                 },
@@ -238,13 +250,25 @@ const docTemplate = `{
             },
             "model.ParishResponse": {
                 "properties": {
+                    "address": {
+                        "type": "string"
+                    },
+                    "church": {
+                        "type": "string"
+                    },
                     "diocese": {
                         "$ref": "#/components/schemas/model.DioceseResponse"
+                    },
+                    "email": {
+                        "type": "string"
                     },
                     "id": {
                         "type": "integer"
                     },
                     "name": {
+                        "type": "string"
+                    },
+                    "phone": {
                         "type": "string"
                     }
                 },
@@ -263,10 +287,22 @@ const docTemplate = `{
             },
             "model.UpdateParishRequest": {
                 "properties": {
+                    "address": {
+                        "type": "string"
+                    },
+                    "church": {
+                        "type": "string"
+                    },
                     "dioceseId": {
                         "type": "integer"
                     },
+                    "email": {
+                        "type": "string"
+                    },
                     "name": {
+                        "type": "string"
+                    },
+                    "phone": {
                         "type": "string"
                     }
                 },
