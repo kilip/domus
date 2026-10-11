@@ -74,3 +74,13 @@ export async function cleanTestParishes() {
     console.error("[e2e] Failed to clean test parishes:", err);
   }
 }
+
+export async function cleanTestMemberships() {
+  try {
+    await authDB.execute(
+      sql`DELETE FROM public.memberships WHERE role LIKE 'finance%'`,
+    );
+  } catch (err) {
+    console.error("[e2e] Failed to clean test memberships:", err);
+  }
+}

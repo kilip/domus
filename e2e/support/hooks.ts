@@ -10,6 +10,7 @@ import { type Browser, chromium } from "@playwright/test";
 import { startApps, stopApps } from "./apps";
 import {
   cleanTestDioceses,
+  cleanTestMemberships,
   cleanTestParishes,
   cleanTestTerritories,
   cleanTestUnits,
@@ -61,6 +62,7 @@ After(async function (this: DomusWorld, scenario) {
   await cleanTestTerritories();
   await cleanTestParishes();
   await cleanTestDioceses();
+  await cleanTestMemberships();
   for (const id of this.userIds) await removeUser(id);
   this.userIds = [];
 });
