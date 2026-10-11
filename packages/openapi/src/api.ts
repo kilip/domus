@@ -1082,6 +1082,279 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/parishes/{parishId}/finance/transactions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Create transaction
+     * @description Create and post a new transaction with single-step journal entry
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Parish ID */
+          parishId: number;
+        };
+        cookie?: never;
+      };
+      /** @description Create transaction request */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["model.CreateTransactionRequest"];
+        };
+      };
+      responses: {
+        /** @description Created */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.WebResponse-model_TransactionResponse"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Conflict */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unprocessable Entity */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/parishes/{parishId}/finance/transactions/search": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Search transactions
+     * @description Search transactions with filters and cursor pagination
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Parish ID */
+          parishId: number;
+        };
+        cookie?: never;
+      };
+      /** @description Search transaction request */
+      requestBody?: {
+        content: {
+          "application/json": components["schemas"]["model.SearchTransactionRequest"];
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.WebResponse-array_model_TransactionSummary"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unprocessable Entity */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/parishes/{parishId}/finance/transactions/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get transaction by ID
+     * @description Get transaction details including journal entries and postings
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Parish ID */
+          parishId: number;
+          /** @description Transaction ID (UUID) */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.WebResponse-model_TransactionResponse"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/ping": {
     parameters: {
       query?: never;
@@ -1938,6 +2211,10 @@ export interface components {
       data?: components["schemas"]["model.TerritoryResponse"][];
       meta?: components["schemas"]["httpx.Meta"];
     };
+    "httpx.WebResponse-array_model_TransactionSummary": {
+      data?: components["schemas"]["model.TransactionSummary"][];
+      meta?: components["schemas"]["httpx.Meta"];
+    };
     "httpx.WebResponse-array_model_UnitResponse": {
       data?: components["schemas"]["model.UnitResponse"][];
       meta?: components["schemas"]["httpx.Meta"];
@@ -1962,6 +2239,10 @@ export interface components {
       data?: components["schemas"]["model.TerritoryResponse"];
       meta?: components["schemas"]["httpx.Meta"];
     };
+    "httpx.WebResponse-model_TransactionResponse": {
+      data?: components["schemas"]["model.TransactionResponse"];
+      meta?: components["schemas"]["httpx.Meta"];
+    };
     "httpx.WebResponse-model_UnitResponse": {
       data?: components["schemas"]["model.UnitResponse"];
       meta?: components["schemas"]["httpx.Meta"];
@@ -1980,6 +2261,16 @@ export interface components {
       type?: string;
       unitId?: number;
       updatedAt?: string;
+    };
+    "model.AttachmentResponse": {
+      checksum?: string;
+      createdAt?: string;
+      createdBy?: components["schemas"]["core.User"];
+      filename?: string;
+      id?: string;
+      mimeType?: string;
+      size?: number;
+      transactionId?: string;
     };
     "model.CreateAccountRequest": {
       code: string;
@@ -2016,6 +2307,15 @@ export interface components {
       /** @enum {string} */
       status?: "active" | "inactive";
     };
+    "model.CreateTransactionRequest": {
+      date: string;
+      description?: string;
+      /** @enum {string} */
+      kind: "income" | "expense" | "transfer" | "adjustment";
+      number?: string;
+      postings: components["schemas"]["model.PostingInput"][];
+      unitId?: number;
+    };
     "model.CreateUnitRequest": {
       code?: string;
       description?: string;
@@ -2037,6 +2337,13 @@ export interface components {
       updatedAt?: string;
       updatedBy?: components["schemas"]["core.User"];
     };
+    "model.EntryResponse": {
+      date?: string;
+      description?: string;
+      id?: string;
+      postings?: components["schemas"]["model.PostingResponse"][];
+      reversesId?: string;
+    };
     "model.ParishResponse": {
       active?: boolean;
       address?: string;
@@ -2047,6 +2354,22 @@ export interface components {
       name?: string;
       phone?: string;
     };
+    "model.PostingInput": {
+      accountId: string;
+      amount: number;
+      memo?: string;
+      /** @enum {string} */
+      side: "debit" | "credit";
+    };
+    "model.PostingResponse": {
+      accountCode?: string;
+      accountId?: string;
+      accountName?: string;
+      amount?: number;
+      id?: string;
+      memo?: string;
+      side?: string;
+    };
     "model.SearchTerritoryRequest": {
       cursor?: string;
       kind?: string;
@@ -2054,6 +2377,19 @@ export interface components {
       parentId?: number;
       parishId?: number;
       status?: string;
+    };
+    "model.SearchTransactionRequest": {
+      accountId?: string;
+      cursor?: string;
+      from?: string;
+      /** @enum {string} */
+      kind?: "income" | "expense" | "transfer" | "adjustment";
+      limit?: number;
+      q?: string;
+      /** @enum {string} */
+      status?: "draft" | "submitted" | "approved" | "posted" | "void";
+      to?: string;
+      unitId?: number;
     };
     "model.SearchUnitRequest": {
       cursor?: string;
@@ -2075,6 +2411,29 @@ export interface components {
       parish?: components["schemas"]["model.ParishResponse"];
       parishId?: number;
       status?: string;
+      unitId?: number;
+    };
+    "model.TransactionResponse": {
+      attachments?: components["schemas"]["model.AttachmentResponse"][];
+      createdAt?: string;
+      createdBy?: components["schemas"]["core.User"];
+      date?: string;
+      description?: string;
+      entries?: components["schemas"]["model.EntryResponse"][];
+      id?: string;
+      kind?: string;
+      number?: string;
+      status?: string;
+      unitId?: number;
+    };
+    "model.TransactionSummary": {
+      date?: string;
+      description?: string;
+      id?: string;
+      kind?: string;
+      number?: string;
+      status?: string;
+      totalAmount?: number;
       unitId?: number;
     };
     "model.UnitResponse": {

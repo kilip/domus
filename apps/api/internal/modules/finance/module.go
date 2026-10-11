@@ -23,6 +23,7 @@ type Config struct {
 type Module struct {
 	config      Config
 	accountCtrl controller.AccountController
+	txCtrl      controller.TransactionController
 }
 
 func New(config Config) Module {
@@ -30,9 +31,14 @@ func New(config Config) Module {
 	accountSvc := service.NewAccountService(accountRepo, config.EntCli, config.Log)
 	accountCtrl := controller.NewAccountController(accountSvc)
 
+	txRepo := repository.NewTransactionRepository(config.EntCli, config.Log)
+	txSvc := service.NewTransactionService(txRepo, accountRepo, config.EntCli, config.Log)
+	txCtrl := controller.NewTransactionController(txSvc)
+
 	return Module{
 		config:      config,
 		accountCtrl: accountCtrl,
+		txCtrl:      txCtrl,
 	}
 }
 
@@ -52,4 +58,8 @@ func (m Module) InitRoutes(r fiber.Router) {
 	fin.Get("/accounts/:id", read, m.accountCtrl.GetByID)
 	fin.Put("/accounts/:id", write, m.accountCtrl.Update)
 	fin.Delete("/accounts/:id", write, m.accountCtrl.Delete)
+
+	fin.Post("/transactions", write, m.txCtrl.Create)
+	fin.Post("/transactions/search", read, m.txCtrl.Search)
+	fin.Get("/transactions/:id", read, m.txCtrl.GetByID)
 }

@@ -185,6 +185,21 @@ const docTemplate = `{
                 },
                 "type": "object"
             },
+            "httpx.WebResponse-array_model_TransactionSummary": {
+                "properties": {
+                    "data": {
+                        "items": {
+                            "$ref": "#/components/schemas/model.TransactionSummary"
+                        },
+                        "type": "array",
+                        "uniqueItems": false
+                    },
+                    "meta": {
+                        "$ref": "#/components/schemas/httpx.Meta"
+                    }
+                },
+                "type": "object"
+            },
             "httpx.WebResponse-array_model_UnitResponse": {
                 "properties": {
                     "data": {
@@ -255,6 +270,17 @@ const docTemplate = `{
                 },
                 "type": "object"
             },
+            "httpx.WebResponse-model_TransactionResponse": {
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/model.TransactionResponse"
+                    },
+                    "meta": {
+                        "$ref": "#/components/schemas/httpx.Meta"
+                    }
+                },
+                "type": "object"
+            },
             "httpx.WebResponse-model_UnitResponse": {
                 "properties": {
                     "data": {
@@ -305,6 +331,35 @@ const docTemplate = `{
                         "type": "integer"
                     },
                     "updatedAt": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "model.AttachmentResponse": {
+                "properties": {
+                    "checksum": {
+                        "type": "string"
+                    },
+                    "createdAt": {
+                        "type": "string"
+                    },
+                    "createdBy": {
+                        "$ref": "#/components/schemas/core.User"
+                    },
+                    "filename": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "mimeType": {
+                        "type": "string"
+                    },
+                    "size": {
+                        "type": "integer"
+                    },
+                    "transactionId": {
                         "type": "string"
                     }
                 },
@@ -436,6 +491,46 @@ const docTemplate = `{
                 ],
                 "type": "object"
             },
+            "model.CreateTransactionRequest": {
+                "properties": {
+                    "date": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "kind": {
+                        "enum": [
+                            "income",
+                            "expense",
+                            "transfer",
+                            "adjustment"
+                        ],
+                        "type": "string"
+                    },
+                    "number": {
+                        "type": "string"
+                    },
+                    "postings": {
+                        "items": {
+                            "$ref": "#/components/schemas/model.PostingInput"
+                        },
+                        "maxItems": 200,
+                        "minItems": 2,
+                        "type": "array",
+                        "uniqueItems": false
+                    },
+                    "unitId": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "date",
+                    "kind",
+                    "postings"
+                ],
+                "type": "object"
+            },
             "model.CreateUnitRequest": {
                 "properties": {
                     "code": {
@@ -507,6 +602,30 @@ const docTemplate = `{
                 },
                 "type": "object"
             },
+            "model.EntryResponse": {
+                "properties": {
+                    "date": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "postings": {
+                        "items": {
+                            "$ref": "#/components/schemas/model.PostingResponse"
+                        },
+                        "type": "array",
+                        "uniqueItems": false
+                    },
+                    "reversesId": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
             "model.ParishResponse": {
                 "properties": {
                     "active": {
@@ -536,6 +655,61 @@ const docTemplate = `{
                 },
                 "type": "object"
             },
+            "model.PostingInput": {
+                "properties": {
+                    "accountId": {
+                        "type": "string"
+                    },
+                    "amount": {
+                        "maximum": 1000000000000000,
+                        "minimum": 1,
+                        "type": "integer"
+                    },
+                    "memo": {
+                        "maxLength": 500,
+                        "type": "string"
+                    },
+                    "side": {
+                        "enum": [
+                            "debit",
+                            "credit"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "accountId",
+                    "amount",
+                    "side"
+                ],
+                "type": "object"
+            },
+            "model.PostingResponse": {
+                "properties": {
+                    "accountCode": {
+                        "type": "string"
+                    },
+                    "accountId": {
+                        "type": "string"
+                    },
+                    "accountName": {
+                        "type": "string"
+                    },
+                    "amount": {
+                        "type": "integer"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "memo": {
+                        "type": "string"
+                    },
+                    "side": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
             "model.SearchTerritoryRequest": {
                 "properties": {
                     "cursor": {
@@ -555,6 +729,53 @@ const docTemplate = `{
                     },
                     "status": {
                         "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "model.SearchTransactionRequest": {
+                "properties": {
+                    "accountId": {
+                        "type": "string"
+                    },
+                    "cursor": {
+                        "type": "string"
+                    },
+                    "from": {
+                        "type": "string"
+                    },
+                    "kind": {
+                        "enum": [
+                            "income",
+                            "expense",
+                            "transfer",
+                            "adjustment"
+                        ],
+                        "type": "string"
+                    },
+                    "limit": {
+                        "maximum": 100,
+                        "minimum": 1,
+                        "type": "integer"
+                    },
+                    "q": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "enum": [
+                            "draft",
+                            "submitted",
+                            "approved",
+                            "posted",
+                            "void"
+                        ],
+                        "type": "string"
+                    },
+                    "to": {
+                        "type": "string"
+                    },
+                    "unitId": {
+                        "type": "integer"
                     }
                 },
                 "type": "object"
@@ -616,6 +837,81 @@ const docTemplate = `{
                     },
                     "status": {
                         "type": "string"
+                    },
+                    "unitId": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "model.TransactionResponse": {
+                "properties": {
+                    "attachments": {
+                        "items": {
+                            "$ref": "#/components/schemas/model.AttachmentResponse"
+                        },
+                        "type": "array",
+                        "uniqueItems": false
+                    },
+                    "createdAt": {
+                        "type": "string"
+                    },
+                    "createdBy": {
+                        "$ref": "#/components/schemas/core.User"
+                    },
+                    "date": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "entries": {
+                        "items": {
+                            "$ref": "#/components/schemas/model.EntryResponse"
+                        },
+                        "type": "array",
+                        "uniqueItems": false
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "kind": {
+                        "type": "string"
+                    },
+                    "number": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "unitId": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "model.TransactionSummary": {
+                "properties": {
+                    "date": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "kind": {
+                        "type": "string"
+                    },
+                    "number": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "totalAmount": {
+                        "type": "integer"
                     },
                     "unitId": {
                         "type": "integer"
@@ -2090,6 +2386,301 @@ const docTemplate = `{
                 "summary": "Update account",
                 "tags": [
                     "Finance Account"
+                ]
+            }
+        },
+        "/parishes/{parishId}/finance/transactions": {
+            "post": {
+                "description": "Create and post a new transaction with single-step journal entry",
+                "parameters": [
+                    {
+                        "description": "Parish ID",
+                        "in": "path",
+                        "name": "parishId",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/model.CreateTransactionRequest",
+                                "summary": "request",
+                                "description": "Create transaction request"
+                            }
+                        }
+                    },
+                    "description": "Create transaction request",
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.WebResponse-model_TransactionResponse"
+                                }
+                            }
+                        },
+                        "description": "Created"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Not Found"
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Conflict"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Unprocessable Entity"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "Create transaction",
+                "tags": [
+                    "Finance Transaction"
+                ]
+            }
+        },
+        "/parishes/{parishId}/finance/transactions/search": {
+            "post": {
+                "description": "Search transactions with filters and cursor pagination",
+                "parameters": [
+                    {
+                        "description": "Parish ID",
+                        "in": "path",
+                        "name": "parishId",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/model.SearchTransactionRequest",
+                                "summary": "request",
+                                "description": "Search transaction request"
+                            }
+                        }
+                    },
+                    "description": "Search transaction request"
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.WebResponse-array_model_TransactionSummary"
+                                }
+                            }
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Unprocessable Entity"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "Search transactions",
+                "tags": [
+                    "Finance Transaction"
+                ]
+            }
+        },
+        "/parishes/{parishId}/finance/transactions/{id}": {
+            "get": {
+                "description": "Get transaction details including journal entries and postings",
+                "parameters": [
+                    {
+                        "description": "Parish ID",
+                        "in": "path",
+                        "name": "parishId",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Transaction ID (UUID)",
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.WebResponse-model_TransactionResponse"
+                                }
+                            }
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "Get transaction by ID",
+                "tags": [
+                    "Finance Transaction"
                 ]
             }
         },
