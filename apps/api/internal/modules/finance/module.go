@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/paroki/domus/api/ent"
+	"github.com/paroki/domus/api/internal/modules/attachment"
 	"github.com/paroki/domus/api/internal/modules/finance/controller"
 	"github.com/paroki/domus/api/internal/modules/finance/repository"
 	"github.com/paroki/domus/api/internal/modules/finance/service"
@@ -25,7 +26,7 @@ type Module struct {
 	config      Config
 	accountCtrl controller.AccountController
 	txCtrl      controller.TransactionController
-	attCtrl     controller.AttachmentController
+	attMod      attachment.Module
 	reportCtrl  controller.ReportController
 }
 
@@ -42,9 +43,13 @@ func New(config Config) Module {
 	txSvc := service.NewTransactionService(txRepo, accountRepo, config.EntCli, config.Log)
 	txCtrl := controller.NewTransactionController(txSvc)
 
-	attRepo := repository.NewAttachmentRepository(config.EntCli, config.Log)
-	attSvc := service.NewAttachmentService(attRepo, config.Storage, config.Bucket, config.Log)
-	attCtrl := controller.NewAttachmentController(attSvc)
+	attMod := attachment.New(attachment.Config{
+		EntCli:  config.EntCli,
+		Authz:   config.Authz,
+		Storage: config.Storage,
+		Bucket:  config.Bucket,
+		Log:     config.Log,
+	})
 
 	reportRepo := repository.NewReportRepository(config.EntCli, config.Log)
 	reportSvc := service.NewReportService(reportRepo, config.Log)
@@ -54,7 +59,7 @@ func New(config Config) Module {
 		config:      config,
 		accountCtrl: accountCtrl,
 		txCtrl:      txCtrl,
-		attCtrl:     attCtrl,
+		attMod:      attMod,
 		reportCtrl:  reportCtrl,
 	}
 }
@@ -81,9 +86,13 @@ func (m Module) InitRoutes(r fiber.Router) {
 	fin.Get("/transactions/:id", read, m.txCtrl.GetByID)
 	fin.Post("/transactions/:id/void", write, m.txCtrl.Void)
 
-	fin.Post("/transactions/:id/attachments", write, m.attCtrl.Upload)
-	fin.Get("/transactions/:id/attachments", read, m.attCtrl.List)
-	fin.Get("/transactions/:id/attachments/:attachmentId/download", read, m.attCtrl.Download)
+	// Attachments are authorized at the transaction's unit scope, not parish.
+	m.attMod.Mount(fin, attachment.Spec{
+		OwnerType: repository.AttachmentOwnerTransaction,
+		Path:      "/transactions/:id/attachments",
+		Resource:  authz.ResourceFinance,
+		Resolver:  repository.NewTransactionOwnerResolver(m.config.EntCli),
+	})
 
 	fin.Get("/reports/ledger", read, m.reportCtrl.GetLedger)
 	fin.Get("/reports/trial-balance", read, m.reportCtrl.GetTrialBalance)

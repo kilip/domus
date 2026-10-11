@@ -20,6 +20,7 @@ import (
 	"github.com/paroki/domus/api/ent/transaction"
 	entunit "github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/internal/core"
+	"github.com/paroki/domus/api/internal/modules/attachment"
 	"github.com/paroki/domus/api/internal/modules/finance/model"
 	"github.com/paroki/domus/api/internal/platform/database"
 )
@@ -50,7 +51,7 @@ func toTransactionResponse(tx *ent.Transaction) model.TransactionResponse {
 		Description: tx.Description,
 		CreatedAt:   tx.CreatedAt,
 		Entries:     make([]model.EntryResponse, 0),
-		Attachments: make([]model.AttachmentResponse, 0),
+		Attachments: make([]attachment.Response, 0),
 	}
 	if tx.Edges.Unit != nil {
 		resp.UnitID = &tx.Edges.Unit.ID
@@ -84,22 +85,6 @@ func toTransactionResponse(tx *ent.Transaction) model.TransactionResponse {
 			entryResp.Postings = append(entryResp.Postings, postResp)
 		}
 		resp.Entries = append(resp.Entries, entryResp)
-	}
-
-	for _, a := range tx.Edges.Attachments {
-		attResp := model.AttachmentResponse{
-			ID:            a.ID,
-			TransactionID: tx.ID,
-			Filename:      a.Filename,
-			MimeType:      a.MimeType,
-			Size:          a.Size,
-			Checksum:      a.Checksum,
-			CreatedAt:     a.CreatedAt,
-		}
-		if a.Edges.Creator != nil {
-			attResp.CreatedBy = toCoreUser(a.Edges.Creator)
-		}
-		resp.Attachments = append(resp.Attachments, attResp)
 	}
 
 	return resp
@@ -250,15 +235,15 @@ func (r TransactionRepository) Create(ctx context.Context, parishID int, req mod
 						pq.WithAccount()
 					}).WithReverses()
 				}).
-				WithAttachments(func(aq *ent.AttachmentQuery) {
-					aq.WithCreator()
-				}).
 				Only(ctx)
 			if err != nil {
 				return err
 			}
 
 			res := toTransactionResponse(loaded)
+			if err := loadTransactionAttachments(ctx, tx.Client(), &res); err != nil {
+				return err
+			}
 			resp = &res
 			return nil
 		})
@@ -289,9 +274,6 @@ func (r TransactionRepository) GetByID(ctx context.Context, parishID int, id uui
 				pq.WithAccount()
 			}).WithReverses()
 		}).
-		WithAttachments(func(aq *ent.AttachmentQuery) {
-			aq.WithCreator()
-		}).
 		Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -300,6 +282,9 @@ func (r TransactionRepository) GetByID(ctx context.Context, parishID int, id uui
 		return nil, err
 	}
 	resp := toTransactionResponse(txEnt)
+	if err := loadTransactionAttachments(ctx, r.entcli, &resp); err != nil {
+		return nil, err
+	}
 	return &resp, nil
 }
 

@@ -46,7 +46,6 @@ func (Transaction) Edges() []ent.Edge {
 		edge.To("parish", Parish.Type).Unique().Required(),
 		edge.To("unit", Unit.Type).Unique(),
 		edge.To("entries", Entry.Type),
-		edge.To("attachments", Attachment.Type),
 	}
 }
 

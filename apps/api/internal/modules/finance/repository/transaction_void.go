@@ -135,15 +135,15 @@ func (r TransactionRepository) Void(ctx context.Context, parishID int, id uuid.U
 					pq.WithAccount()
 				}).WithReverses()
 			}).
-			WithAttachments(func(aq *ent.AttachmentQuery) {
-				aq.WithCreator()
-			}).
 			Only(ctx)
 		if err != nil {
 			return err
 		}
 
 		res := toTransactionResponse(loaded)
+		if err := loadTransactionAttachments(ctx, tx.Client(), &res); err != nil {
+			return err
+		}
 		resp = &res
 		return nil
 	})

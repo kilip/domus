@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/internal/core"
+	"github.com/paroki/domus/api/internal/modules/attachment"
 )
 
 var (
@@ -65,17 +66,17 @@ type EntryResponse struct {
 }
 
 type TransactionResponse struct {
-	ID          uuid.UUID            `json:"id"`
-	Number      string               `json:"number"`
-	Date        string               `json:"date"`
-	Kind        string               `json:"kind"`
-	Status      string               `json:"status"`
-	Description *string              `json:"description,omitempty"`
-	UnitID      *int                 `json:"unitId,omitempty"`
-	Entries     []EntryResponse      `json:"entries"`
-	Attachments []AttachmentResponse `json:"attachments"`
-	CreatedBy   core.User            `json:"createdBy"`
-	CreatedAt   time.Time            `json:"createdAt"`
+	ID          uuid.UUID             `json:"id"`
+	Number      string                `json:"number"`
+	Date        string                `json:"date"`
+	Kind        string                `json:"kind"`
+	Status      string                `json:"status"`
+	Description *string               `json:"description,omitempty"`
+	UnitID      *int                  `json:"unitId,omitempty"`
+	Entries     []EntryResponse       `json:"entries"`
+	Attachments []attachment.Response `json:"attachments"`
+	CreatedBy   core.User             `json:"createdBy"`
+	CreatedAt   time.Time             `json:"createdAt"`
 }
 
 type TransactionSummary struct {

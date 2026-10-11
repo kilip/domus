@@ -1,4 +1,4 @@
-package service
+package attachment
 
 import (
 	"bytes"
@@ -17,28 +17,26 @@ import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/internal/core"
-	"github.com/paroki/domus/api/internal/modules/finance/model"
-	"github.com/paroki/domus/api/internal/modules/finance/repository"
 	"github.com/paroki/domus/api/internal/platform/storage"
 )
 
 const (
-	maxAttachmentSize = 10 * 1024 * 1024 // 10 MiB
-	presignTTL        = 5 * time.Minute
+	maxSize    = 10 * 1024 * 1024 // 10 MiB
+	presignTTL = 5 * time.Minute
 )
 
-type AttachmentService struct {
-	repo    repository.AttachmentRepository
+type Service struct {
+	repo    Repository
 	storage storage.Storage
 	bucket  string
 	log     *slog.Logger
 }
 
-func NewAttachmentService(repo repository.AttachmentRepository, storage storage.Storage, bucket string, log *slog.Logger) AttachmentService {
+func NewService(repo Repository, storage storage.Storage, bucket string, log *slog.Logger) Service {
 	if bucket == "" {
-		bucket = "domus-finance"
+		bucket = "domus-attachments"
 	}
-	return AttachmentService{
+	return Service{
 		repo:    repo,
 		storage: storage,
 		bucket:  bucket,
@@ -46,13 +44,13 @@ func NewAttachmentService(repo repository.AttachmentRepository, storage storage.
 	}
 }
 
-func (s AttachmentService) Upload(ctx context.Context, parishID int, transactionID uuid.UUID, fileHeader *multipart.FileHeader) (*model.AttachmentResponse, error) {
+func (s Service) Upload(ctx context.Context, ownerType string, owner Owner, fileHeader *multipart.FileHeader) (*Response, error) {
 	if fileHeader == nil {
 		return nil, fiber.NewError(fiber.StatusBadRequest, "file is required")
 	}
 
 	// 1. Size check
-	if fileHeader.Size > maxAttachmentSize {
+	if fileHeader.Size > maxSize {
 		return nil, fiber.NewError(fiber.StatusRequestEntityTooLarge, "attachment exceeds maximum size of 10 MiB")
 	}
 
@@ -83,7 +81,7 @@ func (s AttachmentService) Upload(ctx context.Context, parishID int, transaction
 
 	// 4. Object key & ID generation
 	attachmentID := core.GenerateID()
-	objectKey := fmt.Sprintf("finance/%d/%s/%s-%s", parishID, transactionID.String(), attachmentID.String(), sanitizedFilename)
+	objectKey := fmt.Sprintf("%s/%d/%d/%s/%s-%s", ownerType, owner.ParishID, owner.UnitID, owner.ID.String(), attachmentID.String(), sanitizedFilename)
 
 	// 5. Stream to storage and compute SHA-256
 	combinedReader := io.MultiReader(bytes.NewReader(buf[:n]), file)
@@ -100,7 +98,7 @@ func (s AttachmentService) Upload(ctx context.Context, parishID int, transaction
 	checksum := hex.EncodeToString(hasher.Sum(nil))
 
 	// 6. DB insert
-	resp, err := s.repo.Create(ctx, parishID, transactionID, repository.CreateAttachmentInput{
+	resp, err := s.repo.Create(ctx, ownerType, owner, CreateInput{
 		ID:        attachmentID,
 		Bucket:    s.bucket,
 		ObjectKey: objectKey,
@@ -118,12 +116,12 @@ func (s AttachmentService) Upload(ctx context.Context, parishID int, transaction
 	return resp, nil
 }
 
-func (s AttachmentService) List(ctx context.Context, parishID int, transactionID uuid.UUID) ([]model.AttachmentResponse, error) {
-	return s.repo.ListByTransaction(ctx, parishID, transactionID)
+func (s Service) List(ctx context.Context, ownerType string, owner Owner) ([]Response, error) {
+	return s.repo.ListByOwner(ctx, ownerType, owner)
 }
 
-func (s AttachmentService) GetDownloadURL(ctx context.Context, parishID int, transactionID uuid.UUID, attachmentID uuid.UUID) (*model.DownloadResponse, error) {
-	att, err := s.repo.GetByID(ctx, parishID, transactionID, attachmentID)
+func (s Service) GetDownloadURL(ctx context.Context, ownerType string, owner Owner, attachmentID uuid.UUID) (*DownloadResponse, error) {
+	att, err := s.repo.GetByID(ctx, ownerType, owner, attachmentID)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +131,7 @@ func (s AttachmentService) GetDownloadURL(ctx context.Context, parishID int, tra
 		return nil, fmt.Errorf("failed to generate download url: %w", err)
 	}
 
-	return &model.DownloadResponse{
+	return &DownloadResponse{
 		URL:       url,
 		ExpiresAt: time.Now().Add(presignTTL),
 	}, nil
