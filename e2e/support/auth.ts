@@ -47,6 +47,16 @@ export async function cleanTestDioceses() {
   }
 }
 
+export async function cleanTestTerritories() {
+  try {
+    await authDB.execute(
+      sql`DELETE FROM public.territories WHERE name LIKE 'E2E%'`,
+    );
+  } catch (err) {
+    console.error("[e2e] Failed to clean test territories:", err);
+  }
+}
+
 export async function cleanTestParishes() {
   try {
     await authDB.execute(
