@@ -1082,6 +1082,290 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/parishes/{parishId}/finance/reports/collections": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get collections report
+     * @description Get summary of collections (kolekte) for income accounts within a date range
+     */
+    get: {
+      parameters: {
+        query: {
+          /** @description Start date (YYYY-MM-DD) */
+          from: string;
+          /** @description End date (YYYY-MM-DD) */
+          to: string;
+          /** @description Filter by header account subtree (UUID) */
+          parentAccountId?: string;
+          /** @description Filter by transaction unit ID */
+          unitId?: number;
+        };
+        header?: never;
+        path: {
+          /** @description Parish ID */
+          parishId: number;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.WebResponse-model_CollectionsResponse"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unprocessable Entity */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/parishes/{parishId}/finance/reports/ledger": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get account ledger
+     * @description Get detailed transactions and running balance for an account
+     */
+    get: {
+      parameters: {
+        query: {
+          /** @description Account ID (UUID) */
+          accountId: string;
+          /** @description Start date (YYYY-MM-DD) */
+          from: string;
+          /** @description End date (YYYY-MM-DD) */
+          to: string;
+          /** @description Pagination cursor */
+          cursor?: string;
+          /** @description Items per page (default 50, max 200) */
+          limit?: number;
+        };
+        header?: never;
+        path: {
+          /** @description Parish ID */
+          parishId: number;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.WebResponse-model_LedgerResponse"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unprocessable Entity */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/parishes/{parishId}/finance/reports/trial-balance": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get trial balance
+     * @description Get trial balance report as of a specific date
+     */
+    get: {
+      parameters: {
+        query: {
+          /** @description As of date (YYYY-MM-DD) */
+          asOf: string;
+        };
+        header?: never;
+        path: {
+          /** @description Parish ID */
+          parishId: number;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.WebResponse-model_TrialBalanceResponse"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unprocessable Entity */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/parishes/{parishId}/finance/transactions": {
     parameters: {
       query?: never;
@@ -2601,12 +2885,20 @@ export interface components {
       data?: components["schemas"]["model.AttachmentResponse"];
       meta?: components["schemas"]["httpx.Meta"];
     };
+    "httpx.WebResponse-model_CollectionsResponse": {
+      data?: components["schemas"]["model.CollectionsResponse"];
+      meta?: components["schemas"]["httpx.Meta"];
+    };
     "httpx.WebResponse-model_DioceseResponse": {
       data?: components["schemas"]["model.DioceseResponse"];
       meta?: components["schemas"]["httpx.Meta"];
     };
     "httpx.WebResponse-model_DownloadResponse": {
       data?: components["schemas"]["model.DownloadResponse"];
+      meta?: components["schemas"]["httpx.Meta"];
+    };
+    "httpx.WebResponse-model_LedgerResponse": {
+      data?: components["schemas"]["model.LedgerResponse"];
       meta?: components["schemas"]["httpx.Meta"];
     };
     "httpx.WebResponse-model_ParishResponse": {
@@ -2619,6 +2911,10 @@ export interface components {
     };
     "httpx.WebResponse-model_TransactionResponse": {
       data?: components["schemas"]["model.TransactionResponse"];
+      meta?: components["schemas"]["httpx.Meta"];
+    };
+    "httpx.WebResponse-model_TrialBalanceResponse": {
+      data?: components["schemas"]["model.TrialBalanceResponse"];
       meta?: components["schemas"]["httpx.Meta"];
     };
     "httpx.WebResponse-model_UnitResponse": {
@@ -2649,6 +2945,18 @@ export interface components {
       mimeType?: string;
       size?: number;
       transactionId?: string;
+    };
+    "model.CollectionsResponse": {
+      from?: string;
+      grandTotal?: number;
+      rows?: components["schemas"]["model.CollectionsRow"][];
+      to?: string;
+    };
+    "model.CollectionsRow": {
+      accountId?: string;
+      code?: string;
+      name?: string;
+      total?: number;
     };
     "model.CreateAccountRequest": {
       code: string;
@@ -2725,6 +3033,30 @@ export interface components {
       id?: string;
       postings?: components["schemas"]["model.PostingResponse"][];
       reversesId?: string;
+    };
+    "model.LedgerAccount": {
+      code?: string;
+      id?: string;
+      name?: string;
+      normalBalance?: string;
+      type?: string;
+    };
+    "model.LedgerResponse": {
+      account?: components["schemas"]["model.LedgerAccount"];
+      closingBalance?: number;
+      openingBalance?: number;
+      rows?: components["schemas"]["model.LedgerRow"][];
+    };
+    "model.LedgerRow": {
+      balance?: number;
+      credit?: number;
+      date?: string;
+      debit?: number;
+      description?: string;
+      entryId?: string;
+      postingId?: string;
+      transactionId?: string;
+      transactionNumber?: string;
     };
     "model.ParishResponse": {
       active?: boolean;
@@ -2817,6 +3149,24 @@ export interface components {
       status?: string;
       totalAmount?: number;
       unitId?: number;
+    };
+    "model.TrialBalanceResponse": {
+      asOf?: string;
+      rows?: components["schemas"]["model.TrialBalanceRow"][];
+      totals?: components["schemas"]["model.TrialBalanceTotals"];
+    };
+    "model.TrialBalanceRow": {
+      accountId?: string;
+      balance?: number;
+      code?: string;
+      credit?: number;
+      debit?: number;
+      name?: string;
+      type?: string;
+    };
+    "model.TrialBalanceTotals": {
+      credit?: number;
+      debit?: number;
     };
     "model.UnitResponse": {
       code?: string;

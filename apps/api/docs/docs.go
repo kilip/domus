@@ -263,6 +263,17 @@ const docTemplate = `{
                 },
                 "type": "object"
             },
+            "httpx.WebResponse-model_CollectionsResponse": {
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/model.CollectionsResponse"
+                    },
+                    "meta": {
+                        "$ref": "#/components/schemas/httpx.Meta"
+                    }
+                },
+                "type": "object"
+            },
             "httpx.WebResponse-model_DioceseResponse": {
                 "properties": {
                     "data": {
@@ -278,6 +289,17 @@ const docTemplate = `{
                 "properties": {
                     "data": {
                         "$ref": "#/components/schemas/model.DownloadResponse"
+                    },
+                    "meta": {
+                        "$ref": "#/components/schemas/httpx.Meta"
+                    }
+                },
+                "type": "object"
+            },
+            "httpx.WebResponse-model_LedgerResponse": {
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/model.LedgerResponse"
                     },
                     "meta": {
                         "$ref": "#/components/schemas/httpx.Meta"
@@ -311,6 +333,17 @@ const docTemplate = `{
                 "properties": {
                     "data": {
                         "$ref": "#/components/schemas/model.TransactionResponse"
+                    },
+                    "meta": {
+                        "$ref": "#/components/schemas/httpx.Meta"
+                    }
+                },
+                "type": "object"
+            },
+            "httpx.WebResponse-model_TrialBalanceResponse": {
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/model.TrialBalanceResponse"
                     },
                     "meta": {
                         "$ref": "#/components/schemas/httpx.Meta"
@@ -398,6 +431,44 @@ const docTemplate = `{
                     },
                     "transactionId": {
                         "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "model.CollectionsResponse": {
+                "properties": {
+                    "from": {
+                        "type": "string"
+                    },
+                    "grandTotal": {
+                        "type": "integer"
+                    },
+                    "rows": {
+                        "items": {
+                            "$ref": "#/components/schemas/model.CollectionsRow"
+                        },
+                        "type": "array",
+                        "uniqueItems": false
+                    },
+                    "to": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "model.CollectionsRow": {
+                "properties": {
+                    "accountId": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "total": {
+                        "type": "integer"
                     }
                 },
                 "type": "object"
@@ -669,6 +740,79 @@ const docTemplate = `{
                         "uniqueItems": false
                     },
                     "reversesId": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "model.LedgerAccount": {
+                "properties": {
+                    "code": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "normalBalance": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "model.LedgerResponse": {
+                "properties": {
+                    "account": {
+                        "$ref": "#/components/schemas/model.LedgerAccount"
+                    },
+                    "closingBalance": {
+                        "type": "integer"
+                    },
+                    "openingBalance": {
+                        "type": "integer"
+                    },
+                    "rows": {
+                        "items": {
+                            "$ref": "#/components/schemas/model.LedgerRow"
+                        },
+                        "type": "array",
+                        "uniqueItems": false
+                    }
+                },
+                "type": "object"
+            },
+            "model.LedgerRow": {
+                "properties": {
+                    "balance": {
+                        "type": "integer"
+                    },
+                    "credit": {
+                        "type": "integer"
+                    },
+                    "date": {
+                        "type": "string"
+                    },
+                    "debit": {
+                        "type": "integer"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "entryId": {
+                        "type": "string"
+                    },
+                    "postingId": {
+                        "type": "string"
+                    },
+                    "transactionId": {
+                        "type": "string"
+                    },
+                    "transactionNumber": {
                         "type": "string"
                     }
                 },
@@ -962,6 +1106,61 @@ const docTemplate = `{
                         "type": "integer"
                     },
                     "unitId": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "model.TrialBalanceResponse": {
+                "properties": {
+                    "asOf": {
+                        "type": "string"
+                    },
+                    "rows": {
+                        "items": {
+                            "$ref": "#/components/schemas/model.TrialBalanceRow"
+                        },
+                        "type": "array",
+                        "uniqueItems": false
+                    },
+                    "totals": {
+                        "$ref": "#/components/schemas/model.TrialBalanceTotals"
+                    }
+                },
+                "type": "object"
+            },
+            "model.TrialBalanceRow": {
+                "properties": {
+                    "accountId": {
+                        "type": "string"
+                    },
+                    "balance": {
+                        "type": "integer"
+                    },
+                    "code": {
+                        "type": "string"
+                    },
+                    "credit": {
+                        "type": "integer"
+                    },
+                    "debit": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "model.TrialBalanceTotals": {
+                "properties": {
+                    "credit": {
+                        "type": "integer"
+                    },
+                    "debit": {
                         "type": "integer"
                     }
                 },
@@ -2446,6 +2645,353 @@ const docTemplate = `{
                 "summary": "Update account",
                 "tags": [
                     "Finance Account"
+                ]
+            }
+        },
+        "/parishes/{parishId}/finance/reports/collections": {
+            "get": {
+                "description": "Get summary of collections (kolekte) for income accounts within a date range",
+                "parameters": [
+                    {
+                        "description": "Parish ID",
+                        "in": "path",
+                        "name": "parishId",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Start date (YYYY-MM-DD)",
+                        "in": "query",
+                        "name": "from",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "End date (YYYY-MM-DD)",
+                        "in": "query",
+                        "name": "to",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Filter by header account subtree (UUID)",
+                        "in": "query",
+                        "name": "parentAccountId",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Filter by transaction unit ID",
+                        "in": "query",
+                        "name": "unitId",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.WebResponse-model_CollectionsResponse"
+                                }
+                            }
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Unprocessable Entity"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "Get collections report",
+                "tags": [
+                    "Finance Report"
+                ]
+            }
+        },
+        "/parishes/{parishId}/finance/reports/ledger": {
+            "get": {
+                "description": "Get detailed transactions and running balance for an account",
+                "parameters": [
+                    {
+                        "description": "Parish ID",
+                        "in": "path",
+                        "name": "parishId",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Account ID (UUID)",
+                        "in": "query",
+                        "name": "accountId",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Start date (YYYY-MM-DD)",
+                        "in": "query",
+                        "name": "from",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "End date (YYYY-MM-DD)",
+                        "in": "query",
+                        "name": "to",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Pagination cursor",
+                        "in": "query",
+                        "name": "cursor",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Items per page (default 50, max 200)",
+                        "in": "query",
+                        "name": "limit",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.WebResponse-model_LedgerResponse"
+                                }
+                            }
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Unprocessable Entity"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "Get account ledger",
+                "tags": [
+                    "Finance Report"
+                ]
+            }
+        },
+        "/parishes/{parishId}/finance/reports/trial-balance": {
+            "get": {
+                "description": "Get trial balance report as of a specific date",
+                "parameters": [
+                    {
+                        "description": "Parish ID",
+                        "in": "path",
+                        "name": "parishId",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "As of date (YYYY-MM-DD)",
+                        "in": "query",
+                        "name": "asOf",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.WebResponse-model_TrialBalanceResponse"
+                                }
+                            }
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/httpx.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Unprocessable Entity"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "Get trial balance",
+                "tags": [
+                    "Finance Report"
                 ]
             }
         },

@@ -26,6 +26,7 @@ type Module struct {
 	accountCtrl controller.AccountController
 	txCtrl      controller.TransactionController
 	attCtrl     controller.AttachmentController
+	reportCtrl  controller.ReportController
 }
 
 func New(config Config) Module {
@@ -45,11 +46,16 @@ func New(config Config) Module {
 	attSvc := service.NewAttachmentService(attRepo, config.Storage, config.Bucket, config.Log)
 	attCtrl := controller.NewAttachmentController(attSvc)
 
+	reportRepo := repository.NewReportRepository(config.EntCli, config.Log)
+	reportSvc := service.NewReportService(reportRepo, config.Log)
+	reportCtrl := controller.NewReportController(reportSvc)
+
 	return Module{
 		config:      config,
 		accountCtrl: accountCtrl,
 		txCtrl:      txCtrl,
 		attCtrl:     attCtrl,
+		reportCtrl:  reportCtrl,
 	}
 }
 
@@ -78,4 +84,8 @@ func (m Module) InitRoutes(r fiber.Router) {
 	fin.Post("/transactions/:id/attachments", write, m.attCtrl.Upload)
 	fin.Get("/transactions/:id/attachments", read, m.attCtrl.List)
 	fin.Get("/transactions/:id/attachments/:attachmentId/download", read, m.attCtrl.Download)
+
+	fin.Get("/reports/ledger", read, m.reportCtrl.GetLedger)
+	fin.Get("/reports/trial-balance", read, m.reportCtrl.GetTrialBalance)
+	fin.Get("/reports/collections", read, m.reportCtrl.GetCollections)
 }
