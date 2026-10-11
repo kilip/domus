@@ -92,6 +92,9 @@ export default function DioceseListPage() {
       key: "actions",
       width: 120,
       align: "right",
+      onCell: () => ({
+        onClick: (e) => e.stopPropagation(),
+      }),
       render: (_, diocese) => (
         <Space size="small">
           <Tooltip title={t("common.edit")}>
@@ -168,6 +171,14 @@ export default function DioceseListPage() {
           dataSource={rows}
           pagination={{ pageSize: 20, hideOnSinglePage: true }}
           locale={{ emptyText: t("diocese.empty") }}
+          onRow={(record) => ({
+            onClick: () => {
+              if (record.id) {
+                navigate(modulePath("sys", `diocese/update/${record.id}`));
+              }
+            },
+            className: "cursor-pointer",
+          })}
         />
       </section>
     </>

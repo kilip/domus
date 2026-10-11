@@ -271,3 +271,7 @@ body {
   flex: initial;
   text-align: center;
 }
+
+.ant-table-row.cursor-pointer {
+  cursor: pointer;
+}

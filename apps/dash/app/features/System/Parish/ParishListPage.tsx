@@ -96,6 +96,9 @@ export default function ParishListPage() {
       key: "actions",
       width: 120,
       align: "right",
+      onCell: () => ({
+        onClick: (e) => e.stopPropagation(),
+      }),
       render: (_, parish) => (
         <Space size="small">
           <Tooltip title={t("common.edit")}>
@@ -172,6 +175,14 @@ export default function ParishListPage() {
           dataSource={rows}
           pagination={{ pageSize: 20, hideOnSinglePage: true }}
           locale={{ emptyText: t("parish.empty") }}
+          onRow={(record) => ({
+            onClick: () => {
+              if (record.id) {
+                navigate(modulePath("sys", `parish/update/${record.id}`));
+              }
+            },
+            className: "cursor-pointer",
+          })}
         />
       </section>
     </>

@@ -158,6 +158,9 @@ export default function TerritorialListPage() {
       key: "actions",
       width: 110,
       align: "right",
+      onCell: () => ({
+        onClick: (e) => e.stopPropagation(),
+      }),
       render: (_, territory) => (
         <Space size="small">
           <Tooltip title={t("common.edit")}>
@@ -268,6 +271,14 @@ export default function TerritorialListPage() {
           dataSource={rows}
           pagination={{ pageSize: 20, hideOnSinglePage: true }}
           locale={{ emptyText: t("territory.empty") }}
+          onRow={(record) => ({
+            onClick: () => {
+              if (record.id) {
+                navigate(modulePath("sys", `territorial/update/${record.id}`));
+              }
+            },
+            className: "cursor-pointer",
+          })}
         />
       </section>
     </>
