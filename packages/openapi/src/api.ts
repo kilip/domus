@@ -1355,6 +1355,269 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/parishes/{parishId}/finance/transactions/{id}/attachments": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List transaction attachments
+     * @description List all attachments for a transaction
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Parish ID */
+          parishId: number;
+          /** @description Transaction ID */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: {
+        content: {
+          "application/json": Record<string, never>;
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.WebResponse-array_model_AttachmentResponse"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+      };
+    };
+    put?: never;
+    /**
+     * Upload transaction attachment
+     * @description Upload a file attachment for a transaction (PDF, JPEG, PNG, max 10 MiB)
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Parish ID */
+          parishId: number;
+          /** @description Transaction ID */
+          id: string;
+        };
+        cookie?: never;
+      };
+      /** @description Attachment file */
+      requestBody: {
+        content: {
+          "multipart/form-data": {
+            /**
+             * Format: binary
+             * @description Attachment file
+             */
+            file: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Created */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.WebResponse-model_AttachmentResponse"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Request Entity Too Large */
+        413: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unprocessable Entity */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/parishes/{parishId}/finance/transactions/{id}/attachments/{attachmentId}/download": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get presigned download URL for attachment
+     * @description Generate a presigned GET URL valid for 5 minutes to download an attachment
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Parish ID */
+          parishId: number;
+          /** @description Transaction ID */
+          id: string;
+          /** @description Attachment ID */
+          attachmentId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: {
+        content: {
+          "application/json": Record<string, never>;
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.WebResponse-model_DownloadResponse"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/parishes/{parishId}/finance/transactions/{id}/void": {
     parameters: {
       query?: never;
@@ -2302,6 +2565,10 @@ export interface components {
       data?: components["schemas"]["model.AccountResponse"][];
       meta?: components["schemas"]["httpx.Meta"];
     };
+    "httpx.WebResponse-array_model_AttachmentResponse": {
+      data?: components["schemas"]["model.AttachmentResponse"][];
+      meta?: components["schemas"]["httpx.Meta"];
+    };
     "httpx.WebResponse-array_model_DioceseResponse": {
       data?: components["schemas"]["model.DioceseResponse"][];
       meta?: components["schemas"]["httpx.Meta"];
@@ -2330,8 +2597,16 @@ export interface components {
       data?: components["schemas"]["model.AccountResponse"];
       meta?: components["schemas"]["httpx.Meta"];
     };
+    "httpx.WebResponse-model_AttachmentResponse": {
+      data?: components["schemas"]["model.AttachmentResponse"];
+      meta?: components["schemas"]["httpx.Meta"];
+    };
     "httpx.WebResponse-model_DioceseResponse": {
       data?: components["schemas"]["model.DioceseResponse"];
+      meta?: components["schemas"]["httpx.Meta"];
+    };
+    "httpx.WebResponse-model_DownloadResponse": {
+      data?: components["schemas"]["model.DownloadResponse"];
       meta?: components["schemas"]["httpx.Meta"];
     };
     "httpx.WebResponse-model_ParishResponse": {
@@ -2439,6 +2714,10 @@ export interface components {
       name?: string;
       updatedAt?: string;
       updatedBy?: components["schemas"]["core.User"];
+    };
+    "model.DownloadResponse": {
+      expiresAt?: string;
+      url?: string;
     };
     "model.EntryResponse": {
       date?: string;

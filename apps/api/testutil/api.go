@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 
@@ -99,6 +100,45 @@ func (s *ApiTestSuite[T]) RequestWithClaims(path string, method string, requestB
 func (s *ApiTestSuite[T]) Request(path string, method string, requestBody any) {
 	s.T().Helper()
 	s.RequestWithClaims(path, method, requestBody, nil)
+}
+
+func (s *ApiTestSuite[T]) RequestMultipart(path string, method string, fieldName string, filename string, content []byte) {
+	s.T().Helper()
+	s.RequestMultipartWithClaims(path, method, fieldName, filename, content, nil)
+}
+
+func (s *ApiTestSuite[T]) RequestMultipartWithClaims(path string, method string, fieldName string, filename string, content []byte, extraClaims jwt.MapClaims) {
+	s.T().Helper()
+	var b bytes.Buffer
+	w := multipart.NewWriter(&b)
+	if fieldName != "" {
+		part, err := w.CreateFormFile(fieldName, filename)
+		require.NoError(s.T(), err)
+		_, err = part.Write(content)
+		require.NoError(s.T(), err)
+	}
+	require.NoError(s.T(), w.Close())
+
+	req := httptest.NewRequest(method, path, &b)
+	req.Header.Set("Content-Type", w.FormDataContentType())
+
+	claims := jwt.MapClaims{
+		"id":    s.User.ID,
+		"name":  s.User.Name,
+		"email": s.User.Email,
+		"roles": s.User.Roles,
+	}
+	for k, v := range extraClaims {
+		claims[k] = v
+	}
+
+	token := SignToken(s.T(), claims)
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	var err error
+	s.HttpResponse = nil
+	s.HttpResponse, err = api.Test(req)
+	require.NoError(s.T(), err)
 }
 
 func (s *ApiTestSuite[T]) GetResponse() httpx.WebResponse[T] {

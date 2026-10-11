@@ -129,6 +129,21 @@
         },
         "type": "object"
       },
+      "httpx.WebResponse-array_model_AttachmentResponse": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/model.AttachmentResponse"
+            },
+            "type": "array",
+            "uniqueItems": false
+          },
+          "meta": {
+            "$ref": "#/components/schemas/httpx.Meta"
+          }
+        },
+        "type": "object"
+      },
       "httpx.WebResponse-array_model_DioceseResponse": {
         "properties": {
           "data": {
@@ -226,10 +241,32 @@
         },
         "type": "object"
       },
+      "httpx.WebResponse-model_AttachmentResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/model.AttachmentResponse"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/httpx.Meta"
+          }
+        },
+        "type": "object"
+      },
       "httpx.WebResponse-model_DioceseResponse": {
         "properties": {
           "data": {
             "$ref": "#/components/schemas/model.DioceseResponse"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/httpx.Meta"
+          }
+        },
+        "type": "object"
+      },
+      "httpx.WebResponse-model_DownloadResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/model.DownloadResponse"
           },
           "meta": {
             "$ref": "#/components/schemas/httpx.Meta"
@@ -546,6 +583,17 @@
           },
           "updatedBy": {
             "$ref": "#/components/schemas/core.User"
+          }
+        },
+        "type": "object"
+      },
+      "model.DownloadResponse": {
+        "properties": {
+          "expiresAt": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
           }
         },
         "type": "object"
@@ -2548,6 +2596,322 @@
         ],
         "summary": "Get transaction by ID",
         "tags": ["Finance Transaction"]
+      }
+    },
+    "/parishes/{parishId}/finance/transactions/{id}/attachments": {
+      "get": {
+        "description": "List all attachments for a transaction",
+        "parameters": [
+          {
+            "description": "Parish ID",
+            "in": "path",
+            "name": "parishId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Transaction ID",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.WebResponse-array_model_AttachmentResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "List transaction attachments",
+        "tags": ["Finance Attachment"]
+      },
+      "post": {
+        "description": "Upload a file attachment for a transaction (PDF, JPEG, PNG, max 10 MiB)",
+        "parameters": [
+          {
+            "description": "Parish ID",
+            "in": "path",
+            "name": "parishId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Transaction ID",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "description": "Attachment file",
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "required": ["file"],
+                "type": "object"
+              }
+            }
+          },
+          "description": "Attachment file",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.WebResponse-model_AttachmentResponse"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Upload transaction attachment",
+        "tags": ["Finance Attachment"]
+      }
+    },
+    "/parishes/{parishId}/finance/transactions/{id}/attachments/{attachmentId}/download": {
+      "get": {
+        "description": "Generate a presigned GET URL valid for 5 minutes to download an attachment",
+        "parameters": [
+          {
+            "description": "Parish ID",
+            "in": "path",
+            "name": "parishId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Transaction ID",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Attachment ID",
+            "in": "path",
+            "name": "attachmentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.WebResponse-model_DownloadResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Get presigned download URL for attachment",
+        "tags": ["Finance Attachment"]
       }
     },
     "/parishes/{parishId}/finance/transactions/{id}/void": {

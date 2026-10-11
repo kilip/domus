@@ -17,6 +17,7 @@ type Config struct {
 	EntCli  *ent.Client
 	Authz   *authz.Enforcer
 	Storage storage.Storage
+	Bucket  string
 	Log     *slog.Logger
 }
 
@@ -24,9 +25,14 @@ type Module struct {
 	config      Config
 	accountCtrl controller.AccountController
 	txCtrl      controller.TransactionController
+	attCtrl     controller.AttachmentController
 }
 
 func New(config Config) Module {
+	if config.Bucket == "" {
+		config.Bucket = "domus-finance"
+	}
+
 	accountRepo := repository.NewAccountRepository(config.EntCli, config.Log)
 	accountSvc := service.NewAccountService(accountRepo, config.EntCli, config.Log)
 	accountCtrl := controller.NewAccountController(accountSvc)
@@ -35,10 +41,15 @@ func New(config Config) Module {
 	txSvc := service.NewTransactionService(txRepo, accountRepo, config.EntCli, config.Log)
 	txCtrl := controller.NewTransactionController(txSvc)
 
+	attRepo := repository.NewAttachmentRepository(config.EntCli, config.Log)
+	attSvc := service.NewAttachmentService(attRepo, config.Storage, config.Bucket, config.Log)
+	attCtrl := controller.NewAttachmentController(attSvc)
+
 	return Module{
 		config:      config,
 		accountCtrl: accountCtrl,
 		txCtrl:      txCtrl,
+		attCtrl:     attCtrl,
 	}
 }
 
@@ -63,4 +74,8 @@ func (m Module) InitRoutes(r fiber.Router) {
 	fin.Post("/transactions/search", read, m.txCtrl.Search)
 	fin.Get("/transactions/:id", read, m.txCtrl.GetByID)
 	fin.Post("/transactions/:id/void", write, m.txCtrl.Void)
+
+	fin.Post("/transactions/:id/attachments", write, m.attCtrl.Upload)
+	fin.Get("/transactions/:id/attachments", read, m.attCtrl.List)
+	fin.Get("/transactions/:id/attachments/:attachmentId/download", read, m.attCtrl.Download)
 }

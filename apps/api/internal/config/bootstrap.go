@@ -46,6 +46,7 @@ func initFinance(state State) {
 		EntCli:  state.Ent,
 		Authz:   state.Authz,
 		Storage: state.Storage,
+		Bucket:  state.Config.S3Bucket,
 		Log:     state.Log,
 	})
 	finModule.InitRoutes(state.FiberApp)
