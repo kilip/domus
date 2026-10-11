@@ -632,35 +632,6 @@ func HasEntriesWith(preds ...predicate.Entry) predicate.Transaction {
 	})
 }
 
-// HasAttachments applies the HasEdge predicate on the "attachments" edge.
-func HasAttachments() predicate.Transaction {
-	return predicate.Transaction(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, AttachmentsTable, AttachmentsColumn),
-		)
-		schemaConfig := internal.SchemaConfigFromContext(s.Context())
-		step.To.Schema = schemaConfig.Attachment
-		step.Edge.Schema = schemaConfig.Attachment
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasAttachmentsWith applies the HasEdge predicate on the "attachments" edge with a given conditions (other predicates).
-func HasAttachmentsWith(preds ...predicate.Attachment) predicate.Transaction {
-	return predicate.Transaction(func(s *sql.Selector) {
-		step := newAttachmentsStep()
-		schemaConfig := internal.SchemaConfigFromContext(s.Context())
-		step.To.Schema = schemaConfig.Attachment
-		step.Edge.Schema = schemaConfig.Attachment
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Transaction) predicate.Transaction {
 	return predicate.Transaction(sql.AndPredicates(predicates...))

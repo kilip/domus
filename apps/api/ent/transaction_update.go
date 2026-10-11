@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
-	"github.com/paroki/domus/api/ent/attachment"
 	"github.com/paroki/domus/api/ent/entry"
 	"github.com/paroki/domus/api/ent/internal"
 	"github.com/paroki/domus/api/ent/parish"
@@ -232,21 +231,6 @@ func (_u *TransactionUpdate) AddEntries(v ...*Entry) *TransactionUpdate {
 	return _u.AddEntryIDs(ids...)
 }
 
-// AddAttachmentIDs adds the "attachments" edge to the Attachment entity by IDs.
-func (_u *TransactionUpdate) AddAttachmentIDs(ids ...uuid.UUID) *TransactionUpdate {
-	_u.mutation.AddAttachmentIDs(ids...)
-	return _u
-}
-
-// AddAttachments adds the "attachments" edges to the Attachment entity.
-func (_u *TransactionUpdate) AddAttachments(v ...*Attachment) *TransactionUpdate {
-	ids := make([]uuid.UUID, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddAttachmentIDs(ids...)
-}
-
 // Mutation returns the TransactionMutation object of the builder.
 func (_u *TransactionUpdate) Mutation() *TransactionMutation {
 	return _u.mutation
@@ -295,27 +279,6 @@ func (_u *TransactionUpdate) RemoveEntries(v ...*Entry) *TransactionUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveEntryIDs(ids...)
-}
-
-// ClearAttachments clears all "attachments" edges to the Attachment entity.
-func (_u *TransactionUpdate) ClearAttachments() *TransactionUpdate {
-	_u.mutation.ClearAttachments()
-	return _u
-}
-
-// RemoveAttachmentIDs removes the "attachments" edge to Attachment entities by IDs.
-func (_u *TransactionUpdate) RemoveAttachmentIDs(ids ...uuid.UUID) *TransactionUpdate {
-	_u.mutation.RemoveAttachmentIDs(ids...)
-	return _u
-}
-
-// RemoveAttachments removes "attachments" edges to Attachment entities.
-func (_u *TransactionUpdate) RemoveAttachments(v ...*Attachment) *TransactionUpdate {
-	ids := make([]uuid.UUID, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveAttachmentIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -594,54 +557,6 @@ func (_u *TransactionUpdate) sqlSave(ctx context.Context) (_node int, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.AttachmentsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   transaction.AttachmentsTable,
-			Columns: []string{transaction.AttachmentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(attachment.FieldID, field.TypeUUID),
-			},
-		}
-		edge.Schema = _u.schemaConfig.Attachment
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedAttachmentsIDs(); len(nodes) > 0 && !_u.mutation.AttachmentsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   transaction.AttachmentsTable,
-			Columns: []string{transaction.AttachmentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(attachment.FieldID, field.TypeUUID),
-			},
-		}
-		edge.Schema = _u.schemaConfig.Attachment
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.AttachmentsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   transaction.AttachmentsTable,
-			Columns: []string{transaction.AttachmentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(attachment.FieldID, field.TypeUUID),
-			},
-		}
-		edge.Schema = _u.schemaConfig.Attachment
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	_spec.Node.Schema = _u.schemaConfig.Transaction
 	ctx = internal.NewSchemaConfigContext(ctx, _u.schemaConfig)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -861,21 +776,6 @@ func (_u *TransactionUpdateOne) AddEntries(v ...*Entry) *TransactionUpdateOne {
 	return _u.AddEntryIDs(ids...)
 }
 
-// AddAttachmentIDs adds the "attachments" edge to the Attachment entity by IDs.
-func (_u *TransactionUpdateOne) AddAttachmentIDs(ids ...uuid.UUID) *TransactionUpdateOne {
-	_u.mutation.AddAttachmentIDs(ids...)
-	return _u
-}
-
-// AddAttachments adds the "attachments" edges to the Attachment entity.
-func (_u *TransactionUpdateOne) AddAttachments(v ...*Attachment) *TransactionUpdateOne {
-	ids := make([]uuid.UUID, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddAttachmentIDs(ids...)
-}
-
 // Mutation returns the TransactionMutation object of the builder.
 func (_u *TransactionUpdateOne) Mutation() *TransactionMutation {
 	return _u.mutation
@@ -924,27 +824,6 @@ func (_u *TransactionUpdateOne) RemoveEntries(v ...*Entry) *TransactionUpdateOne
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveEntryIDs(ids...)
-}
-
-// ClearAttachments clears all "attachments" edges to the Attachment entity.
-func (_u *TransactionUpdateOne) ClearAttachments() *TransactionUpdateOne {
-	_u.mutation.ClearAttachments()
-	return _u
-}
-
-// RemoveAttachmentIDs removes the "attachments" edge to Attachment entities by IDs.
-func (_u *TransactionUpdateOne) RemoveAttachmentIDs(ids ...uuid.UUID) *TransactionUpdateOne {
-	_u.mutation.RemoveAttachmentIDs(ids...)
-	return _u
-}
-
-// RemoveAttachments removes "attachments" edges to Attachment entities.
-func (_u *TransactionUpdateOne) RemoveAttachments(v ...*Attachment) *TransactionUpdateOne {
-	ids := make([]uuid.UUID, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveAttachmentIDs(ids...)
 }
 
 // Where appends a list predicates to the TransactionUpdate builder.
@@ -1248,54 +1127,6 @@ func (_u *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transaction
 			},
 		}
 		edge.Schema = _u.schemaConfig.Entry
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.AttachmentsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   transaction.AttachmentsTable,
-			Columns: []string{transaction.AttachmentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(attachment.FieldID, field.TypeUUID),
-			},
-		}
-		edge.Schema = _u.schemaConfig.Attachment
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedAttachmentsIDs(); len(nodes) > 0 && !_u.mutation.AttachmentsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   transaction.AttachmentsTable,
-			Columns: []string{transaction.AttachmentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(attachment.FieldID, field.TypeUUID),
-			},
-		}
-		edge.Schema = _u.schemaConfig.Attachment
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.AttachmentsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   transaction.AttachmentsTable,
-			Columns: []string{transaction.AttachmentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(attachment.FieldID, field.TypeUUID),
-			},
-		}
-		edge.Schema = _u.schemaConfig.Attachment
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}

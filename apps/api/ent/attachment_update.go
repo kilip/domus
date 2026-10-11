@@ -15,7 +15,6 @@ import (
 	"github.com/paroki/domus/api/ent/attachment"
 	"github.com/paroki/domus/api/ent/internal"
 	"github.com/paroki/domus/api/ent/predicate"
-	"github.com/paroki/domus/api/ent/transaction"
 	"github.com/paroki/domus/api/ent/user"
 )
 
@@ -179,17 +178,6 @@ func (_u *AttachmentUpdate) SetUpdater(v *User) *AttachmentUpdate {
 	return _u.SetUpdaterID(v.ID)
 }
 
-// SetTransactionID sets the "transaction" edge to the Transaction entity by ID.
-func (_u *AttachmentUpdate) SetTransactionID(id uuid.UUID) *AttachmentUpdate {
-	_u.mutation.SetTransactionID(id)
-	return _u
-}
-
-// SetTransaction sets the "transaction" edge to the Transaction entity.
-func (_u *AttachmentUpdate) SetTransaction(v *Transaction) *AttachmentUpdate {
-	return _u.SetTransactionID(v.ID)
-}
-
 // Mutation returns the AttachmentMutation object of the builder.
 func (_u *AttachmentUpdate) Mutation() *AttachmentMutation {
 	return _u.mutation
@@ -204,12 +192,6 @@ func (_u *AttachmentUpdate) ClearCreator() *AttachmentUpdate {
 // ClearUpdater clears the "updater" edge to the User entity.
 func (_u *AttachmentUpdate) ClearUpdater() *AttachmentUpdate {
 	_u.mutation.ClearUpdater()
-	return _u
-}
-
-// ClearTransaction clears the "transaction" edge to the Transaction entity.
-func (_u *AttachmentUpdate) ClearTransaction() *AttachmentUpdate {
-	_u.mutation.ClearTransaction()
 	return _u
 }
 
@@ -287,8 +269,11 @@ func (_u *AttachmentUpdate) check() error {
 	if _u.mutation.UpdaterCleared() && len(_u.mutation.UpdaterIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Attachment.updater"`)
 	}
-	if _u.mutation.TransactionCleared() && len(_u.mutation.TransactionIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Attachment.transaction"`)
+	if _u.mutation.ParishCleared() && len(_u.mutation.ParishIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Attachment.parish"`)
+	}
+	if _u.mutation.UnitCleared() && len(_u.mutation.UnitIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Attachment.unit"`)
 	}
 	return nil
 }
@@ -383,37 +368,6 @@ func (_u *AttachmentUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
-			},
-		}
-		edge.Schema = _u.schemaConfig.Attachment
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.TransactionCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   attachment.TransactionTable,
-			Columns: []string{attachment.TransactionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeUUID),
-			},
-		}
-		edge.Schema = _u.schemaConfig.Attachment
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.TransactionIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   attachment.TransactionTable,
-			Columns: []string{attachment.TransactionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeUUID),
 			},
 		}
 		edge.Schema = _u.schemaConfig.Attachment
@@ -591,17 +545,6 @@ func (_u *AttachmentUpdateOne) SetUpdater(v *User) *AttachmentUpdateOne {
 	return _u.SetUpdaterID(v.ID)
 }
 
-// SetTransactionID sets the "transaction" edge to the Transaction entity by ID.
-func (_u *AttachmentUpdateOne) SetTransactionID(id uuid.UUID) *AttachmentUpdateOne {
-	_u.mutation.SetTransactionID(id)
-	return _u
-}
-
-// SetTransaction sets the "transaction" edge to the Transaction entity.
-func (_u *AttachmentUpdateOne) SetTransaction(v *Transaction) *AttachmentUpdateOne {
-	return _u.SetTransactionID(v.ID)
-}
-
 // Mutation returns the AttachmentMutation object of the builder.
 func (_u *AttachmentUpdateOne) Mutation() *AttachmentMutation {
 	return _u.mutation
@@ -616,12 +559,6 @@ func (_u *AttachmentUpdateOne) ClearCreator() *AttachmentUpdateOne {
 // ClearUpdater clears the "updater" edge to the User entity.
 func (_u *AttachmentUpdateOne) ClearUpdater() *AttachmentUpdateOne {
 	_u.mutation.ClearUpdater()
-	return _u
-}
-
-// ClearTransaction clears the "transaction" edge to the Transaction entity.
-func (_u *AttachmentUpdateOne) ClearTransaction() *AttachmentUpdateOne {
-	_u.mutation.ClearTransaction()
 	return _u
 }
 
@@ -712,8 +649,11 @@ func (_u *AttachmentUpdateOne) check() error {
 	if _u.mutation.UpdaterCleared() && len(_u.mutation.UpdaterIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Attachment.updater"`)
 	}
-	if _u.mutation.TransactionCleared() && len(_u.mutation.TransactionIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Attachment.transaction"`)
+	if _u.mutation.ParishCleared() && len(_u.mutation.ParishIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Attachment.parish"`)
+	}
+	if _u.mutation.UnitCleared() && len(_u.mutation.UnitIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Attachment.unit"`)
 	}
 	return nil
 }
@@ -825,37 +765,6 @@ func (_u *AttachmentUpdateOne) sqlSave(ctx context.Context) (_node *Attachment, 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
-			},
-		}
-		edge.Schema = _u.schemaConfig.Attachment
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.TransactionCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   attachment.TransactionTable,
-			Columns: []string{attachment.TransactionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeUUID),
-			},
-		}
-		edge.Schema = _u.schemaConfig.Attachment
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.TransactionIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   attachment.TransactionTable,
-			Columns: []string{attachment.TransactionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeUUID),
 			},
 		}
 		edge.Schema = _u.schemaConfig.Attachment

@@ -712,18 +712,37 @@ func (c *AttachmentClient) QueryUpdater(_m *Attachment) *UserQuery {
 	return query
 }
 
-// QueryTransaction queries the transaction edge of a Attachment.
-func (c *AttachmentClient) QueryTransaction(_m *Attachment) *TransactionQuery {
-	query := (&TransactionClient{config: c.config}).Query()
+// QueryParish queries the parish edge of a Attachment.
+func (c *AttachmentClient) QueryParish(_m *Attachment) *ParishQuery {
+	query := (&ParishClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(attachment.Table, attachment.FieldID, id),
-			sqlgraph.To(transaction.Table, transaction.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, attachment.TransactionTable, attachment.TransactionColumn),
+			sqlgraph.To(parish.Table, parish.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, attachment.ParishTable, attachment.ParishColumn),
 		)
 		schemaConfig := _m.schemaConfig
-		step.To.Schema = schemaConfig.Transaction
+		step.To.Schema = schemaConfig.Parish
+		step.Edge.Schema = schemaConfig.Attachment
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUnit queries the unit edge of a Attachment.
+func (c *AttachmentClient) QueryUnit(_m *Attachment) *UnitQuery {
+	query := (&UnitClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(attachment.Table, attachment.FieldID, id),
+			sqlgraph.To(unit.Table, unit.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, attachment.UnitTable, attachment.UnitColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Unit
 		step.Edge.Schema = schemaConfig.Attachment
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -2302,25 +2321,6 @@ func (c *TransactionClient) QueryEntries(_m *Transaction) *EntryQuery {
 		schemaConfig := _m.schemaConfig
 		step.To.Schema = schemaConfig.Entry
 		step.Edge.Schema = schemaConfig.Entry
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryAttachments queries the attachments edge of a Transaction.
-func (c *TransactionClient) QueryAttachments(_m *Transaction) *AttachmentQuery {
-	query := (&AttachmentClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(transaction.Table, transaction.FieldID, id),
-			sqlgraph.To(attachment.Table, attachment.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, transaction.AttachmentsTable, transaction.AttachmentsColumn),
-		)
-		schemaConfig := _m.schemaConfig
-		step.To.Schema = schemaConfig.Attachment
-		step.Edge.Schema = schemaConfig.Attachment
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}

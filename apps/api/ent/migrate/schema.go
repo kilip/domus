@@ -77,6 +77,8 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "owner_type", Type: field.TypeString},
+		{Name: "owner_id", Type: field.TypeUUID},
 		{Name: "bucket", Type: field.TypeString},
 		{Name: "object_key", Type: field.TypeString},
 		{Name: "filename", Type: field.TypeString},
@@ -85,7 +87,8 @@ var (
 		{Name: "checksum", Type: field.TypeString},
 		{Name: "created_by", Type: field.TypeUUID},
 		{Name: "updated_by", Type: field.TypeUUID},
-		{Name: "transaction_attachments", Type: field.TypeUUID},
+		{Name: "attachment_parish", Type: field.TypeInt},
+		{Name: "attachment_unit", Type: field.TypeInt},
 	}
 	// AttachmentsTable holds the schema information for the "attachments" table.
 	AttachmentsTable = &schema.Table{
@@ -95,20 +98,26 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "attachments_users_creator",
-				Columns:    []*schema.Column{AttachmentsColumns[9]},
+				Columns:    []*schema.Column{AttachmentsColumns[11]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "attachments_users_updater",
-				Columns:    []*schema.Column{AttachmentsColumns[10]},
+				Columns:    []*schema.Column{AttachmentsColumns[12]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "attachments_transactions_attachments",
-				Columns:    []*schema.Column{AttachmentsColumns[11]},
-				RefColumns: []*schema.Column{TransactionsColumns[0]},
+				Symbol:     "attachments_parishes_parish",
+				Columns:    []*schema.Column{AttachmentsColumns[13]},
+				RefColumns: []*schema.Column{ParishesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "attachments_units_unit",
+				Columns:    []*schema.Column{AttachmentsColumns[14]},
+				RefColumns: []*schema.Column{UnitsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -116,6 +125,11 @@ var (
 			{
 				Name:    "attachment_bucket_object_key",
 				Unique:  true,
+				Columns: []*schema.Column{AttachmentsColumns[5], AttachmentsColumns[6]},
+			},
+			{
+				Name:    "attachment_owner_type_owner_id",
+				Unique:  false,
 				Columns: []*schema.Column{AttachmentsColumns[3], AttachmentsColumns[4]},
 			},
 		},
@@ -548,7 +562,8 @@ func init() {
 	AccountsTable.ForeignKeys[4].RefTable = AccountsTable
 	AttachmentsTable.ForeignKeys[0].RefTable = UsersTable
 	AttachmentsTable.ForeignKeys[1].RefTable = UsersTable
-	AttachmentsTable.ForeignKeys[2].RefTable = TransactionsTable
+	AttachmentsTable.ForeignKeys[2].RefTable = ParishesTable
+	AttachmentsTable.ForeignKeys[3].RefTable = UnitsTable
 	DiocesesTable.ForeignKeys[0].RefTable = UsersTable
 	DiocesesTable.ForeignKeys[1].RefTable = UsersTable
 	EntriesTable.ForeignKeys[0].RefTable = UsersTable

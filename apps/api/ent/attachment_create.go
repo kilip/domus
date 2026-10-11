@@ -14,7 +14,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent/attachment"
-	"github.com/paroki/domus/api/ent/transaction"
+	"github.com/paroki/domus/api/ent/parish"
+	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
 )
 
@@ -63,6 +64,18 @@ func (_c *AttachmentCreate) SetNillableUpdatedAt(v *time.Time) *AttachmentCreate
 	if v != nil {
 		_c.SetUpdatedAt(*v)
 	}
+	return _c
+}
+
+// SetOwnerType sets the "owner_type" field.
+func (_c *AttachmentCreate) SetOwnerType(v string) *AttachmentCreate {
+	_c.mutation.SetOwnerType(v)
+	return _c
+}
+
+// SetOwnerID sets the "owner_id" field.
+func (_c *AttachmentCreate) SetOwnerID(v uuid.UUID) *AttachmentCreate {
+	_c.mutation.SetOwnerID(v)
 	return _c
 }
 
@@ -138,15 +151,26 @@ func (_c *AttachmentCreate) SetUpdater(v *User) *AttachmentCreate {
 	return _c.SetUpdaterID(v.ID)
 }
 
-// SetTransactionID sets the "transaction" edge to the Transaction entity by ID.
-func (_c *AttachmentCreate) SetTransactionID(id uuid.UUID) *AttachmentCreate {
-	_c.mutation.SetTransactionID(id)
+// SetParishID sets the "parish" edge to the Parish entity by ID.
+func (_c *AttachmentCreate) SetParishID(id int) *AttachmentCreate {
+	_c.mutation.SetParishID(id)
 	return _c
 }
 
-// SetTransaction sets the "transaction" edge to the Transaction entity.
-func (_c *AttachmentCreate) SetTransaction(v *Transaction) *AttachmentCreate {
-	return _c.SetTransactionID(v.ID)
+// SetParish sets the "parish" edge to the Parish entity.
+func (_c *AttachmentCreate) SetParish(v *Parish) *AttachmentCreate {
+	return _c.SetParishID(v.ID)
+}
+
+// SetUnitID sets the "unit" edge to the Unit entity by ID.
+func (_c *AttachmentCreate) SetUnitID(id int) *AttachmentCreate {
+	_c.mutation.SetUnitID(id)
+	return _c
+}
+
+// SetUnit sets the "unit" edge to the Unit entity.
+func (_c *AttachmentCreate) SetUnit(v *Unit) *AttachmentCreate {
+	return _c.SetUnitID(v.ID)
 }
 
 // Mutation returns the AttachmentMutation object of the builder.
@@ -212,6 +236,17 @@ func (_c *AttachmentCreate) check() error {
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updatedAt", err: errors.New(`ent: missing required field "Attachment.updatedAt"`)}
 	}
+	if _, ok := _c.mutation.OwnerType(); !ok {
+		return &ValidationError{Name: "owner_type", err: errors.New(`ent: missing required field "Attachment.owner_type"`)}
+	}
+	if v, ok := _c.mutation.OwnerType(); ok {
+		if err := attachment.OwnerTypeValidator(v); err != nil {
+			return &ValidationError{Name: "owner_type", err: fmt.Errorf(`ent: validator failed for field "Attachment.owner_type": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.OwnerID(); !ok {
+		return &ValidationError{Name: "owner_id", err: errors.New(`ent: missing required field "Attachment.owner_id"`)}
+	}
 	if _, ok := _c.mutation.Bucket(); !ok {
 		return &ValidationError{Name: "bucket", err: errors.New(`ent: missing required field "Attachment.bucket"`)}
 	}
@@ -266,8 +301,11 @@ func (_c *AttachmentCreate) check() error {
 	if len(_c.mutation.UpdaterIDs()) == 0 {
 		return &ValidationError{Name: "updater", err: errors.New(`ent: missing required edge "Attachment.updater"`)}
 	}
-	if len(_c.mutation.TransactionIDs()) == 0 {
-		return &ValidationError{Name: "transaction", err: errors.New(`ent: missing required edge "Attachment.transaction"`)}
+	if len(_c.mutation.ParishIDs()) == 0 {
+		return &ValidationError{Name: "parish", err: errors.New(`ent: missing required edge "Attachment.parish"`)}
+	}
+	if len(_c.mutation.UnitIDs()) == 0 {
+		return &ValidationError{Name: "unit", err: errors.New(`ent: missing required edge "Attachment.unit"`)}
 	}
 	return nil
 }
@@ -313,6 +351,14 @@ func (_c *AttachmentCreate) createSpec() (*Attachment, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(attachment.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
+	}
+	if value, ok := _c.mutation.OwnerType(); ok {
+		_spec.SetField(attachment.FieldOwnerType, field.TypeString, value)
+		_node.OwnerType = value
+	}
+	if value, ok := _c.mutation.OwnerID(); ok {
+		_spec.SetField(attachment.FieldOwnerID, field.TypeUUID, value)
+		_node.OwnerID = value
 	}
 	if value, ok := _c.mutation.Bucket(); ok {
 		_spec.SetField(attachment.FieldBucket, field.TypeString, value)
@@ -374,22 +420,40 @@ func (_c *AttachmentCreate) createSpec() (*Attachment, *sqlgraph.CreateSpec) {
 		_node.UpdatedBy = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.TransactionIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ParishIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   attachment.TransactionTable,
-			Columns: []string{attachment.TransactionColumn},
+			Inverse: false,
+			Table:   attachment.ParishTable,
+			Columns: []string{attachment.ParishColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(parish.FieldID, field.TypeInt),
 			},
 		}
 		edge.Schema = _c.schemaConfig.Attachment
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.transaction_attachments = &nodes[0]
+		_node.attachment_parish = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.UnitIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   attachment.UnitTable,
+			Columns: []string{attachment.UnitColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(unit.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _c.schemaConfig.Attachment
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.attachment_unit = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -577,6 +641,12 @@ func (u *AttachmentUpsertOne) UpdateNewValues() *AttachmentUpsertOne {
 		}
 		if _, exists := u.create.mutation.CreatedAt(); exists {
 			s.SetIgnore(attachment.FieldCreatedAt)
+		}
+		if _, exists := u.create.mutation.OwnerType(); exists {
+			s.SetIgnore(attachment.FieldOwnerType)
+		}
+		if _, exists := u.create.mutation.OwnerID(); exists {
+			s.SetIgnore(attachment.FieldOwnerID)
 		}
 	}))
 	return u
@@ -927,6 +997,12 @@ func (u *AttachmentUpsertBulk) UpdateNewValues() *AttachmentUpsertBulk {
 			}
 			if _, exists := b.mutation.CreatedAt(); exists {
 				s.SetIgnore(attachment.FieldCreatedAt)
+			}
+			if _, exists := b.mutation.OwnerType(); exists {
+				s.SetIgnore(attachment.FieldOwnerType)
+			}
+			if _, exists := b.mutation.OwnerID(); exists {
+				s.SetIgnore(attachment.FieldOwnerID)
 			}
 		}
 	}))

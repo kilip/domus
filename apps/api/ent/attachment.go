@@ -11,7 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent/attachment"
-	"github.com/paroki/domus/api/ent/transaction"
+	"github.com/paroki/domus/api/ent/parish"
+	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
 )
 
@@ -28,6 +29,10 @@ type Attachment struct {
 	UpdatedBy uuid.UUID `json:"updatedBy,omitempty"`
 	// UpdatedAt holds the value of the "updatedAt" field.
 	UpdatedAt time.Time `json:"updatedAt,omitempty"`
+	// OwnerType holds the value of the "owner_type" field.
+	OwnerType string `json:"owner_type,omitempty"`
+	// OwnerID holds the value of the "owner_id" field.
+	OwnerID uuid.UUID `json:"owner_id,omitempty"`
 	// Bucket holds the value of the "bucket" field.
 	Bucket string `json:"bucket,omitempty"`
 	// ObjectKey holds the value of the "object_key" field.
@@ -42,9 +47,10 @@ type Attachment struct {
 	Checksum string `json:"checksum,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AttachmentQuery when eager-loading is set.
-	Edges                   AttachmentEdges `json:"edges"`
-	transaction_attachments *uuid.UUID
-	selectValues            sql.SelectValues
+	Edges             AttachmentEdges `json:"edges"`
+	attachment_parish *int
+	attachment_unit   *int
+	selectValues      sql.SelectValues
 }
 
 // AttachmentEdges holds the relations/edges for other nodes in the graph.
@@ -53,11 +59,13 @@ type AttachmentEdges struct {
 	Creator *User `json:"creator,omitempty"`
 	// Updater holds the value of the updater edge.
 	Updater *User `json:"updater,omitempty"`
-	// Transaction holds the value of the transaction edge.
-	Transaction *Transaction `json:"transaction,omitempty"`
+	// Parish holds the value of the parish edge.
+	Parish *Parish `json:"parish,omitempty"`
+	// Unit holds the value of the unit edge.
+	Unit *Unit `json:"unit,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // CreatorOrErr returns the Creator value or an error if the edge
@@ -82,15 +90,26 @@ func (e AttachmentEdges) UpdaterOrErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "updater"}
 }
 
-// TransactionOrErr returns the Transaction value or an error if the edge
+// ParishOrErr returns the Parish value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e AttachmentEdges) TransactionOrErr() (*Transaction, error) {
-	if e.Transaction != nil {
-		return e.Transaction, nil
+func (e AttachmentEdges) ParishOrErr() (*Parish, error) {
+	if e.Parish != nil {
+		return e.Parish, nil
 	} else if e.loadedTypes[2] {
-		return nil, &NotFoundError{label: transaction.Label}
+		return nil, &NotFoundError{label: parish.Label}
 	}
-	return nil, &NotLoadedError{edge: "transaction"}
+	return nil, &NotLoadedError{edge: "parish"}
+}
+
+// UnitOrErr returns the Unit value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e AttachmentEdges) UnitOrErr() (*Unit, error) {
+	if e.Unit != nil {
+		return e.Unit, nil
+	} else if e.loadedTypes[3] {
+		return nil, &NotFoundError{label: unit.Label}
+	}
+	return nil, &NotLoadedError{edge: "unit"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -100,14 +119,16 @@ func (*Attachment) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case attachment.FieldSize:
 			values[i] = new(sql.NullInt64)
-		case attachment.FieldBucket, attachment.FieldObjectKey, attachment.FieldFilename, attachment.FieldMimeType, attachment.FieldChecksum:
+		case attachment.FieldOwnerType, attachment.FieldBucket, attachment.FieldObjectKey, attachment.FieldFilename, attachment.FieldMimeType, attachment.FieldChecksum:
 			values[i] = new(sql.NullString)
 		case attachment.FieldCreatedAt, attachment.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case attachment.FieldID, attachment.FieldCreatedBy, attachment.FieldUpdatedBy:
+		case attachment.FieldID, attachment.FieldCreatedBy, attachment.FieldUpdatedBy, attachment.FieldOwnerID:
 			values[i] = new(uuid.UUID)
-		case attachment.ForeignKeys[0]: // transaction_attachments
-			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
+		case attachment.ForeignKeys[0]: // attachment_parish
+			values[i] = new(sql.NullInt64)
+		case attachment.ForeignKeys[1]: // attachment_unit
+			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -153,6 +174,18 @@ func (_m *Attachment) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
+		case attachment.FieldOwnerType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field owner_type", values[i])
+			} else if value.Valid {
+				_m.OwnerType = value.String
+			}
+		case attachment.FieldOwnerID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field owner_id", values[i])
+			} else if value != nil {
+				_m.OwnerID = *value
+			}
 		case attachment.FieldBucket:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field bucket", values[i])
@@ -190,11 +223,18 @@ func (_m *Attachment) assignValues(columns []string, values []any) error {
 				_m.Checksum = value.String
 			}
 		case attachment.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field transaction_attachments", values[i])
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field attachment_parish", value)
 			} else if value.Valid {
-				_m.transaction_attachments = new(uuid.UUID)
-				*_m.transaction_attachments = *value.S.(*uuid.UUID)
+				_m.attachment_parish = new(int)
+				*_m.attachment_parish = int(value.Int64)
+			}
+		case attachment.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field attachment_unit", value)
+			} else if value.Valid {
+				_m.attachment_unit = new(int)
+				*_m.attachment_unit = int(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -219,9 +259,14 @@ func (_m *Attachment) QueryUpdater() *UserQuery {
 	return NewAttachmentClient(_m.config).QueryUpdater(_m)
 }
 
-// QueryTransaction queries the "transaction" edge of the Attachment entity.
-func (_m *Attachment) QueryTransaction() *TransactionQuery {
-	return NewAttachmentClient(_m.config).QueryTransaction(_m)
+// QueryParish queries the "parish" edge of the Attachment entity.
+func (_m *Attachment) QueryParish() *ParishQuery {
+	return NewAttachmentClient(_m.config).QueryParish(_m)
+}
+
+// QueryUnit queries the "unit" edge of the Attachment entity.
+func (_m *Attachment) QueryUnit() *UnitQuery {
+	return NewAttachmentClient(_m.config).QueryUnit(_m)
 }
 
 // Update returns a builder for updating this Attachment.
@@ -258,6 +303,12 @@ func (_m *Attachment) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("updatedAt=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("owner_type=")
+	builder.WriteString(_m.OwnerType)
+	builder.WriteString(", ")
+	builder.WriteString("owner_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.OwnerID))
 	builder.WriteString(", ")
 	builder.WriteString("bucket=")
 	builder.WriteString(_m.Bucket)

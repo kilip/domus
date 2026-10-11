@@ -13,7 +13,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
-	"github.com/paroki/domus/api/ent/attachment"
 	"github.com/paroki/domus/api/ent/entry"
 	"github.com/paroki/domus/api/ent/internal"
 	"github.com/paroki/domus/api/ent/parish"
@@ -26,17 +25,16 @@ import (
 // TransactionQuery is the builder for querying Transaction entities.
 type TransactionQuery struct {
 	config
-	ctx             *QueryContext
-	order           []transaction.OrderOption
-	inters          []Interceptor
-	predicates      []predicate.Transaction
-	withCreator     *UserQuery
-	withUpdater     *UserQuery
-	withParish      *ParishQuery
-	withUnit        *UnitQuery
-	withEntries     *EntryQuery
-	withAttachments *AttachmentQuery
-	withFKs         bool
+	ctx         *QueryContext
+	order       []transaction.OrderOption
+	inters      []Interceptor
+	predicates  []predicate.Transaction
+	withCreator *UserQuery
+	withUpdater *UserQuery
+	withParish  *ParishQuery
+	withUnit    *UnitQuery
+	withEntries *EntryQuery
+	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -192,31 +190,6 @@ func (_q *TransactionQuery) QueryEntries() *EntryQuery {
 		schemaConfig := _q.schemaConfig
 		step.To.Schema = schemaConfig.Entry
 		step.Edge.Schema = schemaConfig.Entry
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryAttachments chains the current query on the "attachments" edge.
-func (_q *TransactionQuery) QueryAttachments() *AttachmentQuery {
-	query := (&AttachmentClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(transaction.Table, transaction.FieldID, selector),
-			sqlgraph.To(attachment.Table, attachment.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, transaction.AttachmentsTable, transaction.AttachmentsColumn),
-		)
-		schemaConfig := _q.schemaConfig
-		step.To.Schema = schemaConfig.Attachment
-		step.Edge.Schema = schemaConfig.Attachment
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
@@ -410,17 +383,16 @@ func (_q *TransactionQuery) Clone() *TransactionQuery {
 		return nil
 	}
 	return &TransactionQuery{
-		config:          _q.config,
-		ctx:             _q.ctx.Clone(),
-		order:           append([]transaction.OrderOption{}, _q.order...),
-		inters:          append([]Interceptor{}, _q.inters...),
-		predicates:      append([]predicate.Transaction{}, _q.predicates...),
-		withCreator:     _q.withCreator.Clone(),
-		withUpdater:     _q.withUpdater.Clone(),
-		withParish:      _q.withParish.Clone(),
-		withUnit:        _q.withUnit.Clone(),
-		withEntries:     _q.withEntries.Clone(),
-		withAttachments: _q.withAttachments.Clone(),
+		config:      _q.config,
+		ctx:         _q.ctx.Clone(),
+		order:       append([]transaction.OrderOption{}, _q.order...),
+		inters:      append([]Interceptor{}, _q.inters...),
+		predicates:  append([]predicate.Transaction{}, _q.predicates...),
+		withCreator: _q.withCreator.Clone(),
+		withUpdater: _q.withUpdater.Clone(),
+		withParish:  _q.withParish.Clone(),
+		withUnit:    _q.withUnit.Clone(),
+		withEntries: _q.withEntries.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -479,17 +451,6 @@ func (_q *TransactionQuery) WithEntries(opts ...func(*EntryQuery)) *TransactionQ
 		opt(query)
 	}
 	_q.withEntries = query
-	return _q
-}
-
-// WithAttachments tells the query-builder to eager-load the nodes that are connected to
-// the "attachments" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *TransactionQuery) WithAttachments(opts ...func(*AttachmentQuery)) *TransactionQuery {
-	query := (&AttachmentClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withAttachments = query
 	return _q
 }
 
@@ -572,13 +533,12 @@ func (_q *TransactionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 		nodes       = []*Transaction{}
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [6]bool{
+		loadedTypes = [5]bool{
 			_q.withCreator != nil,
 			_q.withUpdater != nil,
 			_q.withParish != nil,
 			_q.withUnit != nil,
 			_q.withEntries != nil,
-			_q.withAttachments != nil,
 		}
 	)
 	if _q.withParish != nil || _q.withUnit != nil {
@@ -635,13 +595,6 @@ func (_q *TransactionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 		if err := _q.loadEntries(ctx, query, nodes,
 			func(n *Transaction) { n.Edges.Entries = []*Entry{} },
 			func(n *Transaction, e *Entry) { n.Edges.Entries = append(n.Edges.Entries, e) }); err != nil {
-			return nil, err
-		}
-	}
-	if query := _q.withAttachments; query != nil {
-		if err := _q.loadAttachments(ctx, query, nodes,
-			func(n *Transaction) { n.Edges.Attachments = []*Attachment{} },
-			func(n *Transaction, e *Attachment) { n.Edges.Attachments = append(n.Edges.Attachments, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -796,37 +749,6 @@ func (_q *TransactionQuery) loadEntries(ctx context.Context, query *EntryQuery, 
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "transaction_entries" returned %v for node %v`, *fk, n.ID)
-		}
-		assign(node, n)
-	}
-	return nil
-}
-func (_q *TransactionQuery) loadAttachments(ctx context.Context, query *AttachmentQuery, nodes []*Transaction, init func(*Transaction), assign func(*Transaction, *Attachment)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[uuid.UUID]*Transaction)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	query.withFKs = true
-	query.Where(predicate.Attachment(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(transaction.AttachmentsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.transaction_attachments
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "transaction_attachments" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "transaction_attachments" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

@@ -74,28 +74,32 @@ func init() {
 	attachment.DefaultUpdatedAt = attachmentDescUpdatedAt.Default.(func() time.Time)
 	// attachment.UpdateDefaultUpdatedAt holds the default value on update for the updatedAt field.
 	attachment.UpdateDefaultUpdatedAt = attachmentDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// attachmentDescOwnerType is the schema descriptor for owner_type field.
+	attachmentDescOwnerType := attachmentFields[0].Descriptor()
+	// attachment.OwnerTypeValidator is a validator for the "owner_type" field. It is called by the builders before save.
+	attachment.OwnerTypeValidator = attachmentDescOwnerType.Validators[0].(func(string) error)
 	// attachmentDescBucket is the schema descriptor for bucket field.
-	attachmentDescBucket := attachmentFields[0].Descriptor()
+	attachmentDescBucket := attachmentFields[2].Descriptor()
 	// attachment.BucketValidator is a validator for the "bucket" field. It is called by the builders before save.
 	attachment.BucketValidator = attachmentDescBucket.Validators[0].(func(string) error)
 	// attachmentDescObjectKey is the schema descriptor for object_key field.
-	attachmentDescObjectKey := attachmentFields[1].Descriptor()
+	attachmentDescObjectKey := attachmentFields[3].Descriptor()
 	// attachment.ObjectKeyValidator is a validator for the "object_key" field. It is called by the builders before save.
 	attachment.ObjectKeyValidator = attachmentDescObjectKey.Validators[0].(func(string) error)
 	// attachmentDescFilename is the schema descriptor for filename field.
-	attachmentDescFilename := attachmentFields[2].Descriptor()
+	attachmentDescFilename := attachmentFields[4].Descriptor()
 	// attachment.FilenameValidator is a validator for the "filename" field. It is called by the builders before save.
 	attachment.FilenameValidator = attachmentDescFilename.Validators[0].(func(string) error)
 	// attachmentDescMimeType is the schema descriptor for mime_type field.
-	attachmentDescMimeType := attachmentFields[3].Descriptor()
+	attachmentDescMimeType := attachmentFields[5].Descriptor()
 	// attachment.MimeTypeValidator is a validator for the "mime_type" field. It is called by the builders before save.
 	attachment.MimeTypeValidator = attachmentDescMimeType.Validators[0].(func(string) error)
 	// attachmentDescSize is the schema descriptor for size field.
-	attachmentDescSize := attachmentFields[4].Descriptor()
+	attachmentDescSize := attachmentFields[6].Descriptor()
 	// attachment.SizeValidator is a validator for the "size" field. It is called by the builders before save.
 	attachment.SizeValidator = attachmentDescSize.Validators[0].(func(int64) error)
 	// attachmentDescChecksum is the schema descriptor for checksum field.
-	attachmentDescChecksum := attachmentFields[5].Descriptor()
+	attachmentDescChecksum := attachmentFields[7].Descriptor()
 	// attachment.ChecksumValidator is a validator for the "checksum" field. It is called by the builders before save.
 	attachment.ChecksumValidator = attachmentDescChecksum.Validators[0].(func(string) error)
 	// attachmentDescID is the schema descriptor for id field.

@@ -61,11 +61,9 @@ type TransactionEdges struct {
 	Unit *Unit `json:"unit,omitempty"`
 	// Entries holds the value of the entries edge.
 	Entries []*Entry `json:"entries,omitempty"`
-	// Attachments holds the value of the attachments edge.
-	Attachments []*Attachment `json:"attachments,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [6]bool
+	loadedTypes [5]bool
 }
 
 // CreatorOrErr returns the Creator value or an error if the edge
@@ -119,15 +117,6 @@ func (e TransactionEdges) EntriesOrErr() ([]*Entry, error) {
 		return e.Entries, nil
 	}
 	return nil, &NotLoadedError{edge: "entries"}
-}
-
-// AttachmentsOrErr returns the Attachments value or an error if the edge
-// was not loaded in eager-loading.
-func (e TransactionEdges) AttachmentsOrErr() ([]*Attachment, error) {
-	if e.loadedTypes[5] {
-		return e.Attachments, nil
-	}
-	return nil, &NotLoadedError{edge: "attachments"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -278,11 +267,6 @@ func (_m *Transaction) QueryUnit() *UnitQuery {
 // QueryEntries queries the "entries" edge of the Transaction entity.
 func (_m *Transaction) QueryEntries() *EntryQuery {
 	return NewTransactionClient(_m.config).QueryEntries(_m)
-}
-
-// QueryAttachments queries the "attachments" edge of the Transaction entity.
-func (_m *Transaction) QueryAttachments() *AttachmentQuery {
-	return NewTransactionClient(_m.config).QueryAttachments(_m)
 }
 
 // Update returns a builder for updating this Transaction.

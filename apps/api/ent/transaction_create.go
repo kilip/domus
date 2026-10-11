@@ -13,7 +13,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
-	"github.com/paroki/domus/api/ent/attachment"
 	"github.com/paroki/domus/api/ent/entry"
 	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/transaction"
@@ -208,21 +207,6 @@ func (_c *TransactionCreate) AddEntries(v ...*Entry) *TransactionCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddEntryIDs(ids...)
-}
-
-// AddAttachmentIDs adds the "attachments" edge to the Attachment entity by IDs.
-func (_c *TransactionCreate) AddAttachmentIDs(ids ...uuid.UUID) *TransactionCreate {
-	_c.mutation.AddAttachmentIDs(ids...)
-	return _c
-}
-
-// AddAttachments adds the "attachments" edges to the Attachment entity.
-func (_c *TransactionCreate) AddAttachments(v ...*Attachment) *TransactionCreate {
-	ids := make([]uuid.UUID, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddAttachmentIDs(ids...)
 }
 
 // Mutation returns the TransactionMutation object of the builder.
@@ -481,23 +465,6 @@ func (_c *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 			},
 		}
 		edge.Schema = _c.schemaConfig.Entry
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.AttachmentsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   transaction.AttachmentsTable,
-			Columns: []string{transaction.AttachmentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(attachment.FieldID, field.TypeUUID),
-			},
-		}
-		edge.Schema = _c.schemaConfig.Attachment
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}

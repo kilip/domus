@@ -23,6 +23,10 @@ const (
 	FieldUpdatedBy = "updated_by"
 	// FieldUpdatedAt holds the string denoting the updatedat field in the database.
 	FieldUpdatedAt = "updated_at"
+	// FieldOwnerType holds the string denoting the owner_type field in the database.
+	FieldOwnerType = "owner_type"
+	// FieldOwnerID holds the string denoting the owner_id field in the database.
+	FieldOwnerID = "owner_id"
 	// FieldBucket holds the string denoting the bucket field in the database.
 	FieldBucket = "bucket"
 	// FieldObjectKey holds the string denoting the object_key field in the database.
@@ -39,8 +43,10 @@ const (
 	EdgeCreator = "creator"
 	// EdgeUpdater holds the string denoting the updater edge name in mutations.
 	EdgeUpdater = "updater"
-	// EdgeTransaction holds the string denoting the transaction edge name in mutations.
-	EdgeTransaction = "transaction"
+	// EdgeParish holds the string denoting the parish edge name in mutations.
+	EdgeParish = "parish"
+	// EdgeUnit holds the string denoting the unit edge name in mutations.
+	EdgeUnit = "unit"
 	// Table holds the table name of the attachment in the database.
 	Table = "attachments"
 	// CreatorTable is the table that holds the creator relation/edge.
@@ -57,13 +63,20 @@ const (
 	UpdaterInverseTable = "users"
 	// UpdaterColumn is the table column denoting the updater relation/edge.
 	UpdaterColumn = "updated_by"
-	// TransactionTable is the table that holds the transaction relation/edge.
-	TransactionTable = "attachments"
-	// TransactionInverseTable is the table name for the Transaction entity.
-	// It exists in this package in order to avoid circular dependency with the "transaction" package.
-	TransactionInverseTable = "transactions"
-	// TransactionColumn is the table column denoting the transaction relation/edge.
-	TransactionColumn = "transaction_attachments"
+	// ParishTable is the table that holds the parish relation/edge.
+	ParishTable = "attachments"
+	// ParishInverseTable is the table name for the Parish entity.
+	// It exists in this package in order to avoid circular dependency with the "parish" package.
+	ParishInverseTable = "parishes"
+	// ParishColumn is the table column denoting the parish relation/edge.
+	ParishColumn = "attachment_parish"
+	// UnitTable is the table that holds the unit relation/edge.
+	UnitTable = "attachments"
+	// UnitInverseTable is the table name for the Unit entity.
+	// It exists in this package in order to avoid circular dependency with the "unit" package.
+	UnitInverseTable = "units"
+	// UnitColumn is the table column denoting the unit relation/edge.
+	UnitColumn = "attachment_unit"
 )
 
 // Columns holds all SQL columns for attachment fields.
@@ -73,6 +86,8 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedBy,
 	FieldUpdatedAt,
+	FieldOwnerType,
+	FieldOwnerID,
 	FieldBucket,
 	FieldObjectKey,
 	FieldFilename,
@@ -84,7 +99,8 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "attachments"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"transaction_attachments",
+	"attachment_parish",
+	"attachment_unit",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -109,6 +125,8 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updatedAt" field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// OwnerTypeValidator is a validator for the "owner_type" field. It is called by the builders before save.
+	OwnerTypeValidator func(string) error
 	// BucketValidator is a validator for the "bucket" field. It is called by the builders before save.
 	BucketValidator func(string) error
 	// ObjectKeyValidator is a validator for the "object_key" field. It is called by the builders before save.
@@ -151,6 +169,16 @@ func ByUpdatedBy(opts ...sql.OrderTermOption) OrderOption {
 // ByUpdatedAt orders the results by the updatedAt field.
 func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
+// ByOwnerType orders the results by the owner_type field.
+func ByOwnerType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOwnerType, opts...).ToFunc()
+}
+
+// ByOwnerID orders the results by the owner_id field.
+func ByOwnerID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOwnerID, opts...).ToFunc()
 }
 
 // ByBucket orders the results by the bucket field.
@@ -197,10 +225,17 @@ func ByUpdaterField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
-// ByTransactionField orders the results by transaction field.
-func ByTransactionField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByParishField orders the results by parish field.
+func ByParishField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTransactionStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newParishStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByUnitField orders the results by unit field.
+func ByUnitField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newUnitStep(), sql.OrderByField(field, opts...))
 	}
 }
 func newCreatorStep() *sqlgraph.Step {
@@ -217,10 +252,17 @@ func newUpdaterStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2O, false, UpdaterTable, UpdaterColumn),
 	)
 }
-func newTransactionStep() *sqlgraph.Step {
+func newParishStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(TransactionInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, TransactionTable, TransactionColumn),
+		sqlgraph.To(ParishInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, ParishTable, ParishColumn),
+	)
+}
+func newUnitStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(UnitInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, UnitTable, UnitColumn),
 	)
 }

@@ -1490,28 +1490,32 @@ func (m *AccountMutation) ResetEdge(name string) error {
 // AttachmentMutation represents an operation that mutates the Attachment nodes in the graph.
 type AttachmentMutation struct {
 	config
-	op                 Op
-	typ                string
-	id                 *uuid.UUID
-	createdAt          *time.Time
-	updatedAt          *time.Time
-	bucket             *string
-	object_key         *string
-	filename           *string
-	mime_type          *string
-	size               *int64
-	addsize            *int64
-	checksum           *string
-	clearedFields      map[string]struct{}
-	creator            *uuid.UUID
-	clearedcreator     bool
-	updater            *uuid.UUID
-	clearedupdater     bool
-	transaction        *uuid.UUID
-	clearedtransaction bool
-	done               bool
-	oldValue           func(context.Context) (*Attachment, error)
-	predicates         []predicate.Attachment
+	op             Op
+	typ            string
+	id             *uuid.UUID
+	createdAt      *time.Time
+	updatedAt      *time.Time
+	owner_type     *string
+	owner_id       *uuid.UUID
+	bucket         *string
+	object_key     *string
+	filename       *string
+	mime_type      *string
+	size           *int64
+	addsize        *int64
+	checksum       *string
+	clearedFields  map[string]struct{}
+	creator        *uuid.UUID
+	clearedcreator bool
+	updater        *uuid.UUID
+	clearedupdater bool
+	parish         *int
+	clearedparish  bool
+	unit           *int
+	clearedunit    bool
+	done           bool
+	oldValue       func(context.Context) (*Attachment, error)
+	predicates     []predicate.Attachment
 }
 
 var _ ent.Mutation = (*AttachmentMutation)(nil)
@@ -1760,6 +1764,78 @@ func (m *AttachmentMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err
 // ResetUpdatedAt resets all changes to the "updatedAt" field.
 func (m *AttachmentMutation) ResetUpdatedAt() {
 	m.updatedAt = nil
+}
+
+// SetOwnerType sets the "owner_type" field.
+func (m *AttachmentMutation) SetOwnerType(s string) {
+	m.owner_type = &s
+}
+
+// OwnerType returns the value of the "owner_type" field in the mutation.
+func (m *AttachmentMutation) OwnerType() (r string, exists bool) {
+	v := m.owner_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOwnerType returns the old "owner_type" field's value of the Attachment entity.
+// If the Attachment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AttachmentMutation) OldOwnerType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOwnerType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOwnerType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOwnerType: %w", err)
+	}
+	return oldValue.OwnerType, nil
+}
+
+// ResetOwnerType resets all changes to the "owner_type" field.
+func (m *AttachmentMutation) ResetOwnerType() {
+	m.owner_type = nil
+}
+
+// SetOwnerID sets the "owner_id" field.
+func (m *AttachmentMutation) SetOwnerID(u uuid.UUID) {
+	m.owner_id = &u
+}
+
+// OwnerID returns the value of the "owner_id" field in the mutation.
+func (m *AttachmentMutation) OwnerID() (r uuid.UUID, exists bool) {
+	v := m.owner_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOwnerID returns the old "owner_id" field's value of the Attachment entity.
+// If the Attachment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AttachmentMutation) OldOwnerID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOwnerID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOwnerID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOwnerID: %w", err)
+	}
+	return oldValue.OwnerID, nil
+}
+
+// ResetOwnerID resets all changes to the "owner_id" field.
+func (m *AttachmentMutation) ResetOwnerID() {
+	m.owner_id = nil
 }
 
 // SetBucket sets the "bucket" field.
@@ -2078,43 +2154,82 @@ func (m *AttachmentMutation) ResetUpdater() {
 	m.clearedupdater = false
 }
 
-// SetTransactionID sets the "transaction" edge to the Transaction entity by id.
-func (m *AttachmentMutation) SetTransactionID(id uuid.UUID) {
-	m.transaction = &id
+// SetParishID sets the "parish" edge to the Parish entity by id.
+func (m *AttachmentMutation) SetParishID(id int) {
+	m.parish = &id
 }
 
-// ClearTransaction clears the "transaction" edge to the Transaction entity.
-func (m *AttachmentMutation) ClearTransaction() {
-	m.clearedtransaction = true
+// ClearParish clears the "parish" edge to the Parish entity.
+func (m *AttachmentMutation) ClearParish() {
+	m.clearedparish = true
 }
 
-// TransactionCleared reports if the "transaction" edge to the Transaction entity was cleared.
-func (m *AttachmentMutation) TransactionCleared() bool {
-	return m.clearedtransaction
+// ParishCleared reports if the "parish" edge to the Parish entity was cleared.
+func (m *AttachmentMutation) ParishCleared() bool {
+	return m.clearedparish
 }
 
-// TransactionID returns the "transaction" edge ID in the mutation.
-func (m *AttachmentMutation) TransactionID() (id uuid.UUID, exists bool) {
-	if m.transaction != nil {
-		return *m.transaction, true
+// ParishID returns the "parish" edge ID in the mutation.
+func (m *AttachmentMutation) ParishID() (id int, exists bool) {
+	if m.parish != nil {
+		return *m.parish, true
 	}
 	return
 }
 
-// TransactionIDs returns the "transaction" edge IDs in the mutation.
+// ParishIDs returns the "parish" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// TransactionID instead. It exists only for internal usage by the builders.
-func (m *AttachmentMutation) TransactionIDs() (ids []uuid.UUID) {
-	if id := m.transaction; id != nil {
+// ParishID instead. It exists only for internal usage by the builders.
+func (m *AttachmentMutation) ParishIDs() (ids []int) {
+	if id := m.parish; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetTransaction resets all changes to the "transaction" edge.
-func (m *AttachmentMutation) ResetTransaction() {
-	m.transaction = nil
-	m.clearedtransaction = false
+// ResetParish resets all changes to the "parish" edge.
+func (m *AttachmentMutation) ResetParish() {
+	m.parish = nil
+	m.clearedparish = false
+}
+
+// SetUnitID sets the "unit" edge to the Unit entity by id.
+func (m *AttachmentMutation) SetUnitID(id int) {
+	m.unit = &id
+}
+
+// ClearUnit clears the "unit" edge to the Unit entity.
+func (m *AttachmentMutation) ClearUnit() {
+	m.clearedunit = true
+}
+
+// UnitCleared reports if the "unit" edge to the Unit entity was cleared.
+func (m *AttachmentMutation) UnitCleared() bool {
+	return m.clearedunit
+}
+
+// UnitID returns the "unit" edge ID in the mutation.
+func (m *AttachmentMutation) UnitID() (id int, exists bool) {
+	if m.unit != nil {
+		return *m.unit, true
+	}
+	return
+}
+
+// UnitIDs returns the "unit" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UnitID instead. It exists only for internal usage by the builders.
+func (m *AttachmentMutation) UnitIDs() (ids []int) {
+	if id := m.unit; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUnit resets all changes to the "unit" edge.
+func (m *AttachmentMutation) ResetUnit() {
+	m.unit = nil
+	m.clearedunit = false
 }
 
 // Where appends a list predicates to the AttachmentMutation builder.
@@ -2151,7 +2266,7 @@ func (m *AttachmentMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AttachmentMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 12)
 	if m.creator != nil {
 		fields = append(fields, attachment.FieldCreatedBy)
 	}
@@ -2163,6 +2278,12 @@ func (m *AttachmentMutation) Fields() []string {
 	}
 	if m.updatedAt != nil {
 		fields = append(fields, attachment.FieldUpdatedAt)
+	}
+	if m.owner_type != nil {
+		fields = append(fields, attachment.FieldOwnerType)
+	}
+	if m.owner_id != nil {
+		fields = append(fields, attachment.FieldOwnerID)
 	}
 	if m.bucket != nil {
 		fields = append(fields, attachment.FieldBucket)
@@ -2198,6 +2319,10 @@ func (m *AttachmentMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedBy()
 	case attachment.FieldUpdatedAt:
 		return m.UpdatedAt()
+	case attachment.FieldOwnerType:
+		return m.OwnerType()
+	case attachment.FieldOwnerID:
+		return m.OwnerID()
 	case attachment.FieldBucket:
 		return m.Bucket()
 	case attachment.FieldObjectKey:
@@ -2227,6 +2352,10 @@ func (m *AttachmentMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldUpdatedBy(ctx)
 	case attachment.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
+	case attachment.FieldOwnerType:
+		return m.OldOwnerType(ctx)
+	case attachment.FieldOwnerID:
+		return m.OldOwnerID(ctx)
 	case attachment.FieldBucket:
 		return m.OldBucket(ctx)
 	case attachment.FieldObjectKey:
@@ -2275,6 +2404,20 @@ func (m *AttachmentMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUpdatedAt(v)
+		return nil
+	case attachment.FieldOwnerType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOwnerType(v)
+		return nil
+	case attachment.FieldOwnerID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOwnerID(v)
 		return nil
 	case attachment.FieldBucket:
 		v, ok := value.(string)
@@ -2394,6 +2537,12 @@ func (m *AttachmentMutation) ResetField(name string) error {
 	case attachment.FieldUpdatedAt:
 		m.ResetUpdatedAt()
 		return nil
+	case attachment.FieldOwnerType:
+		m.ResetOwnerType()
+		return nil
+	case attachment.FieldOwnerID:
+		m.ResetOwnerID()
+		return nil
 	case attachment.FieldBucket:
 		m.ResetBucket()
 		return nil
@@ -2418,15 +2567,18 @@ func (m *AttachmentMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *AttachmentMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.creator != nil {
 		edges = append(edges, attachment.EdgeCreator)
 	}
 	if m.updater != nil {
 		edges = append(edges, attachment.EdgeUpdater)
 	}
-	if m.transaction != nil {
-		edges = append(edges, attachment.EdgeTransaction)
+	if m.parish != nil {
+		edges = append(edges, attachment.EdgeParish)
+	}
+	if m.unit != nil {
+		edges = append(edges, attachment.EdgeUnit)
 	}
 	return edges
 }
@@ -2443,8 +2595,12 @@ func (m *AttachmentMutation) AddedIDs(name string) []ent.Value {
 		if id := m.updater; id != nil {
 			return []ent.Value{*id}
 		}
-	case attachment.EdgeTransaction:
-		if id := m.transaction; id != nil {
+	case attachment.EdgeParish:
+		if id := m.parish; id != nil {
+			return []ent.Value{*id}
+		}
+	case attachment.EdgeUnit:
+		if id := m.unit; id != nil {
 			return []ent.Value{*id}
 		}
 	}
@@ -2453,7 +2609,7 @@ func (m *AttachmentMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *AttachmentMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	return edges
 }
 
@@ -2465,15 +2621,18 @@ func (m *AttachmentMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *AttachmentMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.clearedcreator {
 		edges = append(edges, attachment.EdgeCreator)
 	}
 	if m.clearedupdater {
 		edges = append(edges, attachment.EdgeUpdater)
 	}
-	if m.clearedtransaction {
-		edges = append(edges, attachment.EdgeTransaction)
+	if m.clearedparish {
+		edges = append(edges, attachment.EdgeParish)
+	}
+	if m.clearedunit {
+		edges = append(edges, attachment.EdgeUnit)
 	}
 	return edges
 }
@@ -2486,8 +2645,10 @@ func (m *AttachmentMutation) EdgeCleared(name string) bool {
 		return m.clearedcreator
 	case attachment.EdgeUpdater:
 		return m.clearedupdater
-	case attachment.EdgeTransaction:
-		return m.clearedtransaction
+	case attachment.EdgeParish:
+		return m.clearedparish
+	case attachment.EdgeUnit:
+		return m.clearedunit
 	}
 	return false
 }
@@ -2502,8 +2663,11 @@ func (m *AttachmentMutation) ClearEdge(name string) error {
 	case attachment.EdgeUpdater:
 		m.ClearUpdater()
 		return nil
-	case attachment.EdgeTransaction:
-		m.ClearTransaction()
+	case attachment.EdgeParish:
+		m.ClearParish()
+		return nil
+	case attachment.EdgeUnit:
+		m.ClearUnit()
 		return nil
 	}
 	return fmt.Errorf("unknown Attachment unique edge %s", name)
@@ -2519,8 +2683,11 @@ func (m *AttachmentMutation) ResetEdge(name string) error {
 	case attachment.EdgeUpdater:
 		m.ResetUpdater()
 		return nil
-	case attachment.EdgeTransaction:
-		m.ResetTransaction()
+	case attachment.EdgeParish:
+		m.ResetParish()
+		return nil
+	case attachment.EdgeUnit:
+		m.ResetUnit()
 		return nil
 	}
 	return fmt.Errorf("unknown Attachment edge %s", name)
@@ -8485,35 +8652,32 @@ func (m *TerritoryMutation) ResetEdge(name string) error {
 // TransactionMutation represents an operation that mutates the Transaction nodes in the graph.
 type TransactionMutation struct {
 	config
-	op                 Op
-	typ                string
-	id                 *uuid.UUID
-	createdAt          *time.Time
-	updatedAt          *time.Time
-	deletedAt          *time.Time
-	number             *string
-	date               *time.Time
-	kind               *transaction.Kind
-	description        *string
-	status             *transaction.Status
-	clearedFields      map[string]struct{}
-	creator            *uuid.UUID
-	clearedcreator     bool
-	updater            *uuid.UUID
-	clearedupdater     bool
-	parish             *int
-	clearedparish      bool
-	unit               *int
-	clearedunit        bool
-	entries            map[uuid.UUID]struct{}
-	removedentries     map[uuid.UUID]struct{}
-	clearedentries     bool
-	attachments        map[uuid.UUID]struct{}
-	removedattachments map[uuid.UUID]struct{}
-	clearedattachments bool
-	done               bool
-	oldValue           func(context.Context) (*Transaction, error)
-	predicates         []predicate.Transaction
+	op             Op
+	typ            string
+	id             *uuid.UUID
+	createdAt      *time.Time
+	updatedAt      *time.Time
+	deletedAt      *time.Time
+	number         *string
+	date           *time.Time
+	kind           *transaction.Kind
+	description    *string
+	status         *transaction.Status
+	clearedFields  map[string]struct{}
+	creator        *uuid.UUID
+	clearedcreator bool
+	updater        *uuid.UUID
+	clearedupdater bool
+	parish         *int
+	clearedparish  bool
+	unit           *int
+	clearedunit    bool
+	entries        map[uuid.UUID]struct{}
+	removedentries map[uuid.UUID]struct{}
+	clearedentries bool
+	done           bool
+	oldValue       func(context.Context) (*Transaction, error)
+	predicates     []predicate.Transaction
 }
 
 var _ ent.Mutation = (*TransactionMutation)(nil)
@@ -9218,60 +9382,6 @@ func (m *TransactionMutation) ResetEntries() {
 	m.removedentries = nil
 }
 
-// AddAttachmentIDs adds the "attachments" edge to the Attachment entity by ids.
-func (m *TransactionMutation) AddAttachmentIDs(ids ...uuid.UUID) {
-	if m.attachments == nil {
-		m.attachments = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m.attachments[ids[i]] = struct{}{}
-	}
-}
-
-// ClearAttachments clears the "attachments" edge to the Attachment entity.
-func (m *TransactionMutation) ClearAttachments() {
-	m.clearedattachments = true
-}
-
-// AttachmentsCleared reports if the "attachments" edge to the Attachment entity was cleared.
-func (m *TransactionMutation) AttachmentsCleared() bool {
-	return m.clearedattachments
-}
-
-// RemoveAttachmentIDs removes the "attachments" edge to the Attachment entity by IDs.
-func (m *TransactionMutation) RemoveAttachmentIDs(ids ...uuid.UUID) {
-	if m.removedattachments == nil {
-		m.removedattachments = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		delete(m.attachments, ids[i])
-		m.removedattachments[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedAttachments returns the removed IDs of the "attachments" edge to the Attachment entity.
-func (m *TransactionMutation) RemovedAttachmentsIDs() (ids []uuid.UUID) {
-	for id := range m.removedattachments {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// AttachmentsIDs returns the "attachments" edge IDs in the mutation.
-func (m *TransactionMutation) AttachmentsIDs() (ids []uuid.UUID) {
-	for id := range m.attachments {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetAttachments resets all changes to the "attachments" edge.
-func (m *TransactionMutation) ResetAttachments() {
-	m.attachments = nil
-	m.clearedattachments = false
-	m.removedattachments = nil
-}
-
 // Where appends a list predicates to the TransactionMutation builder.
 func (m *TransactionMutation) Where(ps ...predicate.Transaction) {
 	m.predicates = append(m.predicates, ps...)
@@ -9573,7 +9683,7 @@ func (m *TransactionMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TransactionMutation) AddedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 5)
 	if m.creator != nil {
 		edges = append(edges, transaction.EdgeCreator)
 	}
@@ -9588,9 +9698,6 @@ func (m *TransactionMutation) AddedEdges() []string {
 	}
 	if m.entries != nil {
 		edges = append(edges, transaction.EdgeEntries)
-	}
-	if m.attachments != nil {
-		edges = append(edges, transaction.EdgeAttachments)
 	}
 	return edges
 }
@@ -9621,24 +9728,15 @@ func (m *TransactionMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case transaction.EdgeAttachments:
-		ids := make([]ent.Value, 0, len(m.attachments))
-		for id := range m.attachments {
-			ids = append(ids, id)
-		}
-		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TransactionMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 5)
 	if m.removedentries != nil {
 		edges = append(edges, transaction.EdgeEntries)
-	}
-	if m.removedattachments != nil {
-		edges = append(edges, transaction.EdgeAttachments)
 	}
 	return edges
 }
@@ -9653,19 +9751,13 @@ func (m *TransactionMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case transaction.EdgeAttachments:
-		ids := make([]ent.Value, 0, len(m.removedattachments))
-		for id := range m.removedattachments {
-			ids = append(ids, id)
-		}
-		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TransactionMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 5)
 	if m.clearedcreator {
 		edges = append(edges, transaction.EdgeCreator)
 	}
@@ -9680,9 +9772,6 @@ func (m *TransactionMutation) ClearedEdges() []string {
 	}
 	if m.clearedentries {
 		edges = append(edges, transaction.EdgeEntries)
-	}
-	if m.clearedattachments {
-		edges = append(edges, transaction.EdgeAttachments)
 	}
 	return edges
 }
@@ -9701,8 +9790,6 @@ func (m *TransactionMutation) EdgeCleared(name string) bool {
 		return m.clearedunit
 	case transaction.EdgeEntries:
 		return m.clearedentries
-	case transaction.EdgeAttachments:
-		return m.clearedattachments
 	}
 	return false
 }
@@ -9745,9 +9832,6 @@ func (m *TransactionMutation) ResetEdge(name string) error {
 		return nil
 	case transaction.EdgeEntries:
 		m.ResetEntries()
-		return nil
-	case transaction.EdgeAttachments:
-		m.ResetAttachments()
 		return nil
 	}
 	return fmt.Errorf("unknown Transaction edge %s", name)

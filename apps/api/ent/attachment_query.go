@@ -14,22 +14,24 @@ import (
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent/attachment"
 	"github.com/paroki/domus/api/ent/internal"
+	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/predicate"
-	"github.com/paroki/domus/api/ent/transaction"
+	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
 )
 
 // AttachmentQuery is the builder for querying Attachment entities.
 type AttachmentQuery struct {
 	config
-	ctx             *QueryContext
-	order           []attachment.OrderOption
-	inters          []Interceptor
-	predicates      []predicate.Attachment
-	withCreator     *UserQuery
-	withUpdater     *UserQuery
-	withTransaction *TransactionQuery
-	withFKs         bool
+	ctx         *QueryContext
+	order       []attachment.OrderOption
+	inters      []Interceptor
+	predicates  []predicate.Attachment
+	withCreator *UserQuery
+	withUpdater *UserQuery
+	withParish  *ParishQuery
+	withUnit    *UnitQuery
+	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -116,9 +118,9 @@ func (_q *AttachmentQuery) QueryUpdater() *UserQuery {
 	return query
 }
 
-// QueryTransaction chains the current query on the "transaction" edge.
-func (_q *AttachmentQuery) QueryTransaction() *TransactionQuery {
-	query := (&TransactionClient{config: _q.config}).Query()
+// QueryParish chains the current query on the "parish" edge.
+func (_q *AttachmentQuery) QueryParish() *ParishQuery {
+	query := (&ParishClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -129,11 +131,36 @@ func (_q *AttachmentQuery) QueryTransaction() *TransactionQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(attachment.Table, attachment.FieldID, selector),
-			sqlgraph.To(transaction.Table, transaction.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, attachment.TransactionTable, attachment.TransactionColumn),
+			sqlgraph.To(parish.Table, parish.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, attachment.ParishTable, attachment.ParishColumn),
 		)
 		schemaConfig := _q.schemaConfig
-		step.To.Schema = schemaConfig.Transaction
+		step.To.Schema = schemaConfig.Parish
+		step.Edge.Schema = schemaConfig.Attachment
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryUnit chains the current query on the "unit" edge.
+func (_q *AttachmentQuery) QueryUnit() *UnitQuery {
+	query := (&UnitClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(attachment.Table, attachment.FieldID, selector),
+			sqlgraph.To(unit.Table, unit.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, attachment.UnitTable, attachment.UnitColumn),
+		)
+		schemaConfig := _q.schemaConfig
+		step.To.Schema = schemaConfig.Unit
 		step.Edge.Schema = schemaConfig.Attachment
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -328,14 +355,15 @@ func (_q *AttachmentQuery) Clone() *AttachmentQuery {
 		return nil
 	}
 	return &AttachmentQuery{
-		config:          _q.config,
-		ctx:             _q.ctx.Clone(),
-		order:           append([]attachment.OrderOption{}, _q.order...),
-		inters:          append([]Interceptor{}, _q.inters...),
-		predicates:      append([]predicate.Attachment{}, _q.predicates...),
-		withCreator:     _q.withCreator.Clone(),
-		withUpdater:     _q.withUpdater.Clone(),
-		withTransaction: _q.withTransaction.Clone(),
+		config:      _q.config,
+		ctx:         _q.ctx.Clone(),
+		order:       append([]attachment.OrderOption{}, _q.order...),
+		inters:      append([]Interceptor{}, _q.inters...),
+		predicates:  append([]predicate.Attachment{}, _q.predicates...),
+		withCreator: _q.withCreator.Clone(),
+		withUpdater: _q.withUpdater.Clone(),
+		withParish:  _q.withParish.Clone(),
+		withUnit:    _q.withUnit.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -364,14 +392,25 @@ func (_q *AttachmentQuery) WithUpdater(opts ...func(*UserQuery)) *AttachmentQuer
 	return _q
 }
 
-// WithTransaction tells the query-builder to eager-load the nodes that are connected to
-// the "transaction" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *AttachmentQuery) WithTransaction(opts ...func(*TransactionQuery)) *AttachmentQuery {
-	query := (&TransactionClient{config: _q.config}).Query()
+// WithParish tells the query-builder to eager-load the nodes that are connected to
+// the "parish" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *AttachmentQuery) WithParish(opts ...func(*ParishQuery)) *AttachmentQuery {
+	query := (&ParishClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withTransaction = query
+	_q.withParish = query
+	return _q
+}
+
+// WithUnit tells the query-builder to eager-load the nodes that are connected to
+// the "unit" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *AttachmentQuery) WithUnit(opts ...func(*UnitQuery)) *AttachmentQuery {
+	query := (&UnitClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withUnit = query
 	return _q
 }
 
@@ -454,13 +493,14 @@ func (_q *AttachmentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*A
 		nodes       = []*Attachment{}
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			_q.withCreator != nil,
 			_q.withUpdater != nil,
-			_q.withTransaction != nil,
+			_q.withParish != nil,
+			_q.withUnit != nil,
 		}
 	)
-	if _q.withTransaction != nil {
+	if _q.withParish != nil || _q.withUnit != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -498,9 +538,15 @@ func (_q *AttachmentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*A
 			return nil, err
 		}
 	}
-	if query := _q.withTransaction; query != nil {
-		if err := _q.loadTransaction(ctx, query, nodes, nil,
-			func(n *Attachment, e *Transaction) { n.Edges.Transaction = e }); err != nil {
+	if query := _q.withParish; query != nil {
+		if err := _q.loadParish(ctx, query, nodes, nil,
+			func(n *Attachment, e *Parish) { n.Edges.Parish = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withUnit; query != nil {
+		if err := _q.loadUnit(ctx, query, nodes, nil,
+			func(n *Attachment, e *Unit) { n.Edges.Unit = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -565,14 +611,14 @@ func (_q *AttachmentQuery) loadUpdater(ctx context.Context, query *UserQuery, no
 	}
 	return nil
 }
-func (_q *AttachmentQuery) loadTransaction(ctx context.Context, query *TransactionQuery, nodes []*Attachment, init func(*Attachment), assign func(*Attachment, *Transaction)) error {
-	ids := make([]uuid.UUID, 0, len(nodes))
-	nodeids := make(map[uuid.UUID][]*Attachment)
+func (_q *AttachmentQuery) loadParish(ctx context.Context, query *ParishQuery, nodes []*Attachment, init func(*Attachment), assign func(*Attachment, *Parish)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Attachment)
 	for i := range nodes {
-		if nodes[i].transaction_attachments == nil {
+		if nodes[i].attachment_parish == nil {
 			continue
 		}
-		fk := *nodes[i].transaction_attachments
+		fk := *nodes[i].attachment_parish
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -581,7 +627,7 @@ func (_q *AttachmentQuery) loadTransaction(ctx context.Context, query *Transacti
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(transaction.IDIn(ids...))
+	query.Where(parish.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -589,7 +635,39 @@ func (_q *AttachmentQuery) loadTransaction(ctx context.Context, query *Transacti
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "transaction_attachments" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "attachment_parish" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (_q *AttachmentQuery) loadUnit(ctx context.Context, query *UnitQuery, nodes []*Attachment, init func(*Attachment), assign func(*Attachment, *Unit)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Attachment)
+	for i := range nodes {
+		if nodes[i].attachment_unit == nil {
+			continue
+		}
+		fk := *nodes[i].attachment_unit
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(unit.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "attachment_unit" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

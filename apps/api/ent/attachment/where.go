@@ -77,6 +77,16 @@ func UpdatedAt(v time.Time) predicate.Attachment {
 	return predicate.Attachment(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
+// OwnerType applies equality check predicate on the "owner_type" field. It's identical to OwnerTypeEQ.
+func OwnerType(v string) predicate.Attachment {
+	return predicate.Attachment(sql.FieldEQ(FieldOwnerType, v))
+}
+
+// OwnerID applies equality check predicate on the "owner_id" field. It's identical to OwnerIDEQ.
+func OwnerID(v uuid.UUID) predicate.Attachment {
+	return predicate.Attachment(sql.FieldEQ(FieldOwnerID, v))
+}
+
 // Bucket applies equality check predicate on the "bucket" field. It's identical to BucketEQ.
 func Bucket(v string) predicate.Attachment {
 	return predicate.Attachment(sql.FieldEQ(FieldBucket, v))
@@ -225,6 +235,111 @@ func UpdatedAtLT(v time.Time) predicate.Attachment {
 // UpdatedAtLTE applies the LTE predicate on the "updatedAt" field.
 func UpdatedAtLTE(v time.Time) predicate.Attachment {
 	return predicate.Attachment(sql.FieldLTE(FieldUpdatedAt, v))
+}
+
+// OwnerTypeEQ applies the EQ predicate on the "owner_type" field.
+func OwnerTypeEQ(v string) predicate.Attachment {
+	return predicate.Attachment(sql.FieldEQ(FieldOwnerType, v))
+}
+
+// OwnerTypeNEQ applies the NEQ predicate on the "owner_type" field.
+func OwnerTypeNEQ(v string) predicate.Attachment {
+	return predicate.Attachment(sql.FieldNEQ(FieldOwnerType, v))
+}
+
+// OwnerTypeIn applies the In predicate on the "owner_type" field.
+func OwnerTypeIn(vs ...string) predicate.Attachment {
+	return predicate.Attachment(sql.FieldIn(FieldOwnerType, vs...))
+}
+
+// OwnerTypeNotIn applies the NotIn predicate on the "owner_type" field.
+func OwnerTypeNotIn(vs ...string) predicate.Attachment {
+	return predicate.Attachment(sql.FieldNotIn(FieldOwnerType, vs...))
+}
+
+// OwnerTypeGT applies the GT predicate on the "owner_type" field.
+func OwnerTypeGT(v string) predicate.Attachment {
+	return predicate.Attachment(sql.FieldGT(FieldOwnerType, v))
+}
+
+// OwnerTypeGTE applies the GTE predicate on the "owner_type" field.
+func OwnerTypeGTE(v string) predicate.Attachment {
+	return predicate.Attachment(sql.FieldGTE(FieldOwnerType, v))
+}
+
+// OwnerTypeLT applies the LT predicate on the "owner_type" field.
+func OwnerTypeLT(v string) predicate.Attachment {
+	return predicate.Attachment(sql.FieldLT(FieldOwnerType, v))
+}
+
+// OwnerTypeLTE applies the LTE predicate on the "owner_type" field.
+func OwnerTypeLTE(v string) predicate.Attachment {
+	return predicate.Attachment(sql.FieldLTE(FieldOwnerType, v))
+}
+
+// OwnerTypeContains applies the Contains predicate on the "owner_type" field.
+func OwnerTypeContains(v string) predicate.Attachment {
+	return predicate.Attachment(sql.FieldContains(FieldOwnerType, v))
+}
+
+// OwnerTypeHasPrefix applies the HasPrefix predicate on the "owner_type" field.
+func OwnerTypeHasPrefix(v string) predicate.Attachment {
+	return predicate.Attachment(sql.FieldHasPrefix(FieldOwnerType, v))
+}
+
+// OwnerTypeHasSuffix applies the HasSuffix predicate on the "owner_type" field.
+func OwnerTypeHasSuffix(v string) predicate.Attachment {
+	return predicate.Attachment(sql.FieldHasSuffix(FieldOwnerType, v))
+}
+
+// OwnerTypeEqualFold applies the EqualFold predicate on the "owner_type" field.
+func OwnerTypeEqualFold(v string) predicate.Attachment {
+	return predicate.Attachment(sql.FieldEqualFold(FieldOwnerType, v))
+}
+
+// OwnerTypeContainsFold applies the ContainsFold predicate on the "owner_type" field.
+func OwnerTypeContainsFold(v string) predicate.Attachment {
+	return predicate.Attachment(sql.FieldContainsFold(FieldOwnerType, v))
+}
+
+// OwnerIDEQ applies the EQ predicate on the "owner_id" field.
+func OwnerIDEQ(v uuid.UUID) predicate.Attachment {
+	return predicate.Attachment(sql.FieldEQ(FieldOwnerID, v))
+}
+
+// OwnerIDNEQ applies the NEQ predicate on the "owner_id" field.
+func OwnerIDNEQ(v uuid.UUID) predicate.Attachment {
+	return predicate.Attachment(sql.FieldNEQ(FieldOwnerID, v))
+}
+
+// OwnerIDIn applies the In predicate on the "owner_id" field.
+func OwnerIDIn(vs ...uuid.UUID) predicate.Attachment {
+	return predicate.Attachment(sql.FieldIn(FieldOwnerID, vs...))
+}
+
+// OwnerIDNotIn applies the NotIn predicate on the "owner_id" field.
+func OwnerIDNotIn(vs ...uuid.UUID) predicate.Attachment {
+	return predicate.Attachment(sql.FieldNotIn(FieldOwnerID, vs...))
+}
+
+// OwnerIDGT applies the GT predicate on the "owner_id" field.
+func OwnerIDGT(v uuid.UUID) predicate.Attachment {
+	return predicate.Attachment(sql.FieldGT(FieldOwnerID, v))
+}
+
+// OwnerIDGTE applies the GTE predicate on the "owner_id" field.
+func OwnerIDGTE(v uuid.UUID) predicate.Attachment {
+	return predicate.Attachment(sql.FieldGTE(FieldOwnerID, v))
+}
+
+// OwnerIDLT applies the LT predicate on the "owner_id" field.
+func OwnerIDLT(v uuid.UUID) predicate.Attachment {
+	return predicate.Attachment(sql.FieldLT(FieldOwnerID, v))
+}
+
+// OwnerIDLTE applies the LTE predicate on the "owner_id" field.
+func OwnerIDLTE(v uuid.UUID) predicate.Attachment {
+	return predicate.Attachment(sql.FieldLTE(FieldOwnerID, v))
 }
 
 // BucketEQ applies the EQ predicate on the "bucket" field.
@@ -650,26 +765,55 @@ func HasUpdaterWith(preds ...predicate.User) predicate.Attachment {
 	})
 }
 
-// HasTransaction applies the HasEdge predicate on the "transaction" edge.
-func HasTransaction() predicate.Attachment {
+// HasParish applies the HasEdge predicate on the "parish" edge.
+func HasParish() predicate.Attachment {
 	return predicate.Attachment(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, TransactionTable, TransactionColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, ParishTable, ParishColumn),
 		)
 		schemaConfig := internal.SchemaConfigFromContext(s.Context())
-		step.To.Schema = schemaConfig.Transaction
+		step.To.Schema = schemaConfig.Parish
 		step.Edge.Schema = schemaConfig.Attachment
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasTransactionWith applies the HasEdge predicate on the "transaction" edge with a given conditions (other predicates).
-func HasTransactionWith(preds ...predicate.Transaction) predicate.Attachment {
+// HasParishWith applies the HasEdge predicate on the "parish" edge with a given conditions (other predicates).
+func HasParishWith(preds ...predicate.Parish) predicate.Attachment {
 	return predicate.Attachment(func(s *sql.Selector) {
-		step := newTransactionStep()
+		step := newParishStep()
 		schemaConfig := internal.SchemaConfigFromContext(s.Context())
-		step.To.Schema = schemaConfig.Transaction
+		step.To.Schema = schemaConfig.Parish
+		step.Edge.Schema = schemaConfig.Attachment
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasUnit applies the HasEdge predicate on the "unit" edge.
+func HasUnit() predicate.Attachment {
+	return predicate.Attachment(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, UnitTable, UnitColumn),
+		)
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.Unit
+		step.Edge.Schema = schemaConfig.Attachment
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasUnitWith applies the HasEdge predicate on the "unit" edge with a given conditions (other predicates).
+func HasUnitWith(preds ...predicate.Unit) predicate.Attachment {
+	return predicate.Attachment(func(s *sql.Selector) {
+		step := newUnitStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.Unit
 		step.Edge.Schema = schemaConfig.Attachment
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
