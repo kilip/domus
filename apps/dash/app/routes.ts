@@ -1,5 +1,6 @@
 import type { RouteConfig, RouteConfigEntry } from "@react-router/dev/routes";
 import { flatRoutes } from "@react-router/fs-routes";
+import { financeRoutes } from "./features/Finance/routes";
 import { systemRoutes } from "./features/System/routes";
 
 /**
@@ -7,7 +8,7 @@ import { systemRoutes } from "./features/System/routes";
  * `features/<Modul>/routes.ts`, lalu daftarkan di sini.
  * Semuanya masuk ke dalam layout `_app` (guard login + AppShell).
  */
-const moduleRoutes: RouteConfigEntry[] = [...systemRoutes];
+const moduleRoutes: RouteConfigEntry[] = [...systemRoutes, ...financeRoutes];
 
 const APP_LAYOUT_FILE = "routes/_app.tsx";
 
@@ -23,7 +24,7 @@ async function buildRoutes(): Promise<RouteConfigEntry[]> {
   if (!appLayout) {
     throw new Error(`Layout route "${APP_LAYOUT_FILE}" tidak ditemukan.`);
   }
-  appLayout.children = [...(appLayout.children ?? []), ...moduleRoutes];
+  appLayout.children = [...moduleRoutes, ...(appLayout.children ?? [])];
   return routes;
 }
 

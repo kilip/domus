@@ -17,7 +17,7 @@ function redirectToLogin(): never {
 }
 
 function withToken(request: Request, token: string): Request {
-  const next = new Request(request);
+  const next = new Request(request, { credentials: "include" });
   next.headers.set("Authorization", `Bearer ${token}`);
   return next;
 }

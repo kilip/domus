@@ -23,6 +23,7 @@ export const en: typeof id = {
     inactive: "Inactive",
     reload: "Reload",
     searchPlaceholder: "Search",
+    backToHome: "Back to home",
   },
   roles: {
     admin: "Admin",
@@ -218,6 +219,9 @@ export const en: typeof id = {
     fin: {
       name: "Finance",
       description: "Cash, collections, and the parish budget.",
+      selectUnit: "Select finance unit",
+      noAccessTitle: "No Access",
+      noAccessDescription: "You do not have access to the finance module.",
       groups: {
         transactions: "Transactions",
       },

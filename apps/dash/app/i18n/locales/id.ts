@@ -24,6 +24,7 @@ export const id = {
     inactive: "Nonaktif",
     reload: "Muat ulang",
     searchPlaceholder: "Cari",
+    backToHome: "Kembali ke beranda",
   },
   roles: {
     admin: "Admin",
@@ -218,6 +219,9 @@ export const id = {
     fin: {
       name: "Keuangan",
       description: "Kas, kolekte, dan anggaran paroki.",
+      selectUnit: "Pilih unit keuangan",
+      noAccessTitle: "Tidak Ada Akses",
+      noAccessDescription: "Anda tidak memiliki akses untuk modul finance.",
       groups: {
         transactions: "Transaksi",
       },
