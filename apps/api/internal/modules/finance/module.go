@@ -62,4 +62,5 @@ func (m Module) InitRoutes(r fiber.Router) {
 	fin.Post("/transactions", write, m.txCtrl.Create)
 	fin.Post("/transactions/search", read, m.txCtrl.Search)
 	fin.Get("/transactions/:id", read, m.txCtrl.GetByID)
+	fin.Post("/transactions/:id/void", write, m.txCtrl.Void)
 }

@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gofiber/fiber/v3"
@@ -28,10 +29,15 @@ var errConflictRetry = errors.New("conflict retry")
 type TransactionRepository struct {
 	entcli *ent.Client
 	log    *slog.Logger
+	voidMu *sync.Mutex
 }
 
 func NewTransactionRepository(entcli *ent.Client, log *slog.Logger) TransactionRepository {
-	return TransactionRepository{entcli: entcli, log: log}
+	return TransactionRepository{
+		entcli: entcli,
+		log:    log,
+		voidMu: &sync.Mutex{},
+	}
 }
 
 func toTransactionResponse(tx *ent.Transaction) model.TransactionResponse {

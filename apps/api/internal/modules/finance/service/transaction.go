@@ -19,6 +19,7 @@ type TransactionRepository interface {
 	Create(ctx context.Context, parishID int, req model.CreateTransactionRequest, number string, txDate time.Time) (*model.TransactionResponse, error)
 	GetByID(ctx context.Context, parishID int, id uuid.UUID) (*model.TransactionResponse, error)
 	Search(ctx context.Context, parishID int, req model.SearchTransactionRequest) (*model.PaginatedResult[model.TransactionSummary], error)
+	Void(ctx context.Context, parishID int, id uuid.UUID, reversalDate *time.Time, reason *string) (*model.TransactionResponse, error)
 }
 
 type AccountLookupRepository interface {
@@ -152,4 +153,17 @@ func (s TransactionService) Search(ctx context.Context, parishID int, req model.
 		}
 	}
 	return s.txRepo.Search(ctx, parishID, req)
+}
+
+func (s TransactionService) Void(ctx context.Context, parishID int, id uuid.UUID, req model.VoidTransactionRequest) (*model.TransactionResponse, error) {
+	var reversalDate *time.Time
+	if req.Date != nil && *req.Date != "" {
+		parsedDate, err := model.ParseDate(*req.Date)
+		if err != nil {
+			return nil, fiber.NewError(fiber.StatusBadRequest, "invalid date format: "+err.Error())
+		}
+		reversalDate = &parsedDate
+	}
+
+	return s.txRepo.Void(ctx, parishID, id, reversalDate, req.Reason)
 }

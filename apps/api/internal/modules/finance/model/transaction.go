@@ -29,6 +29,11 @@ type CreateTransactionRequest struct {
 	Postings    []PostingInput `json:"postings" validate:"required,min=2,max=200,dive"`
 }
 
+type VoidTransactionRequest struct {
+	Reason *string `json:"reason,omitempty" validate:"omitempty,max=500"`
+	Date   *string `json:"date,omitempty"`
+}
+
 type SearchTransactionRequest struct {
 	From      *string    `json:"from,omitempty"`
 	To        *string    `json:"to,omitempty"`

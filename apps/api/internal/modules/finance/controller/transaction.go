@@ -13,6 +13,7 @@ type TransactionService interface {
 	Create(ctx context.Context, parishID int, req model.CreateTransactionRequest) (*model.TransactionResponse, error)
 	GetByID(ctx context.Context, parishID int, id uuid.UUID) (*model.TransactionResponse, error)
 	Search(ctx context.Context, parishID int, req model.SearchTransactionRequest) (*model.PaginatedResult[model.TransactionSummary], error)
+	Void(ctx context.Context, parishID int, id uuid.UUID, req model.VoidTransactionRequest) (*model.TransactionResponse, error)
 }
 
 type TransactionController struct {
@@ -117,6 +118,47 @@ func (tc TransactionController) GetByID(c fiber.Ctx) error {
 		return err
 	}
 	res, err := tc.svc.GetByID(c, parishID, *id)
+	if err != nil {
+		return err
+	}
+	return httpx.OK(c, res)
+}
+
+// Void godoc
+//
+//	@Summary		Void transaction
+//	@Description	Void a posted transaction by creating a reversal entry and setting transaction status to void
+//	@Tags			Finance Transaction
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			parishId	path		int							true	"Parish ID"
+//	@Param			id			path		string						true	"Transaction ID (UUID)"
+//	@Param			request		body		model.VoidTransactionRequest	false	"Void transaction request"
+//	@Success		200			{object}	httpx.WebResponse[model.TransactionResponse]
+//	@Failure		400			{object}	httpx.ErrorResponse
+//	@Failure		401			{object}	httpx.ErrorResponse
+//	@Failure		403			{object}	httpx.ErrorResponse
+//	@Failure		404			{object}	httpx.ErrorResponse
+//	@Failure		409			{object}	httpx.ErrorResponse
+//	@Failure		422			{object}	httpx.ErrorResponse
+//	@Router			/parishes/{parishId}/finance/transactions/{id}/void [post]
+func (tc TransactionController) Void(c fiber.Ctx) error {
+	parishID, err := httpx.GetIntParam(c, "parishId")
+	if err != nil {
+		return err
+	}
+	id, err := httpx.GetID(c)
+	if err != nil {
+		return err
+	}
+	var req model.VoidTransactionRequest
+	if len(c.Body()) > 0 {
+		if err := c.Bind().Body(&req); err != nil {
+			return err
+		}
+	}
+	res, err := tc.svc.Void(c, parishID, *id, req)
 	if err != nil {
 		return err
 	}
