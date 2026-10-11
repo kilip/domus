@@ -59,6 +59,31 @@ func Name(v string) predicate.Parish {
 	return predicate.Parish(sql.FieldEQ(FieldName, v))
 }
 
+// Church applies equality check predicate on the "church" field. It's identical to ChurchEQ.
+func Church(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldEQ(FieldChurch, v))
+}
+
+// Address applies equality check predicate on the "address" field. It's identical to AddressEQ.
+func Address(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldEQ(FieldAddress, v))
+}
+
+// Phone applies equality check predicate on the "phone" field. It's identical to PhoneEQ.
+func Phone(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldEQ(FieldPhone, v))
+}
+
+// Email applies equality check predicate on the "email" field. It's identical to EmailEQ.
+func Email(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldEQ(FieldEmail, v))
+}
+
+// Active applies equality check predicate on the "active" field. It's identical to ActiveEQ.
+func Active(v bool) predicate.Parish {
+	return predicate.Parish(sql.FieldEQ(FieldActive, v))
+}
+
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.Parish {
 	return predicate.Parish(sql.FieldEQ(FieldName, v))
@@ -122,6 +147,316 @@ func NameEqualFold(v string) predicate.Parish {
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.Parish {
 	return predicate.Parish(sql.FieldContainsFold(FieldName, v))
+}
+
+// ChurchEQ applies the EQ predicate on the "church" field.
+func ChurchEQ(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldEQ(FieldChurch, v))
+}
+
+// ChurchNEQ applies the NEQ predicate on the "church" field.
+func ChurchNEQ(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldNEQ(FieldChurch, v))
+}
+
+// ChurchIn applies the In predicate on the "church" field.
+func ChurchIn(vs ...string) predicate.Parish {
+	return predicate.Parish(sql.FieldIn(FieldChurch, vs...))
+}
+
+// ChurchNotIn applies the NotIn predicate on the "church" field.
+func ChurchNotIn(vs ...string) predicate.Parish {
+	return predicate.Parish(sql.FieldNotIn(FieldChurch, vs...))
+}
+
+// ChurchGT applies the GT predicate on the "church" field.
+func ChurchGT(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldGT(FieldChurch, v))
+}
+
+// ChurchGTE applies the GTE predicate on the "church" field.
+func ChurchGTE(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldGTE(FieldChurch, v))
+}
+
+// ChurchLT applies the LT predicate on the "church" field.
+func ChurchLT(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldLT(FieldChurch, v))
+}
+
+// ChurchLTE applies the LTE predicate on the "church" field.
+func ChurchLTE(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldLTE(FieldChurch, v))
+}
+
+// ChurchContains applies the Contains predicate on the "church" field.
+func ChurchContains(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldContains(FieldChurch, v))
+}
+
+// ChurchHasPrefix applies the HasPrefix predicate on the "church" field.
+func ChurchHasPrefix(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldHasPrefix(FieldChurch, v))
+}
+
+// ChurchHasSuffix applies the HasSuffix predicate on the "church" field.
+func ChurchHasSuffix(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldHasSuffix(FieldChurch, v))
+}
+
+// ChurchIsNil applies the IsNil predicate on the "church" field.
+func ChurchIsNil() predicate.Parish {
+	return predicate.Parish(sql.FieldIsNull(FieldChurch))
+}
+
+// ChurchNotNil applies the NotNil predicate on the "church" field.
+func ChurchNotNil() predicate.Parish {
+	return predicate.Parish(sql.FieldNotNull(FieldChurch))
+}
+
+// ChurchEqualFold applies the EqualFold predicate on the "church" field.
+func ChurchEqualFold(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldEqualFold(FieldChurch, v))
+}
+
+// ChurchContainsFold applies the ContainsFold predicate on the "church" field.
+func ChurchContainsFold(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldContainsFold(FieldChurch, v))
+}
+
+// AddressEQ applies the EQ predicate on the "address" field.
+func AddressEQ(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldEQ(FieldAddress, v))
+}
+
+// AddressNEQ applies the NEQ predicate on the "address" field.
+func AddressNEQ(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldNEQ(FieldAddress, v))
+}
+
+// AddressIn applies the In predicate on the "address" field.
+func AddressIn(vs ...string) predicate.Parish {
+	return predicate.Parish(sql.FieldIn(FieldAddress, vs...))
+}
+
+// AddressNotIn applies the NotIn predicate on the "address" field.
+func AddressNotIn(vs ...string) predicate.Parish {
+	return predicate.Parish(sql.FieldNotIn(FieldAddress, vs...))
+}
+
+// AddressGT applies the GT predicate on the "address" field.
+func AddressGT(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldGT(FieldAddress, v))
+}
+
+// AddressGTE applies the GTE predicate on the "address" field.
+func AddressGTE(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldGTE(FieldAddress, v))
+}
+
+// AddressLT applies the LT predicate on the "address" field.
+func AddressLT(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldLT(FieldAddress, v))
+}
+
+// AddressLTE applies the LTE predicate on the "address" field.
+func AddressLTE(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldLTE(FieldAddress, v))
+}
+
+// AddressContains applies the Contains predicate on the "address" field.
+func AddressContains(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldContains(FieldAddress, v))
+}
+
+// AddressHasPrefix applies the HasPrefix predicate on the "address" field.
+func AddressHasPrefix(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldHasPrefix(FieldAddress, v))
+}
+
+// AddressHasSuffix applies the HasSuffix predicate on the "address" field.
+func AddressHasSuffix(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldHasSuffix(FieldAddress, v))
+}
+
+// AddressIsNil applies the IsNil predicate on the "address" field.
+func AddressIsNil() predicate.Parish {
+	return predicate.Parish(sql.FieldIsNull(FieldAddress))
+}
+
+// AddressNotNil applies the NotNil predicate on the "address" field.
+func AddressNotNil() predicate.Parish {
+	return predicate.Parish(sql.FieldNotNull(FieldAddress))
+}
+
+// AddressEqualFold applies the EqualFold predicate on the "address" field.
+func AddressEqualFold(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldEqualFold(FieldAddress, v))
+}
+
+// AddressContainsFold applies the ContainsFold predicate on the "address" field.
+func AddressContainsFold(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldContainsFold(FieldAddress, v))
+}
+
+// PhoneEQ applies the EQ predicate on the "phone" field.
+func PhoneEQ(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldEQ(FieldPhone, v))
+}
+
+// PhoneNEQ applies the NEQ predicate on the "phone" field.
+func PhoneNEQ(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldNEQ(FieldPhone, v))
+}
+
+// PhoneIn applies the In predicate on the "phone" field.
+func PhoneIn(vs ...string) predicate.Parish {
+	return predicate.Parish(sql.FieldIn(FieldPhone, vs...))
+}
+
+// PhoneNotIn applies the NotIn predicate on the "phone" field.
+func PhoneNotIn(vs ...string) predicate.Parish {
+	return predicate.Parish(sql.FieldNotIn(FieldPhone, vs...))
+}
+
+// PhoneGT applies the GT predicate on the "phone" field.
+func PhoneGT(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldGT(FieldPhone, v))
+}
+
+// PhoneGTE applies the GTE predicate on the "phone" field.
+func PhoneGTE(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldGTE(FieldPhone, v))
+}
+
+// PhoneLT applies the LT predicate on the "phone" field.
+func PhoneLT(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldLT(FieldPhone, v))
+}
+
+// PhoneLTE applies the LTE predicate on the "phone" field.
+func PhoneLTE(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldLTE(FieldPhone, v))
+}
+
+// PhoneContains applies the Contains predicate on the "phone" field.
+func PhoneContains(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldContains(FieldPhone, v))
+}
+
+// PhoneHasPrefix applies the HasPrefix predicate on the "phone" field.
+func PhoneHasPrefix(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldHasPrefix(FieldPhone, v))
+}
+
+// PhoneHasSuffix applies the HasSuffix predicate on the "phone" field.
+func PhoneHasSuffix(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldHasSuffix(FieldPhone, v))
+}
+
+// PhoneIsNil applies the IsNil predicate on the "phone" field.
+func PhoneIsNil() predicate.Parish {
+	return predicate.Parish(sql.FieldIsNull(FieldPhone))
+}
+
+// PhoneNotNil applies the NotNil predicate on the "phone" field.
+func PhoneNotNil() predicate.Parish {
+	return predicate.Parish(sql.FieldNotNull(FieldPhone))
+}
+
+// PhoneEqualFold applies the EqualFold predicate on the "phone" field.
+func PhoneEqualFold(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldEqualFold(FieldPhone, v))
+}
+
+// PhoneContainsFold applies the ContainsFold predicate on the "phone" field.
+func PhoneContainsFold(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldContainsFold(FieldPhone, v))
+}
+
+// EmailEQ applies the EQ predicate on the "email" field.
+func EmailEQ(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldEQ(FieldEmail, v))
+}
+
+// EmailNEQ applies the NEQ predicate on the "email" field.
+func EmailNEQ(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldNEQ(FieldEmail, v))
+}
+
+// EmailIn applies the In predicate on the "email" field.
+func EmailIn(vs ...string) predicate.Parish {
+	return predicate.Parish(sql.FieldIn(FieldEmail, vs...))
+}
+
+// EmailNotIn applies the NotIn predicate on the "email" field.
+func EmailNotIn(vs ...string) predicate.Parish {
+	return predicate.Parish(sql.FieldNotIn(FieldEmail, vs...))
+}
+
+// EmailGT applies the GT predicate on the "email" field.
+func EmailGT(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldGT(FieldEmail, v))
+}
+
+// EmailGTE applies the GTE predicate on the "email" field.
+func EmailGTE(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldGTE(FieldEmail, v))
+}
+
+// EmailLT applies the LT predicate on the "email" field.
+func EmailLT(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldLT(FieldEmail, v))
+}
+
+// EmailLTE applies the LTE predicate on the "email" field.
+func EmailLTE(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldLTE(FieldEmail, v))
+}
+
+// EmailContains applies the Contains predicate on the "email" field.
+func EmailContains(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldContains(FieldEmail, v))
+}
+
+// EmailHasPrefix applies the HasPrefix predicate on the "email" field.
+func EmailHasPrefix(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldHasPrefix(FieldEmail, v))
+}
+
+// EmailHasSuffix applies the HasSuffix predicate on the "email" field.
+func EmailHasSuffix(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldHasSuffix(FieldEmail, v))
+}
+
+// EmailIsNil applies the IsNil predicate on the "email" field.
+func EmailIsNil() predicate.Parish {
+	return predicate.Parish(sql.FieldIsNull(FieldEmail))
+}
+
+// EmailNotNil applies the NotNil predicate on the "email" field.
+func EmailNotNil() predicate.Parish {
+	return predicate.Parish(sql.FieldNotNull(FieldEmail))
+}
+
+// EmailEqualFold applies the EqualFold predicate on the "email" field.
+func EmailEqualFold(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldEqualFold(FieldEmail, v))
+}
+
+// EmailContainsFold applies the ContainsFold predicate on the "email" field.
+func EmailContainsFold(v string) predicate.Parish {
+	return predicate.Parish(sql.FieldContainsFold(FieldEmail, v))
+}
+
+// ActiveEQ applies the EQ predicate on the "active" field.
+func ActiveEQ(v bool) predicate.Parish {
+	return predicate.Parish(sql.FieldEQ(FieldActive, v))
+}
+
+// ActiveNEQ applies the NEQ predicate on the "active" field.
+func ActiveNEQ(v bool) predicate.Parish {
+	return predicate.Parish(sql.FieldNEQ(FieldActive, v))
 }
 
 // HasDiocese applies the HasEdge predicate on the "diocese" edge.

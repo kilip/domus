@@ -14,6 +14,7 @@ import (
 
 type Config struct {
 	EntCli *ent.Client
+	Authz  *authz.Enforcer
 	Log    *slog.Logger
 }
 
@@ -36,18 +37,23 @@ func New(config Config) Module {
 }
 
 func (m Module) InitRoutes(r fiber.Router) {
-	read := httpx.RequirePermission(authz.ResourceDiocese, authz.ActionRead)
-	write := httpx.RequirePermission(authz.ResourceDiocese, authz.ActionWrite)
+	az := m.config.Authz
+	perm := func(obj authz.Resource, act authz.Action) fiber.Handler {
+		return httpx.RequirePermission(az, httpx.SystemScope, obj, act)
+	}
+
+	read := perm(authz.ResourceDiocese, authz.ActionRead)
+	write := perm(authz.ResourceDiocese, authz.ActionWrite)
 	r.Get("/dioceses", read, m.ctrl.GetAll)
-	r.Get("/dioceses/:id", write, m.ctrl.GetByID)
+	r.Get("/dioceses/:id", read, m.ctrl.GetByID)
 	r.Post("/dioceses", write, m.ctrl.Create)
 	r.Put("/dioceses/:id", write, m.ctrl.Update)
 	r.Delete("/dioceses/:id", write, m.ctrl.Delete)
 
-	readParish := httpx.RequirePermission(authz.ResourceParish, authz.ActionRead)
-	writeParish := httpx.RequirePermission(authz.ResourceParish, authz.ActionWrite)
+	readParish := perm(authz.ResourceParish, authz.ActionRead)
+	writeParish := perm(authz.ResourceParish, authz.ActionWrite)
 	r.Get("/parishes", readParish, m.parishCtrl.GetAll)
-	r.Get("/parishes/:id", writeParish, m.parishCtrl.GetByID)
+	r.Get("/parishes/:id", readParish, m.parishCtrl.GetByID)
 	r.Post("/parishes", writeParish, m.parishCtrl.Create)
 	r.Put("/parishes/:id", writeParish, m.parishCtrl.Update)
 	r.Delete("/parishes/:id", writeParish, m.parishCtrl.Delete)

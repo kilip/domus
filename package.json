@@ -16,11 +16,12 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "prepare": "husky",
-    "oa:gen": "turbo run oa:gen",
+    "api:gen": "turbo run oa:gen && openapi-typescript ./apps/api/docs/swagger.json -o ./packages/openapi/src/api.ts",
     "db:push": "turbo run db:push",
     "db:generate": "turbo run db:generate",
     "db:migrate": "turbo run db:migrate",
-    "clean": "turbo run clean && rm -rf node_modules"
+    "clean": "turbo run clean && rm -rf node_modules",
+    "e2e": "turbo run e2e"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",

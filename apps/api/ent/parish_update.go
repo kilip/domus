@@ -43,6 +43,100 @@ func (_u *ParishUpdate) SetNillableName(v *string) *ParishUpdate {
 	return _u
 }
 
+// SetChurch sets the "church" field.
+func (_u *ParishUpdate) SetChurch(v string) *ParishUpdate {
+	_u.mutation.SetChurch(v)
+	return _u
+}
+
+// SetNillableChurch sets the "church" field if the given value is not nil.
+func (_u *ParishUpdate) SetNillableChurch(v *string) *ParishUpdate {
+	if v != nil {
+		_u.SetChurch(*v)
+	}
+	return _u
+}
+
+// ClearChurch clears the value of the "church" field.
+func (_u *ParishUpdate) ClearChurch() *ParishUpdate {
+	_u.mutation.ClearChurch()
+	return _u
+}
+
+// SetAddress sets the "address" field.
+func (_u *ParishUpdate) SetAddress(v string) *ParishUpdate {
+	_u.mutation.SetAddress(v)
+	return _u
+}
+
+// SetNillableAddress sets the "address" field if the given value is not nil.
+func (_u *ParishUpdate) SetNillableAddress(v *string) *ParishUpdate {
+	if v != nil {
+		_u.SetAddress(*v)
+	}
+	return _u
+}
+
+// ClearAddress clears the value of the "address" field.
+func (_u *ParishUpdate) ClearAddress() *ParishUpdate {
+	_u.mutation.ClearAddress()
+	return _u
+}
+
+// SetPhone sets the "phone" field.
+func (_u *ParishUpdate) SetPhone(v string) *ParishUpdate {
+	_u.mutation.SetPhone(v)
+	return _u
+}
+
+// SetNillablePhone sets the "phone" field if the given value is not nil.
+func (_u *ParishUpdate) SetNillablePhone(v *string) *ParishUpdate {
+	if v != nil {
+		_u.SetPhone(*v)
+	}
+	return _u
+}
+
+// ClearPhone clears the value of the "phone" field.
+func (_u *ParishUpdate) ClearPhone() *ParishUpdate {
+	_u.mutation.ClearPhone()
+	return _u
+}
+
+// SetEmail sets the "email" field.
+func (_u *ParishUpdate) SetEmail(v string) *ParishUpdate {
+	_u.mutation.SetEmail(v)
+	return _u
+}
+
+// SetNillableEmail sets the "email" field if the given value is not nil.
+func (_u *ParishUpdate) SetNillableEmail(v *string) *ParishUpdate {
+	if v != nil {
+		_u.SetEmail(*v)
+	}
+	return _u
+}
+
+// ClearEmail clears the value of the "email" field.
+func (_u *ParishUpdate) ClearEmail() *ParishUpdate {
+	_u.mutation.ClearEmail()
+	return _u
+}
+
+// SetActive sets the "active" field.
+func (_u *ParishUpdate) SetActive(v bool) *ParishUpdate {
+	_u.mutation.SetActive(v)
+	return _u
+}
+
+// SetNillableActive sets the "active" field if the given value is not nil.
+func (_u *ParishUpdate) SetNillableActive(v *bool) *ParishUpdate {
+	if v != nil {
+		_u.SetActive(*v)
+	}
+	return _u
+}
+
 // SetDioceseID sets the "diocese" edge to the Diocese entity by ID.
 func (_u *ParishUpdate) SetDioceseID(id int) *ParishUpdate {
 	_u.mutation.SetDioceseID(id)
@@ -112,6 +206,33 @@ func (_u *ParishUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(parish.FieldName, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.Church(); ok {
+		_spec.SetField(parish.FieldChurch, field.TypeString, value)
+	}
+	if _u.mutation.ChurchCleared() {
+		_spec.ClearField(parish.FieldChurch, field.TypeString)
+	}
+	if value, ok := _u.mutation.Address(); ok {
+		_spec.SetField(parish.FieldAddress, field.TypeString, value)
+	}
+	if _u.mutation.AddressCleared() {
+		_spec.ClearField(parish.FieldAddress, field.TypeString)
+	}
+	if value, ok := _u.mutation.Phone(); ok {
+		_spec.SetField(parish.FieldPhone, field.TypeString, value)
+	}
+	if _u.mutation.PhoneCleared() {
+		_spec.ClearField(parish.FieldPhone, field.TypeString)
+	}
+	if value, ok := _u.mutation.Email(); ok {
+		_spec.SetField(parish.FieldEmail, field.TypeString, value)
+	}
+	if _u.mutation.EmailCleared() {
+		_spec.ClearField(parish.FieldEmail, field.TypeString)
+	}
+	if value, ok := _u.mutation.Active(); ok {
+		_spec.SetField(parish.FieldActive, field.TypeBool, value)
+	}
 	if _u.mutation.DioceseCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -175,6 +296,100 @@ func (_u *ParishUpdateOne) SetName(v string) *ParishUpdateOne {
 func (_u *ParishUpdateOne) SetNillableName(v *string) *ParishUpdateOne {
 	if v != nil {
 		_u.SetName(*v)
+	}
+	return _u
+}
+
+// SetChurch sets the "church" field.
+func (_u *ParishUpdateOne) SetChurch(v string) *ParishUpdateOne {
+	_u.mutation.SetChurch(v)
+	return _u
+}
+
+// SetNillableChurch sets the "church" field if the given value is not nil.
+func (_u *ParishUpdateOne) SetNillableChurch(v *string) *ParishUpdateOne {
+	if v != nil {
+		_u.SetChurch(*v)
+	}
+	return _u
+}
+
+// ClearChurch clears the value of the "church" field.
+func (_u *ParishUpdateOne) ClearChurch() *ParishUpdateOne {
+	_u.mutation.ClearChurch()
+	return _u
+}
+
+// SetAddress sets the "address" field.
+func (_u *ParishUpdateOne) SetAddress(v string) *ParishUpdateOne {
+	_u.mutation.SetAddress(v)
+	return _u
+}
+
+// SetNillableAddress sets the "address" field if the given value is not nil.
+func (_u *ParishUpdateOne) SetNillableAddress(v *string) *ParishUpdateOne {
+	if v != nil {
+		_u.SetAddress(*v)
+	}
+	return _u
+}
+
+// ClearAddress clears the value of the "address" field.
+func (_u *ParishUpdateOne) ClearAddress() *ParishUpdateOne {
+	_u.mutation.ClearAddress()
+	return _u
+}
+
+// SetPhone sets the "phone" field.
+func (_u *ParishUpdateOne) SetPhone(v string) *ParishUpdateOne {
+	_u.mutation.SetPhone(v)
+	return _u
+}
+
+// SetNillablePhone sets the "phone" field if the given value is not nil.
+func (_u *ParishUpdateOne) SetNillablePhone(v *string) *ParishUpdateOne {
+	if v != nil {
+		_u.SetPhone(*v)
+	}
+	return _u
+}
+
+// ClearPhone clears the value of the "phone" field.
+func (_u *ParishUpdateOne) ClearPhone() *ParishUpdateOne {
+	_u.mutation.ClearPhone()
+	return _u
+}
+
+// SetEmail sets the "email" field.
+func (_u *ParishUpdateOne) SetEmail(v string) *ParishUpdateOne {
+	_u.mutation.SetEmail(v)
+	return _u
+}
+
+// SetNillableEmail sets the "email" field if the given value is not nil.
+func (_u *ParishUpdateOne) SetNillableEmail(v *string) *ParishUpdateOne {
+	if v != nil {
+		_u.SetEmail(*v)
+	}
+	return _u
+}
+
+// ClearEmail clears the value of the "email" field.
+func (_u *ParishUpdateOne) ClearEmail() *ParishUpdateOne {
+	_u.mutation.ClearEmail()
+	return _u
+}
+
+// SetActive sets the "active" field.
+func (_u *ParishUpdateOne) SetActive(v bool) *ParishUpdateOne {
+	_u.mutation.SetActive(v)
+	return _u
+}
+
+// SetNillableActive sets the "active" field if the given value is not nil.
+func (_u *ParishUpdateOne) SetNillableActive(v *bool) *ParishUpdateOne {
+	if v != nil {
+		_u.SetActive(*v)
 	}
 	return _u
 }
@@ -277,6 +492,33 @@ func (_u *ParishUpdateOne) sqlSave(ctx context.Context) (_node *Parish, err erro
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(parish.FieldName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Church(); ok {
+		_spec.SetField(parish.FieldChurch, field.TypeString, value)
+	}
+	if _u.mutation.ChurchCleared() {
+		_spec.ClearField(parish.FieldChurch, field.TypeString)
+	}
+	if value, ok := _u.mutation.Address(); ok {
+		_spec.SetField(parish.FieldAddress, field.TypeString, value)
+	}
+	if _u.mutation.AddressCleared() {
+		_spec.ClearField(parish.FieldAddress, field.TypeString)
+	}
+	if value, ok := _u.mutation.Phone(); ok {
+		_spec.SetField(parish.FieldPhone, field.TypeString, value)
+	}
+	if _u.mutation.PhoneCleared() {
+		_spec.ClearField(parish.FieldPhone, field.TypeString)
+	}
+	if value, ok := _u.mutation.Email(); ok {
+		_spec.SetField(parish.FieldEmail, field.TypeString, value)
+	}
+	if _u.mutation.EmailCleared() {
+		_spec.ClearField(parish.FieldEmail, field.TypeString)
+	}
+	if value, ok := _u.mutation.Active(); ok {
+		_spec.SetField(parish.FieldActive, field.TypeBool, value)
 	}
 	if _u.mutation.DioceseCleared() {
 		edge := &sqlgraph.EdgeSpec{

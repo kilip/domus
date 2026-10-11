@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/paroki/domus/api/internal/core"
 	"github.com/paroki/domus/api/internal/modules/unit/model"
+	"github.com/paroki/domus/api/internal/platform/authz"
 	"github.com/paroki/domus/api/testutil"
 	"github.com/stretchr/testify/suite"
 )
@@ -17,7 +18,7 @@ type DioceseSuite struct {
 
 func (s *DioceseSuite) SetupTest() {
 	s.ApiTestSuite.SetupTest()
-	s.User.Roles = []core.UserRole{core.UserRoleSuperadmin}
+	s.GrantRole(authz.RoleSuperadmin, authz.System)
 }
 
 func (s *DioceseSuite) TestCreate_Success() {
@@ -31,11 +32,28 @@ func (s *DioceseSuite) TestCreate_Success() {
 	res := s.GetResponse()
 	s.Greater(res.Data.ID, 0)
 	s.Equal("Keuskupan Agung Jakarta", res.Data.Name)
+	s.True(res.Data.Active)
 	s.Equal(s.User.ID, res.Data.CreatedBy.ID)
 	s.Equal(s.User.Name, res.Data.CreatedBy.Name)
 	s.Equal(s.User.ID, res.Data.UpdatedBy.ID)
 	s.False(res.Data.CreatedAt.IsZero())
 	s.False(res.Data.UpdatedAt.IsZero())
+}
+
+func (s *DioceseSuite) TestCreate_WithActiveFalse() {
+	active := false
+	req := model.CreateDioceseRequest{
+		Name:   "Keuskupan Inaktif",
+		Active: &active,
+	}
+
+	s.Request("/dioceses", fiber.MethodPost, req)
+	s.Created()
+
+	res := s.GetResponse()
+	s.Greater(res.Data.ID, 0)
+	s.Equal("Keuskupan Inaktif", res.Data.Name)
+	s.False(res.Data.Active)
 }
 
 func (s *DioceseSuite) TestCreate_ValidationError() {
@@ -94,13 +112,18 @@ func (s *DioceseSuite) TestUpdate_Success() {
 	s.Created()
 	created := s.GetResponse().Data
 
-	updateReq := model.UpdateDioceseRequest{Name: "Keuskupan Malang Updated"}
+	activeFalse := false
+	updateReq := model.UpdateDioceseRequest{
+		Name:   "Keuskupan Malang Updated",
+		Active: &activeFalse,
+	}
 	s.Request(fmt.Sprintf("/dioceses/%d", created.ID), fiber.MethodPut, updateReq)
 	s.OK()
 
 	res := s.GetResponse()
 	s.Equal(created.ID, res.Data.ID)
 	s.Equal("Keuskupan Malang Updated", res.Data.Name)
+	s.False(res.Data.Active)
 	s.Equal(s.User.ID, res.Data.UpdatedBy.ID)
 }
 
@@ -129,7 +152,8 @@ func (s *DioceseSuite) TestDelete_NotFound() {
 }
 
 func (s *DioceseSuite) TestForbidden_NoPermission() {
-	s.User.Roles = []core.UserRole{core.UserRoleUser}
+	// new user without any membership
+	s.User.ID = core.GenerateID()
 
 	s.Request("/dioceses", fiber.MethodGet, nil)
 	s.AssertStatus(fiber.StatusForbidden)

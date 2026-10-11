@@ -23,6 +23,7 @@ func main() {
 	entcli := config.GetEntClient(cfg)
 	state := config.State{
 		Ent:      entcli,
+		Authz:    config.GetAuthz(entcli),
 		Config:   cfg,
 		FiberApp: fiber,
 		Log:      logger,

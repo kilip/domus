@@ -1,0 +1,4 @@
+{
+  "extends": "@domus/tsconfig/base.json",
+  "include": ["./src"]
+}

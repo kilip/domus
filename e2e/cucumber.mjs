@@ -1,0 +1,6 @@
+export default {
+  paths: ["features/**/*.feature"],
+  import: ["support/**/*.ts", "steps/**/*.ts"],
+  format: ["progress-bar", "html:reports/cucumber.html"],
+  formatOptions: { snippetInterface: "async-await" },
+};

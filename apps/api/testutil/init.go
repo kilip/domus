@@ -38,10 +38,11 @@ func init() {
 
 	cfg = config.GetConfig()
 
-	// force test environment config
-	cfg.JWKSUrl = "http://localhost:4321/jwks"
+	mock := NewJWKSMock()
+	jwksMock = *mock
 
-	jwksMock = *NewJWKSMock()
+	// force test environment config
+	cfg.JWKSUrl = mock.URL
 
 	_, b, _, _ := runtime.Caller(0)
 	logPath := filepath.Join(filepath.Dir(b), "../tmp/test.log")
@@ -66,6 +67,7 @@ func init() {
 		Config:   cfg,
 		Log:      logger,
 		Ent:      entClient,
+		Authz:    config.GetAuthz(entClient),
 	}
 
 	config.Bootstrap(state)

@@ -11,13 +11,11 @@ const config = {
         "dash",
         "api",
         "e2e",
-        // packages
-        "better-auth",
-        "openapi",
         // infra / cross-cutting
         "deps",
         "ci",
         "release",
+        "tools",
       ],
     ],
     // Scope is optional (bare `feat: ...` is fine)

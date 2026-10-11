@@ -7,10 +7,8 @@ import (
 	"encoding/json"
 	"log"
 	"math/big"
-	"net"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"testing"
 	"time"
 
@@ -31,52 +29,26 @@ type JWKSMock struct {
 	key    *rsa.PrivateKey
 }
 
-// NewJWKSMock spins up a fake JWKS server matching the JWKS_URL env var
-// (falls back to http://localhost:3000/api/auth/jwks if unset), serving a
-// single RSA public key under KID testKID. Call defer mock.Server.Close()
-// in your test.
-//
-// Since it binds to a fixed host:port taken from JWKS_URL, only one test
-// using this helper can run at a time per process — run serially (not
-// t.Parallel()) or with -p 1.
+// NewJWKSMock spins up a fake JWKS server serving a single RSA public key under KID testKID.
 func NewJWKSMock() *JWKSMock {
-	//t.Helper()
-
-	rawURL := state.Config.DatabaseUrl
-	parsed, err := url.Parse("http://localhost:4321/jwks")
-	if err != nil {
-		log.Fatalf("Error: %v", err)
-	}
-	//require.NoError(t, err, "invalid %s: %q", jwksURLEnvVarName, rawURL)
-
-	addr := parsed.Host
-	path := parsed.Path
-	if path == "" {
-		path = "/"
-	}
-
 	key, err := rsa.GenerateKey(rand.Reader, 2048)
-	//require.NoError(t, err, "failed to generate RSA key")
+	if err != nil {
+		log.Fatalf("failed to generate RSA key: %v", err)
+	}
 
 	jwks := buildJWKS(key, testKID)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/jwks", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(jwks)
 	})
 
-	lis, err := net.Listen("tcp", addr)
-	//require.NoError(t, err, "failed to bind %s (is it already in use?)", addr)
-
-	srv := httptest.NewUnstartedServer(mux)
-	srv.Listener.Close()
-	srv.Listener = lis
-	srv.Start()
+	srv := httptest.NewServer(mux)
 
 	return &JWKSMock{
 		Server: srv,
-		URL:    rawURL,
+		URL:    srv.URL + "/jwks",
 		key:    key,
 	}
 }

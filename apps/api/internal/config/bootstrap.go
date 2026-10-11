@@ -7,10 +7,12 @@ import (
 	"github.com/paroki/domus/api/ent"
 	"github.com/paroki/domus/api/internal/modules/auth"
 	"github.com/paroki/domus/api/internal/modules/unit"
+	"github.com/paroki/domus/api/internal/platform/authz"
 )
 
 type State struct {
 	Ent      *ent.Client
+	Authz    *authz.Enforcer
 	Config   Config
 	FiberApp *fiber.App
 	Log      *slog.Logger
@@ -30,6 +32,7 @@ func initAuth(state State) {
 func initUnit(state State) {
 	unitModule := unit.New(unit.Config{
 		EntCli: state.Ent,
+		Authz:  state.Authz,
 		Log:    state.Log,
 	})
 	unitModule.InitRoutes(state.FiberApp)

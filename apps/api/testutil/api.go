@@ -2,6 +2,7 @@ package testutil
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -9,7 +10,9 @@ import (
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/paroki/domus/api/ent/membership"
 	"github.com/paroki/domus/api/internal/core"
+	"github.com/paroki/domus/api/internal/platform/authz"
 	"github.com/paroki/domus/api/internal/platform/httpx"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -28,6 +31,22 @@ func (s *ApiTestSuite[T]) SetupTest() {
 		ID:    core.GenerateID(),
 		Roles: []core.UserRole{core.UserRoleAdmin},
 	}
+}
+
+// GrantRole creates a Membership row for the current test user and
+// registers it in the enforcer, mirroring what production does.
+func (s *ApiTestSuite[T]) GrantRole(role string, scope authz.Scope) {
+	s.T().Helper()
+	uid := s.User.ID.String()
+
+	_, err := entClient.Membership.Create().
+		SetUserID(uid).
+		SetScopeType(membership.ScopeType(scope.Type)).
+		SetScopeID(scope.ID).
+		SetRole(role).
+		Save(context.Background())
+	require.NoError(s.T(), err)
+	require.NoError(s.T(), state.Authz.AddMembership(uid, role, scope))
 }
 
 func (s *ApiTestSuite[T]) jsonBody(v any) io.Reader {

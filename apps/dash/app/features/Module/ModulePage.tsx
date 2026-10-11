@@ -31,7 +31,7 @@ export function clientLoader({ params }: Route.ClientLoaderArgs) {
 
 /**
  * Placeholder untuk semua halaman modul yang belum dibuat.
- * Ganti dengan route statis `_app.<module>.<slug>.tsx` saat halamannya siap.
+ * Ganti dengan route di `features/<Modul>/routes.ts` saat halamannya siap.
  */
 export default function ModulePage() {
   const { t } = useTranslation();

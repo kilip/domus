@@ -1,7 +1,8 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConfigProvider } from "antd";
 import enUS from "antd/locale/en_US";
 import idID from "antd/locale/id_ID";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   isRouteErrorResponse,
@@ -56,6 +57,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: false,
+            refetchOnWindowFocus: false,
+          },
+        },
+      }),
+  );
   const mode = useThemeMode();
   const theme = useMemo(() => getAntdTheme(mode), [mode]);
   // Ikut berganti saat bahasa diubah (useTranslation subscribe ke i18n).
@@ -68,9 +80,11 @@ export default function App() {
   }, [language, i18n.language]);
 
   return (
-    <ConfigProvider theme={theme} locale={ANTD_LOCALES[language]}>
-      <Outlet />
-    </ConfigProvider>
+    <QueryClientProvider client={queryClient}>
+      <ConfigProvider theme={theme} locale={ANTD_LOCALES[language]}>
+        <Outlet />
+      </ConfigProvider>
+    </QueryClientProvider>
   );
 }
 

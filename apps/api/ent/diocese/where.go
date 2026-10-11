@@ -82,6 +82,11 @@ func Name(v string) predicate.Diocese {
 	return predicate.Diocese(sql.FieldEQ(FieldName, v))
 }
 
+// Active applies equality check predicate on the "active" field. It's identical to ActiveEQ.
+func Active(v bool) predicate.Diocese {
+	return predicate.Diocese(sql.FieldEQ(FieldActive, v))
+}
+
 // CreatedByEQ applies the EQ predicate on the "createdBy" field.
 func CreatedByEQ(v uuid.UUID) predicate.Diocese {
 	return predicate.Diocese(sql.FieldEQ(FieldCreatedBy, v))
@@ -265,6 +270,16 @@ func NameEqualFold(v string) predicate.Diocese {
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.Diocese {
 	return predicate.Diocese(sql.FieldContainsFold(FieldName, v))
+}
+
+// ActiveEQ applies the EQ predicate on the "active" field.
+func ActiveEQ(v bool) predicate.Diocese {
+	return predicate.Diocese(sql.FieldEQ(FieldActive, v))
+}
+
+// ActiveNEQ applies the NEQ predicate on the "active" field.
+func ActiveNEQ(v bool) predicate.Diocese {
+	return predicate.Diocese(sql.FieldNEQ(FieldActive, v))
 }
 
 // HasCreator applies the HasEdge predicate on the "creator" edge.

@@ -16,6 +16,11 @@ func (Parish) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id"),
 		field.String("name"),
+		field.String("church").Optional().Nillable(),
+		field.String("address").Optional().Nillable(),
+		field.String("phone").Optional().Nillable(),
+		field.String("email").Optional().Nillable(),
+		field.Bool("active").Default(true),
 	}
 }
 

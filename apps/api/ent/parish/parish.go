@@ -14,6 +14,16 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldChurch holds the string denoting the church field in the database.
+	FieldChurch = "church"
+	// FieldAddress holds the string denoting the address field in the database.
+	FieldAddress = "address"
+	// FieldPhone holds the string denoting the phone field in the database.
+	FieldPhone = "phone"
+	// FieldEmail holds the string denoting the email field in the database.
+	FieldEmail = "email"
+	// FieldActive holds the string denoting the active field in the database.
+	FieldActive = "active"
 	// EdgeDiocese holds the string denoting the diocese edge name in mutations.
 	EdgeDiocese = "diocese"
 	// Table holds the table name of the parish in the database.
@@ -31,6 +41,11 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldName,
+	FieldChurch,
+	FieldAddress,
+	FieldPhone,
+	FieldEmail,
+	FieldActive,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "parishes"
@@ -54,6 +69,11 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+var (
+	// DefaultActive holds the default value on creation for the "active" field.
+	DefaultActive bool
+)
+
 // OrderOption defines the ordering options for the Parish queries.
 type OrderOption func(*sql.Selector)
 
@@ -65,6 +85,31 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByName orders the results by the name field.
 func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByChurch orders the results by the church field.
+func ByChurch(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldChurch, opts...).ToFunc()
+}
+
+// ByAddress orders the results by the address field.
+func ByAddress(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAddress, opts...).ToFunc()
+}
+
+// ByPhone orders the results by the phone field.
+func ByPhone(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPhone, opts...).ToFunc()
+}
+
+// ByEmail orders the results by the email field.
+func ByEmail(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEmail, opts...).ToFunc()
+}
+
+// ByActive orders the results by the active field.
+func ByActive(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldActive, opts...).ToFunc()
 }
 
 // ByDioceseField orders the results by diocese field.

@@ -22,6 +22,7 @@ func (Diocese) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id"),
 		field.String("name").NotEmpty(),
+		field.Bool("active").Default(true),
 	}
 }
 

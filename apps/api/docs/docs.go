@@ -190,6 +190,9 @@ const docTemplate = `{
             },
             "model.CreateDioceseRequest": {
                 "properties": {
+                    "active": {
+                        "type": "boolean"
+                    },
                     "name": {
                         "type": "string"
                     }
@@ -201,10 +204,25 @@ const docTemplate = `{
             },
             "model.CreateParishRequest": {
                 "properties": {
+                    "active": {
+                        "type": "boolean"
+                    },
+                    "address": {
+                        "type": "string"
+                    },
+                    "church": {
+                        "type": "string"
+                    },
                     "dioceseId": {
                         "type": "integer"
                     },
+                    "email": {
+                        "type": "string"
+                    },
                     "name": {
+                        "type": "string"
+                    },
+                    "phone": {
                         "type": "string"
                     }
                 },
@@ -215,6 +233,9 @@ const docTemplate = `{
             },
             "model.DioceseResponse": {
                 "properties": {
+                    "active": {
+                        "type": "boolean"
+                    },
                     "createdAt": {
                         "type": "string"
                     },
@@ -238,13 +259,28 @@ const docTemplate = `{
             },
             "model.ParishResponse": {
                 "properties": {
+                    "active": {
+                        "type": "boolean"
+                    },
+                    "address": {
+                        "type": "string"
+                    },
+                    "church": {
+                        "type": "string"
+                    },
                     "diocese": {
                         "$ref": "#/components/schemas/model.DioceseResponse"
+                    },
+                    "email": {
+                        "type": "string"
                     },
                     "id": {
                         "type": "integer"
                     },
                     "name": {
+                        "type": "string"
+                    },
+                    "phone": {
                         "type": "string"
                     }
                 },
@@ -252,6 +288,9 @@ const docTemplate = `{
             },
             "model.UpdateDioceseRequest": {
                 "properties": {
+                    "active": {
+                        "type": "boolean"
+                    },
                     "name": {
                         "type": "string"
                     }
@@ -263,10 +302,25 @@ const docTemplate = `{
             },
             "model.UpdateParishRequest": {
                 "properties": {
+                    "active": {
+                        "type": "boolean"
+                    },
+                    "address": {
+                        "type": "string"
+                    },
+                    "church": {
+                        "type": "string"
+                    },
                     "dioceseId": {
                         "type": "integer"
                     },
+                    "email": {
+                        "type": "string"
+                    },
                     "name": {
+                        "type": "string"
+                    },
+                    "phone": {
                         "type": "string"
                     }
                 },

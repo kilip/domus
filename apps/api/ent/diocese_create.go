@@ -71,6 +71,20 @@ func (_c *DioceseCreate) SetName(v string) *DioceseCreate {
 	return _c
 }
 
+// SetActive sets the "active" field.
+func (_c *DioceseCreate) SetActive(v bool) *DioceseCreate {
+	_c.mutation.SetActive(v)
+	return _c
+}
+
+// SetNillableActive sets the "active" field if the given value is not nil.
+func (_c *DioceseCreate) SetNillableActive(v *bool) *DioceseCreate {
+	if v != nil {
+		_c.SetActive(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *DioceseCreate) SetID(v int) *DioceseCreate {
 	_c.mutation.SetID(v)
@@ -157,6 +171,10 @@ func (_c *DioceseCreate) defaults() {
 		v := diocese.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.Active(); !ok {
+		v := diocese.DefaultActive
+		_c.mutation.SetActive(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -180,6 +198,9 @@ func (_c *DioceseCreate) check() error {
 		if err := diocese.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Diocese.name": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.Active(); !ok {
+		return &ValidationError{Name: "active", err: errors.New(`ent: missing required field "Diocese.active"`)}
 	}
 	if len(_c.mutation.CreatorIDs()) == 0 {
 		return &ValidationError{Name: "creator", err: errors.New(`ent: missing required edge "Diocese.creator"`)}
@@ -232,6 +253,10 @@ func (_c *DioceseCreate) createSpec() (*Diocese, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(diocese.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if value, ok := _c.mutation.Active(); ok {
+		_spec.SetField(diocese.FieldActive, field.TypeBool, value)
+		_node.Active = value
 	}
 	if nodes := _c.mutation.CreatorIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -386,6 +411,18 @@ func (u *DioceseUpsert) UpdateName() *DioceseUpsert {
 	return u
 }
 
+// SetActive sets the "active" field.
+func (u *DioceseUpsert) SetActive(v bool) *DioceseUpsert {
+	u.Set(diocese.FieldActive, v)
+	return u
+}
+
+// UpdateActive sets the "active" field to the value that was provided on create.
+func (u *DioceseUpsert) UpdateActive() *DioceseUpsert {
+	u.SetExcluded(diocese.FieldActive)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -490,6 +527,20 @@ func (u *DioceseUpsertOne) SetName(v string) *DioceseUpsertOne {
 func (u *DioceseUpsertOne) UpdateName() *DioceseUpsertOne {
 	return u.Update(func(s *DioceseUpsert) {
 		s.UpdateName()
+	})
+}
+
+// SetActive sets the "active" field.
+func (u *DioceseUpsertOne) SetActive(v bool) *DioceseUpsertOne {
+	return u.Update(func(s *DioceseUpsert) {
+		s.SetActive(v)
+	})
+}
+
+// UpdateActive sets the "active" field to the value that was provided on create.
+func (u *DioceseUpsertOne) UpdateActive() *DioceseUpsertOne {
+	return u.Update(func(s *DioceseUpsert) {
+		s.UpdateActive()
 	})
 }
 
@@ -763,6 +814,20 @@ func (u *DioceseUpsertBulk) SetName(v string) *DioceseUpsertBulk {
 func (u *DioceseUpsertBulk) UpdateName() *DioceseUpsertBulk {
 	return u.Update(func(s *DioceseUpsert) {
 		s.UpdateName()
+	})
+}
+
+// SetActive sets the "active" field.
+func (u *DioceseUpsertBulk) SetActive(v bool) *DioceseUpsertBulk {
+	return u.Update(func(s *DioceseUpsert) {
+		s.SetActive(v)
+	})
+}
+
+// UpdateActive sets the "active" field to the value that was provided on create.
+func (u *DioceseUpsertBulk) UpdateActive() *DioceseUpsertBulk {
+	return u.Update(func(s *DioceseUpsert) {
+		s.UpdateActive()
 	})
 }
 

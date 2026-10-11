@@ -45,6 +45,7 @@ export function ControlPanel({
           className="w-full sm:w-72"
           placeholder={searchPlaceholder}
           onSearch={onSearch}
+          onChange={(e) => onSearch?.(e.target.value)}
         />
       )}
       {actions && <div className="flex items-center gap-2">{actions}</div>}

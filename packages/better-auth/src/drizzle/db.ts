@@ -21,4 +21,8 @@ const getAuthDB = () => {
   return cachedDB;
 };
 
-export const authDB = getAuthDB();
+export const authDB = new Proxy({} as NodePgDatabase<typeof relations>, {
+  get(_target, prop, receiver) {
+    return Reflect.get(getAuthDB(), prop, receiver);
+  },
+});

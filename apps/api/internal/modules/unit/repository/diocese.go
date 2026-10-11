@@ -45,6 +45,7 @@ func toDioceseResponse(d *ent.Diocese) model.DioceseResponse {
 	return model.DioceseResponse{
 		ID:        d.ID,
 		Name:      d.Name,
+		Active:    d.Active,
 		CreatedBy: creator,
 		CreatedAt: d.CreatedAt,
 		UpdatedBy: updater,
@@ -88,11 +89,16 @@ func (r DioceseRepository) GetByID(c context.Context, id int) (*model.DioceseRes
 func (r DioceseRepository) Create(c context.Context, creatorID uuid.UUID, req model.CreateDioceseRequest) (*model.DioceseResponse, error) {
 	var created *ent.Diocese
 	err := database.WithTx(c, r.entcli, func(tx *ent.Tx) error {
-		d, err := tx.Diocese.Create().
+		builder := tx.Diocese.Create().
 			SetName(req.Name).
 			SetCreatedBy(creatorID).
-			SetUpdatedBy(creatorID).
-			Save(c)
+			SetUpdatedBy(creatorID)
+		if req.Active != nil {
+			builder.SetActive(*req.Active)
+		} else {
+			builder.SetActive(true)
+		}
+		d, err := builder.Save(c)
 		if err != nil {
 			return err
 		}
@@ -124,10 +130,13 @@ func (r DioceseRepository) Update(c context.Context, updaterID uuid.UUID, id int
 			return core.ErrItemNotFound
 		}
 
-		_, err = tx.Diocese.UpdateOneID(id).
+		builder := tx.Diocese.UpdateOneID(id).
 			SetName(req.Name).
-			SetUpdatedBy(updaterID).
-			Save(c)
+			SetUpdatedBy(updaterID)
+		if req.Active != nil {
+			builder.SetActive(*req.Active)
+		}
+		_, err = builder.Save(c)
 		if err != nil {
 			return err
 		}

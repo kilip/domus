@@ -121,6 +121,8 @@ components:
       type: object
     model.CreateDioceseRequest:
       properties:
+        active:
+          type: boolean
         name:
           type: string
       required:
@@ -128,15 +130,27 @@ components:
       type: object
     model.CreateParishRequest:
       properties:
+        active:
+          type: boolean
+        address:
+          type: string
+        church:
+          type: string
         dioceseId:
           type: integer
+        email:
+          type: string
         name:
+          type: string
+        phone:
           type: string
       required:
       - name
       type: object
     model.DioceseResponse:
       properties:
+        active:
+          type: boolean
         createdAt:
           type: string
         createdBy:
@@ -152,15 +166,27 @@ components:
       type: object
     model.ParishResponse:
       properties:
+        active:
+          type: boolean
+        address:
+          type: string
+        church:
+          type: string
         diocese:
           $ref: '#/components/schemas/model.DioceseResponse'
+        email:
+          type: string
         id:
           type: integer
         name:
           type: string
+        phone:
+          type: string
       type: object
     model.UpdateDioceseRequest:
       properties:
+        active:
+          type: boolean
         name:
           type: string
       required:
@@ -168,9 +194,19 @@ components:
       type: object
     model.UpdateParishRequest:
       properties:
+        active:
+          type: boolean
+        address:
+          type: string
+        church:
+          type: string
         dioceseId:
           type: integer
+        email:
+          type: string
         name:
+          type: string
+        phone:
           type: string
       required:
       - name

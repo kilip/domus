@@ -22,8 +22,13 @@ func NewParishRepository(entcli *ent.Client, log *slog.Logger) ParishRepository 
 
 func toParishResponse(p *ent.Parish) model.ParishResponse {
 	resp := model.ParishResponse{
-		ID:   p.ID,
-		Name: p.Name,
+		ID:      p.ID,
+		Name:    p.Name,
+		Active:  p.Active,
+		Church:  p.Church,
+		Address: p.Address,
+		Phone:   p.Phone,
+		Email:   p.Email,
 	}
 	if p.Edges.Diocese != nil {
 		dResp := toDioceseResponse(p.Edges.Diocese)
@@ -72,6 +77,23 @@ func (r ParishRepository) Create(c context.Context, req model.CreateParishReques
 	err := database.WithTx(c, r.entcli, func(tx *ent.Tx) error {
 		builder := tx.Parish.Create().
 			SetName(req.Name)
+		if req.Active != nil {
+			builder.SetActive(*req.Active)
+		} else {
+			builder.SetActive(true)
+		}
+		if req.Church != nil && *req.Church != "" {
+			builder.SetChurch(*req.Church)
+		}
+		if req.Address != nil && *req.Address != "" {
+			builder.SetAddress(*req.Address)
+		}
+		if req.Phone != nil && *req.Phone != "" {
+			builder.SetPhone(*req.Phone)
+		}
+		if req.Email != nil && *req.Email != "" {
+			builder.SetEmail(*req.Email)
+		}
 		if req.DioceseID != nil {
 			builder.SetDioceseID(*req.DioceseID)
 		}
@@ -110,8 +132,33 @@ func (r ParishRepository) Update(c context.Context, id int, req model.UpdatePari
 
 		builder := tx.Parish.UpdateOneID(id).
 			SetName(req.Name)
+		if req.Active != nil {
+			builder.SetActive(*req.Active)
+		}
+		if req.Church != nil && *req.Church != "" {
+			builder.SetChurch(*req.Church)
+		} else {
+			builder.ClearChurch()
+		}
+		if req.Address != nil && *req.Address != "" {
+			builder.SetAddress(*req.Address)
+		} else {
+			builder.ClearAddress()
+		}
+		if req.Phone != nil && *req.Phone != "" {
+			builder.SetPhone(*req.Phone)
+		} else {
+			builder.ClearPhone()
+		}
+		if req.Email != nil && *req.Email != "" {
+			builder.SetEmail(*req.Email)
+		} else {
+			builder.ClearEmail()
+		}
 		if req.DioceseID != nil {
 			builder.SetDioceseID(*req.DioceseID)
+		} else {
+			builder.ClearDiocese()
 		}
 		_, err = builder.Save(c)
 		if err != nil {

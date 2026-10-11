@@ -31,11 +31,12 @@
   --domus-info: #4a6fa5;
 
   /* module icons (launcher). White glyph on top needs >= 3:1 */
-  --domus-app-website: #3f6fb0;
-  --domus-app-sakramen: #7a5aa6;
-  --domus-app-keuangan: #4f7f52;
-  --domus-app-umat: #c2603a;
-  --domus-app-kegiatan: #b7791f;
+  --domus-app-sys: #7a5f45;
+  --domus-app-web: #3f6fb0;
+  --domus-app-sacra: #7a5aa6;
+  --domus-app-fin: #4f7f52;
+  --domus-app-par: #c2603a;
+  --domus-app-act: #b7791f;
 
   /* glass */
   --domus-glass: rgba(255, 255, 255, 0.55);

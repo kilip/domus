@@ -80,6 +80,20 @@ func (_u *DioceseUpdate) SetNillableName(v *string) *DioceseUpdate {
 	return _u
 }
 
+// SetActive sets the "active" field.
+func (_u *DioceseUpdate) SetActive(v bool) *DioceseUpdate {
+	_u.mutation.SetActive(v)
+	return _u
+}
+
+// SetNillableActive sets the "active" field if the given value is not nil.
+func (_u *DioceseUpdate) SetNillableActive(v *bool) *DioceseUpdate {
+	if v != nil {
+		_u.SetActive(*v)
+	}
+	return _u
+}
+
 // SetCreatorID sets the "creator" edge to the User entity by ID.
 func (_u *DioceseUpdate) SetCreatorID(id uuid.UUID) *DioceseUpdate {
 	_u.mutation.SetCreatorID(id)
@@ -224,6 +238,9 @@ func (_u *DioceseUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(diocese.FieldName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Active(); ok {
+		_spec.SetField(diocese.FieldActive, field.TypeBool, value)
 	}
 	if _u.mutation.CreatorCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -405,6 +422,20 @@ func (_u *DioceseUpdateOne) SetNillableName(v *string) *DioceseUpdateOne {
 	return _u
 }
 
+// SetActive sets the "active" field.
+func (_u *DioceseUpdateOne) SetActive(v bool) *DioceseUpdateOne {
+	_u.mutation.SetActive(v)
+	return _u
+}
+
+// SetNillableActive sets the "active" field if the given value is not nil.
+func (_u *DioceseUpdateOne) SetNillableActive(v *bool) *DioceseUpdateOne {
+	if v != nil {
+		_u.SetActive(*v)
+	}
+	return _u
+}
+
 // SetCreatorID sets the "creator" edge to the User entity by ID.
 func (_u *DioceseUpdateOne) SetCreatorID(id uuid.UUID) *DioceseUpdateOne {
 	_u.mutation.SetCreatorID(id)
@@ -579,6 +610,9 @@ func (_u *DioceseUpdateOne) sqlSave(ctx context.Context) (_node *Diocese, err er
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(diocese.FieldName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Active(); ok {
+		_spec.SetField(diocese.FieldActive, field.TypeBool, value)
 	}
 	if _u.mutation.CreatorCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -7,7 +7,10 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent/diocese"
+	"github.com/paroki/domus/api/ent/membership"
+	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/schema"
+	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
 )
 
@@ -34,6 +37,53 @@ func init() {
 	dioceseDescName := dioceseFields[1].Descriptor()
 	// diocese.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	diocese.NameValidator = dioceseDescName.Validators[0].(func(string) error)
+	// dioceseDescActive is the schema descriptor for active field.
+	dioceseDescActive := dioceseFields[2].Descriptor()
+	// diocese.DefaultActive holds the default value on creation for the active field.
+	diocese.DefaultActive = dioceseDescActive.Default.(bool)
+	membershipFields := schema.Membership{}.Fields()
+	_ = membershipFields
+	// membershipDescUserID is the schema descriptor for user_id field.
+	membershipDescUserID := membershipFields[0].Descriptor()
+	// membership.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	membership.UserIDValidator = membershipDescUserID.Validators[0].(func(string) error)
+	// membershipDescScopeID is the schema descriptor for scope_id field.
+	membershipDescScopeID := membershipFields[2].Descriptor()
+	// membership.ScopeIDValidator is a validator for the "scope_id" field. It is called by the builders before save.
+	membership.ScopeIDValidator = membershipDescScopeID.Validators[0].(func(int64) error)
+	// membershipDescRole is the schema descriptor for role field.
+	membershipDescRole := membershipFields[3].Descriptor()
+	// membership.RoleValidator is a validator for the "role" field. It is called by the builders before save.
+	membership.RoleValidator = membershipDescRole.Validators[0].(func(string) error)
+	// membershipDescCreatedAt is the schema descriptor for created_at field.
+	membershipDescCreatedAt := membershipFields[4].Descriptor()
+	// membership.DefaultCreatedAt holds the default value on creation for the created_at field.
+	membership.DefaultCreatedAt = membershipDescCreatedAt.Default.(func() time.Time)
+	parishFields := schema.Parish{}.Fields()
+	_ = parishFields
+	// parishDescActive is the schema descriptor for active field.
+	parishDescActive := parishFields[6].Descriptor()
+	// parish.DefaultActive holds the default value on creation for the active field.
+	parish.DefaultActive = parishDescActive.Default.(bool)
+	unitMixin := schema.Unit{}.Mixin()
+	unitMixinFields0 := unitMixin[0].Fields()
+	_ = unitMixinFields0
+	unitFields := schema.Unit{}.Fields()
+	_ = unitFields
+	// unitDescCreatedAt is the schema descriptor for createdAt field.
+	unitDescCreatedAt := unitMixinFields0[1].Descriptor()
+	// unit.DefaultCreatedAt holds the default value on creation for the createdAt field.
+	unit.DefaultCreatedAt = unitDescCreatedAt.Default.(func() time.Time)
+	// unitDescUpdatedAt is the schema descriptor for updatedAt field.
+	unitDescUpdatedAt := unitMixinFields0[3].Descriptor()
+	// unit.DefaultUpdatedAt holds the default value on creation for the updatedAt field.
+	unit.DefaultUpdatedAt = unitDescUpdatedAt.Default.(func() time.Time)
+	// unit.UpdateDefaultUpdatedAt holds the default value on update for the updatedAt field.
+	unit.UpdateDefaultUpdatedAt = unitDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// unitDescName is the schema descriptor for name field.
+	unitDescName := unitFields[1].Descriptor()
+	// unit.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	unit.NameValidator = unitDescName.Validators[0].(func(string) error)
 	userMixin := schema.User{}.Mixin()
 	userMixinFields0 := userMixin[0].Fields()
 	_ = userMixinFields0
