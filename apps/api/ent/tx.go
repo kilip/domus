@@ -12,16 +12,26 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// Account is the client for interacting with the Account builders.
+	Account *AccountClient
+	// Attachment is the client for interacting with the Attachment builders.
+	Attachment *AttachmentClient
 	// Diocese is the client for interacting with the Diocese builders.
 	Diocese *DioceseClient
+	// Entry is the client for interacting with the Entry builders.
+	Entry *EntryClient
 	// Membership is the client for interacting with the Membership builders.
 	Membership *MembershipClient
 	// Parish is the client for interacting with the Parish builders.
 	Parish *ParishClient
 	// Parishioner is the client for interacting with the Parishioner builders.
 	Parishioner *ParishionerClient
+	// Posting is the client for interacting with the Posting builders.
+	Posting *PostingClient
 	// Territory is the client for interacting with the Territory builders.
 	Territory *TerritoryClient
+	// Transaction is the client for interacting with the Transaction builders.
+	Transaction *TransactionClient
 	// Unit is the client for interacting with the Unit builders.
 	Unit *UnitClient
 	// User is the client for interacting with the User builders.
@@ -157,11 +167,16 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.Account = NewAccountClient(tx.config)
+	tx.Attachment = NewAttachmentClient(tx.config)
 	tx.Diocese = NewDioceseClient(tx.config)
+	tx.Entry = NewEntryClient(tx.config)
 	tx.Membership = NewMembershipClient(tx.config)
 	tx.Parish = NewParishClient(tx.config)
 	tx.Parishioner = NewParishionerClient(tx.config)
+	tx.Posting = NewPostingClient(tx.config)
 	tx.Territory = NewTerritoryClient(tx.config)
+	tx.Transaction = NewTransactionClient(tx.config)
 	tx.Unit = NewUnitClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
@@ -173,7 +188,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Diocese.QueryXXX(), the query will be executed
+// applies a query, for example: Account.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

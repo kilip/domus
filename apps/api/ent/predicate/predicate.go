@@ -6,8 +6,17 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// Account is the predicate function for account builders.
+type Account func(*sql.Selector)
+
+// Attachment is the predicate function for attachment builders.
+type Attachment func(*sql.Selector)
+
 // Diocese is the predicate function for diocese builders.
 type Diocese func(*sql.Selector)
+
+// Entry is the predicate function for entry builders.
+type Entry func(*sql.Selector)
 
 // Membership is the predicate function for membership builders.
 type Membership func(*sql.Selector)
@@ -18,8 +27,14 @@ type Parish func(*sql.Selector)
 // Parishioner is the predicate function for parishioner builders.
 type Parishioner func(*sql.Selector)
 
+// Posting is the predicate function for posting builders.
+type Posting func(*sql.Selector)
+
 // Territory is the predicate function for territory builders.
 type Territory func(*sql.Selector)
+
+// Transaction is the predicate function for transaction builders.
+type Transaction func(*sql.Selector)
 
 // Unit is the predicate function for unit builders.
 type Unit func(*sql.Selector)

@@ -16,11 +16,16 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/paroki/domus/api/ent/account"
+	"github.com/paroki/domus/api/ent/attachment"
 	"github.com/paroki/domus/api/ent/diocese"
+	"github.com/paroki/domus/api/ent/entry"
 	"github.com/paroki/domus/api/ent/membership"
 	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/parishioner"
+	"github.com/paroki/domus/api/ent/posting"
 	"github.com/paroki/domus/api/ent/territory"
+	"github.com/paroki/domus/api/ent/transaction"
 	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
 
@@ -32,16 +37,26 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Account is the client for interacting with the Account builders.
+	Account *AccountClient
+	// Attachment is the client for interacting with the Attachment builders.
+	Attachment *AttachmentClient
 	// Diocese is the client for interacting with the Diocese builders.
 	Diocese *DioceseClient
+	// Entry is the client for interacting with the Entry builders.
+	Entry *EntryClient
 	// Membership is the client for interacting with the Membership builders.
 	Membership *MembershipClient
 	// Parish is the client for interacting with the Parish builders.
 	Parish *ParishClient
 	// Parishioner is the client for interacting with the Parishioner builders.
 	Parishioner *ParishionerClient
+	// Posting is the client for interacting with the Posting builders.
+	Posting *PostingClient
 	// Territory is the client for interacting with the Territory builders.
 	Territory *TerritoryClient
+	// Transaction is the client for interacting with the Transaction builders.
+	Transaction *TransactionClient
 	// Unit is the client for interacting with the Unit builders.
 	Unit *UnitClient
 	// User is the client for interacting with the User builders.
@@ -57,11 +72,16 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Account = NewAccountClient(c.config)
+	c.Attachment = NewAttachmentClient(c.config)
 	c.Diocese = NewDioceseClient(c.config)
+	c.Entry = NewEntryClient(c.config)
 	c.Membership = NewMembershipClient(c.config)
 	c.Parish = NewParishClient(c.config)
 	c.Parishioner = NewParishionerClient(c.config)
+	c.Posting = NewPostingClient(c.config)
 	c.Territory = NewTerritoryClient(c.config)
+	c.Transaction = NewTransactionClient(c.config)
 	c.Unit = NewUnitClient(c.config)
 	c.User = NewUserClient(c.config)
 }
@@ -158,11 +178,16 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:         ctx,
 		config:      cfg,
+		Account:     NewAccountClient(cfg),
+		Attachment:  NewAttachmentClient(cfg),
 		Diocese:     NewDioceseClient(cfg),
+		Entry:       NewEntryClient(cfg),
 		Membership:  NewMembershipClient(cfg),
 		Parish:      NewParishClient(cfg),
 		Parishioner: NewParishionerClient(cfg),
+		Posting:     NewPostingClient(cfg),
 		Territory:   NewTerritoryClient(cfg),
+		Transaction: NewTransactionClient(cfg),
 		Unit:        NewUnitClient(cfg),
 		User:        NewUserClient(cfg),
 	}, nil
@@ -184,11 +209,16 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:         ctx,
 		config:      cfg,
+		Account:     NewAccountClient(cfg),
+		Attachment:  NewAttachmentClient(cfg),
 		Diocese:     NewDioceseClient(cfg),
+		Entry:       NewEntryClient(cfg),
 		Membership:  NewMembershipClient(cfg),
 		Parish:      NewParishClient(cfg),
 		Parishioner: NewParishionerClient(cfg),
+		Posting:     NewPostingClient(cfg),
 		Territory:   NewTerritoryClient(cfg),
+		Transaction: NewTransactionClient(cfg),
 		Unit:        NewUnitClient(cfg),
 		User:        NewUserClient(cfg),
 	}, nil
@@ -197,7 +227,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Diocese.
+//		Account.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -220,7 +250,8 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Diocese, c.Membership, c.Parish, c.Parishioner, c.Territory, c.Unit, c.User,
+		c.Account, c.Attachment, c.Diocese, c.Entry, c.Membership, c.Parish,
+		c.Parishioner, c.Posting, c.Territory, c.Transaction, c.Unit, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -230,7 +261,8 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Diocese, c.Membership, c.Parish, c.Parishioner, c.Territory, c.Unit, c.User,
+		c.Account, c.Attachment, c.Diocese, c.Entry, c.Membership, c.Parish,
+		c.Parishioner, c.Posting, c.Territory, c.Transaction, c.Unit, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -239,22 +271,488 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *AccountMutation:
+		return c.Account.mutate(ctx, m)
+	case *AttachmentMutation:
+		return c.Attachment.mutate(ctx, m)
 	case *DioceseMutation:
 		return c.Diocese.mutate(ctx, m)
+	case *EntryMutation:
+		return c.Entry.mutate(ctx, m)
 	case *MembershipMutation:
 		return c.Membership.mutate(ctx, m)
 	case *ParishMutation:
 		return c.Parish.mutate(ctx, m)
 	case *ParishionerMutation:
 		return c.Parishioner.mutate(ctx, m)
+	case *PostingMutation:
+		return c.Posting.mutate(ctx, m)
 	case *TerritoryMutation:
 		return c.Territory.mutate(ctx, m)
+	case *TransactionMutation:
+		return c.Transaction.mutate(ctx, m)
 	case *UnitMutation:
 		return c.Unit.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// AccountClient is a client for the Account schema.
+type AccountClient struct {
+	config
+}
+
+// NewAccountClient returns a client for the Account from the given config.
+func NewAccountClient(c config) *AccountClient {
+	return &AccountClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `account.Hooks(f(g(h())))`.
+func (c *AccountClient) Use(hooks ...Hook) {
+	c.hooks.Account = append(c.hooks.Account, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `account.Intercept(f(g(h())))`.
+func (c *AccountClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Account = append(c.inters.Account, interceptors...)
+}
+
+// Create returns a builder for creating a Account entity.
+func (c *AccountClient) Create() *AccountCreate {
+	mutation := newAccountMutation(c.config, OpCreate)
+	return &AccountCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Account entities.
+func (c *AccountClient) CreateBulk(builders ...*AccountCreate) *AccountCreateBulk {
+	return &AccountCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AccountClient) MapCreateBulk(slice any, setFunc func(*AccountCreate, int)) *AccountCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AccountCreateBulk{err: fmt.Errorf("calling to AccountClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AccountCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AccountCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Account.
+func (c *AccountClient) Update() *AccountUpdate {
+	mutation := newAccountMutation(c.config, OpUpdate)
+	return &AccountUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AccountClient) UpdateOne(_m *Account) *AccountUpdateOne {
+	mutation := newAccountMutation(c.config, OpUpdateOne, withAccount(_m))
+	return &AccountUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AccountClient) UpdateOneID(id uuid.UUID) *AccountUpdateOne {
+	mutation := newAccountMutation(c.config, OpUpdateOne, withAccountID(id))
+	return &AccountUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Account.
+func (c *AccountClient) Delete() *AccountDelete {
+	mutation := newAccountMutation(c.config, OpDelete)
+	return &AccountDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AccountClient) DeleteOne(_m *Account) *AccountDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AccountClient) DeleteOneID(id uuid.UUID) *AccountDeleteOne {
+	builder := c.Delete().Where(account.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AccountDeleteOne{builder}
+}
+
+// Query returns a query builder for Account.
+func (c *AccountClient) Query() *AccountQuery {
+	return &AccountQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAccount},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Account entity by its id.
+func (c *AccountClient) Get(ctx context.Context, id uuid.UUID) (*Account, error) {
+	return c.Query().Where(account.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AccountClient) GetX(ctx context.Context, id uuid.UUID) *Account {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCreator queries the creator edge of a Account.
+func (c *AccountClient) QueryCreator(_m *Account) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(account.Table, account.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, account.CreatorTable, account.CreatorColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Account
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUpdater queries the updater edge of a Account.
+func (c *AccountClient) QueryUpdater(_m *Account) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(account.Table, account.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, account.UpdaterTable, account.UpdaterColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Account
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryParish queries the parish edge of a Account.
+func (c *AccountClient) QueryParish(_m *Account) *ParishQuery {
+	query := (&ParishClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(account.Table, account.FieldID, id),
+			sqlgraph.To(parish.Table, parish.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, account.ParishTable, account.ParishColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Parish
+		step.Edge.Schema = schemaConfig.Account
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUnit queries the unit edge of a Account.
+func (c *AccountClient) QueryUnit(_m *Account) *UnitQuery {
+	query := (&UnitClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(account.Table, account.FieldID, id),
+			sqlgraph.To(unit.Table, unit.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, account.UnitTable, account.UnitColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Unit
+		step.Edge.Schema = schemaConfig.Account
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryParent queries the parent edge of a Account.
+func (c *AccountClient) QueryParent(_m *Account) *AccountQuery {
+	query := (&AccountClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(account.Table, account.FieldID, id),
+			sqlgraph.To(account.Table, account.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, account.ParentTable, account.ParentColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Account
+		step.Edge.Schema = schemaConfig.Account
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryChildren queries the children edge of a Account.
+func (c *AccountClient) QueryChildren(_m *Account) *AccountQuery {
+	query := (&AccountClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(account.Table, account.FieldID, id),
+			sqlgraph.To(account.Table, account.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, account.ChildrenTable, account.ChildrenColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Account
+		step.Edge.Schema = schemaConfig.Account
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPostings queries the postings edge of a Account.
+func (c *AccountClient) QueryPostings(_m *Account) *PostingQuery {
+	query := (&PostingClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(account.Table, account.FieldID, id),
+			sqlgraph.To(posting.Table, posting.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, account.PostingsTable, account.PostingsColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Posting
+		step.Edge.Schema = schemaConfig.Posting
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *AccountClient) Hooks() []Hook {
+	return c.hooks.Account
+}
+
+// Interceptors returns the client interceptors.
+func (c *AccountClient) Interceptors() []Interceptor {
+	return c.inters.Account
+}
+
+func (c *AccountClient) mutate(ctx context.Context, m *AccountMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AccountCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AccountUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AccountUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AccountDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Account mutation op: %q", m.Op())
+	}
+}
+
+// AttachmentClient is a client for the Attachment schema.
+type AttachmentClient struct {
+	config
+}
+
+// NewAttachmentClient returns a client for the Attachment from the given config.
+func NewAttachmentClient(c config) *AttachmentClient {
+	return &AttachmentClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `attachment.Hooks(f(g(h())))`.
+func (c *AttachmentClient) Use(hooks ...Hook) {
+	c.hooks.Attachment = append(c.hooks.Attachment, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `attachment.Intercept(f(g(h())))`.
+func (c *AttachmentClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Attachment = append(c.inters.Attachment, interceptors...)
+}
+
+// Create returns a builder for creating a Attachment entity.
+func (c *AttachmentClient) Create() *AttachmentCreate {
+	mutation := newAttachmentMutation(c.config, OpCreate)
+	return &AttachmentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Attachment entities.
+func (c *AttachmentClient) CreateBulk(builders ...*AttachmentCreate) *AttachmentCreateBulk {
+	return &AttachmentCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AttachmentClient) MapCreateBulk(slice any, setFunc func(*AttachmentCreate, int)) *AttachmentCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AttachmentCreateBulk{err: fmt.Errorf("calling to AttachmentClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AttachmentCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AttachmentCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Attachment.
+func (c *AttachmentClient) Update() *AttachmentUpdate {
+	mutation := newAttachmentMutation(c.config, OpUpdate)
+	return &AttachmentUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AttachmentClient) UpdateOne(_m *Attachment) *AttachmentUpdateOne {
+	mutation := newAttachmentMutation(c.config, OpUpdateOne, withAttachment(_m))
+	return &AttachmentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AttachmentClient) UpdateOneID(id uuid.UUID) *AttachmentUpdateOne {
+	mutation := newAttachmentMutation(c.config, OpUpdateOne, withAttachmentID(id))
+	return &AttachmentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Attachment.
+func (c *AttachmentClient) Delete() *AttachmentDelete {
+	mutation := newAttachmentMutation(c.config, OpDelete)
+	return &AttachmentDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AttachmentClient) DeleteOne(_m *Attachment) *AttachmentDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AttachmentClient) DeleteOneID(id uuid.UUID) *AttachmentDeleteOne {
+	builder := c.Delete().Where(attachment.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AttachmentDeleteOne{builder}
+}
+
+// Query returns a query builder for Attachment.
+func (c *AttachmentClient) Query() *AttachmentQuery {
+	return &AttachmentQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAttachment},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Attachment entity by its id.
+func (c *AttachmentClient) Get(ctx context.Context, id uuid.UUID) (*Attachment, error) {
+	return c.Query().Where(attachment.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AttachmentClient) GetX(ctx context.Context, id uuid.UUID) *Attachment {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCreator queries the creator edge of a Attachment.
+func (c *AttachmentClient) QueryCreator(_m *Attachment) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(attachment.Table, attachment.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, attachment.CreatorTable, attachment.CreatorColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Attachment
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUpdater queries the updater edge of a Attachment.
+func (c *AttachmentClient) QueryUpdater(_m *Attachment) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(attachment.Table, attachment.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, attachment.UpdaterTable, attachment.UpdaterColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Attachment
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTransaction queries the transaction edge of a Attachment.
+func (c *AttachmentClient) QueryTransaction(_m *Attachment) *TransactionQuery {
+	query := (&TransactionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(attachment.Table, attachment.FieldID, id),
+			sqlgraph.To(transaction.Table, transaction.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, attachment.TransactionTable, attachment.TransactionColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Transaction
+		step.Edge.Schema = schemaConfig.Attachment
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *AttachmentClient) Hooks() []Hook {
+	return c.hooks.Attachment
+}
+
+// Interceptors returns the client interceptors.
+func (c *AttachmentClient) Interceptors() []Interceptor {
+	return c.inters.Attachment
+}
+
+func (c *AttachmentClient) mutate(ctx context.Context, m *AttachmentMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AttachmentCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AttachmentUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AttachmentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AttachmentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Attachment mutation op: %q", m.Op())
 	}
 }
 
@@ -445,6 +943,253 @@ func (c *DioceseClient) mutate(ctx context.Context, m *DioceseMutation) (Value, 
 		return (&DioceseDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Diocese mutation op: %q", m.Op())
+	}
+}
+
+// EntryClient is a client for the Entry schema.
+type EntryClient struct {
+	config
+}
+
+// NewEntryClient returns a client for the Entry from the given config.
+func NewEntryClient(c config) *EntryClient {
+	return &EntryClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `entry.Hooks(f(g(h())))`.
+func (c *EntryClient) Use(hooks ...Hook) {
+	c.hooks.Entry = append(c.hooks.Entry, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `entry.Intercept(f(g(h())))`.
+func (c *EntryClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Entry = append(c.inters.Entry, interceptors...)
+}
+
+// Create returns a builder for creating a Entry entity.
+func (c *EntryClient) Create() *EntryCreate {
+	mutation := newEntryMutation(c.config, OpCreate)
+	return &EntryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Entry entities.
+func (c *EntryClient) CreateBulk(builders ...*EntryCreate) *EntryCreateBulk {
+	return &EntryCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *EntryClient) MapCreateBulk(slice any, setFunc func(*EntryCreate, int)) *EntryCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &EntryCreateBulk{err: fmt.Errorf("calling to EntryClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*EntryCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &EntryCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Entry.
+func (c *EntryClient) Update() *EntryUpdate {
+	mutation := newEntryMutation(c.config, OpUpdate)
+	return &EntryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *EntryClient) UpdateOne(_m *Entry) *EntryUpdateOne {
+	mutation := newEntryMutation(c.config, OpUpdateOne, withEntry(_m))
+	return &EntryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *EntryClient) UpdateOneID(id uuid.UUID) *EntryUpdateOne {
+	mutation := newEntryMutation(c.config, OpUpdateOne, withEntryID(id))
+	return &EntryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Entry.
+func (c *EntryClient) Delete() *EntryDelete {
+	mutation := newEntryMutation(c.config, OpDelete)
+	return &EntryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *EntryClient) DeleteOne(_m *Entry) *EntryDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *EntryClient) DeleteOneID(id uuid.UUID) *EntryDeleteOne {
+	builder := c.Delete().Where(entry.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &EntryDeleteOne{builder}
+}
+
+// Query returns a query builder for Entry.
+func (c *EntryClient) Query() *EntryQuery {
+	return &EntryQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeEntry},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Entry entity by its id.
+func (c *EntryClient) Get(ctx context.Context, id uuid.UUID) (*Entry, error) {
+	return c.Query().Where(entry.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *EntryClient) GetX(ctx context.Context, id uuid.UUID) *Entry {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCreator queries the creator edge of a Entry.
+func (c *EntryClient) QueryCreator(_m *Entry) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(entry.Table, entry.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, entry.CreatorTable, entry.CreatorColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Entry
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUpdater queries the updater edge of a Entry.
+func (c *EntryClient) QueryUpdater(_m *Entry) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(entry.Table, entry.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, entry.UpdaterTable, entry.UpdaterColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Entry
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTransaction queries the transaction edge of a Entry.
+func (c *EntryClient) QueryTransaction(_m *Entry) *TransactionQuery {
+	query := (&TransactionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(entry.Table, entry.FieldID, id),
+			sqlgraph.To(transaction.Table, transaction.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, entry.TransactionTable, entry.TransactionColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Transaction
+		step.Edge.Schema = schemaConfig.Entry
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPostings queries the postings edge of a Entry.
+func (c *EntryClient) QueryPostings(_m *Entry) *PostingQuery {
+	query := (&PostingClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(entry.Table, entry.FieldID, id),
+			sqlgraph.To(posting.Table, posting.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, entry.PostingsTable, entry.PostingsColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Posting
+		step.Edge.Schema = schemaConfig.Posting
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryReverses queries the reverses edge of a Entry.
+func (c *EntryClient) QueryReverses(_m *Entry) *EntryQuery {
+	query := (&EntryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(entry.Table, entry.FieldID, id),
+			sqlgraph.To(entry.Table, entry.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, entry.ReversesTable, entry.ReversesColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Entry
+		step.Edge.Schema = schemaConfig.Entry
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryReversedBy queries the reversed_by edge of a Entry.
+func (c *EntryClient) QueryReversedBy(_m *Entry) *EntryQuery {
+	query := (&EntryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(entry.Table, entry.FieldID, id),
+			sqlgraph.To(entry.Table, entry.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, entry.ReversedByTable, entry.ReversedByColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Entry
+		step.Edge.Schema = schemaConfig.Entry
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *EntryClient) Hooks() []Hook {
+	return c.hooks.Entry
+}
+
+// Interceptors returns the client interceptors.
+func (c *EntryClient) Interceptors() []Interceptor {
+	return c.inters.Entry
+}
+
+func (c *EntryClient) mutate(ctx context.Context, m *EntryMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&EntryCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&EntryUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&EntryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&EntryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Entry mutation op: %q", m.Op())
 	}
 }
 
@@ -904,6 +1649,215 @@ func (c *ParishionerClient) mutate(ctx context.Context, m *ParishionerMutation) 
 	}
 }
 
+// PostingClient is a client for the Posting schema.
+type PostingClient struct {
+	config
+}
+
+// NewPostingClient returns a client for the Posting from the given config.
+func NewPostingClient(c config) *PostingClient {
+	return &PostingClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `posting.Hooks(f(g(h())))`.
+func (c *PostingClient) Use(hooks ...Hook) {
+	c.hooks.Posting = append(c.hooks.Posting, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `posting.Intercept(f(g(h())))`.
+func (c *PostingClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Posting = append(c.inters.Posting, interceptors...)
+}
+
+// Create returns a builder for creating a Posting entity.
+func (c *PostingClient) Create() *PostingCreate {
+	mutation := newPostingMutation(c.config, OpCreate)
+	return &PostingCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Posting entities.
+func (c *PostingClient) CreateBulk(builders ...*PostingCreate) *PostingCreateBulk {
+	return &PostingCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PostingClient) MapCreateBulk(slice any, setFunc func(*PostingCreate, int)) *PostingCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PostingCreateBulk{err: fmt.Errorf("calling to PostingClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PostingCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PostingCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Posting.
+func (c *PostingClient) Update() *PostingUpdate {
+	mutation := newPostingMutation(c.config, OpUpdate)
+	return &PostingUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PostingClient) UpdateOne(_m *Posting) *PostingUpdateOne {
+	mutation := newPostingMutation(c.config, OpUpdateOne, withPosting(_m))
+	return &PostingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PostingClient) UpdateOneID(id uuid.UUID) *PostingUpdateOne {
+	mutation := newPostingMutation(c.config, OpUpdateOne, withPostingID(id))
+	return &PostingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Posting.
+func (c *PostingClient) Delete() *PostingDelete {
+	mutation := newPostingMutation(c.config, OpDelete)
+	return &PostingDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PostingClient) DeleteOne(_m *Posting) *PostingDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PostingClient) DeleteOneID(id uuid.UUID) *PostingDeleteOne {
+	builder := c.Delete().Where(posting.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PostingDeleteOne{builder}
+}
+
+// Query returns a query builder for Posting.
+func (c *PostingClient) Query() *PostingQuery {
+	return &PostingQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePosting},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Posting entity by its id.
+func (c *PostingClient) Get(ctx context.Context, id uuid.UUID) (*Posting, error) {
+	return c.Query().Where(posting.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PostingClient) GetX(ctx context.Context, id uuid.UUID) *Posting {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCreator queries the creator edge of a Posting.
+func (c *PostingClient) QueryCreator(_m *Posting) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(posting.Table, posting.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, posting.CreatorTable, posting.CreatorColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Posting
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUpdater queries the updater edge of a Posting.
+func (c *PostingClient) QueryUpdater(_m *Posting) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(posting.Table, posting.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, posting.UpdaterTable, posting.UpdaterColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Posting
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryEntry queries the entry edge of a Posting.
+func (c *PostingClient) QueryEntry(_m *Posting) *EntryQuery {
+	query := (&EntryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(posting.Table, posting.FieldID, id),
+			sqlgraph.To(entry.Table, entry.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, posting.EntryTable, posting.EntryColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Entry
+		step.Edge.Schema = schemaConfig.Posting
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAccount queries the account edge of a Posting.
+func (c *PostingClient) QueryAccount(_m *Posting) *AccountQuery {
+	query := (&AccountClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(posting.Table, posting.FieldID, id),
+			sqlgraph.To(account.Table, account.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, posting.AccountTable, posting.AccountColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Account
+		step.Edge.Schema = schemaConfig.Posting
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PostingClient) Hooks() []Hook {
+	return c.hooks.Posting
+}
+
+// Interceptors returns the client interceptors.
+func (c *PostingClient) Interceptors() []Interceptor {
+	return c.inters.Posting
+}
+
+func (c *PostingClient) mutate(ctx context.Context, m *PostingMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PostingCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PostingUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PostingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PostingDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Posting mutation op: %q", m.Op())
+	}
+}
+
 // TerritoryClient is a client for the Territory schema.
 type TerritoryClient struct {
 	config
@@ -1148,6 +2102,253 @@ func (c *TerritoryClient) mutate(ctx context.Context, m *TerritoryMutation) (Val
 		return (&TerritoryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Territory mutation op: %q", m.Op())
+	}
+}
+
+// TransactionClient is a client for the Transaction schema.
+type TransactionClient struct {
+	config
+}
+
+// NewTransactionClient returns a client for the Transaction from the given config.
+func NewTransactionClient(c config) *TransactionClient {
+	return &TransactionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `transaction.Hooks(f(g(h())))`.
+func (c *TransactionClient) Use(hooks ...Hook) {
+	c.hooks.Transaction = append(c.hooks.Transaction, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `transaction.Intercept(f(g(h())))`.
+func (c *TransactionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Transaction = append(c.inters.Transaction, interceptors...)
+}
+
+// Create returns a builder for creating a Transaction entity.
+func (c *TransactionClient) Create() *TransactionCreate {
+	mutation := newTransactionMutation(c.config, OpCreate)
+	return &TransactionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Transaction entities.
+func (c *TransactionClient) CreateBulk(builders ...*TransactionCreate) *TransactionCreateBulk {
+	return &TransactionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *TransactionClient) MapCreateBulk(slice any, setFunc func(*TransactionCreate, int)) *TransactionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &TransactionCreateBulk{err: fmt.Errorf("calling to TransactionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*TransactionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &TransactionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Transaction.
+func (c *TransactionClient) Update() *TransactionUpdate {
+	mutation := newTransactionMutation(c.config, OpUpdate)
+	return &TransactionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TransactionClient) UpdateOne(_m *Transaction) *TransactionUpdateOne {
+	mutation := newTransactionMutation(c.config, OpUpdateOne, withTransaction(_m))
+	return &TransactionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TransactionClient) UpdateOneID(id uuid.UUID) *TransactionUpdateOne {
+	mutation := newTransactionMutation(c.config, OpUpdateOne, withTransactionID(id))
+	return &TransactionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Transaction.
+func (c *TransactionClient) Delete() *TransactionDelete {
+	mutation := newTransactionMutation(c.config, OpDelete)
+	return &TransactionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TransactionClient) DeleteOne(_m *Transaction) *TransactionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TransactionClient) DeleteOneID(id uuid.UUID) *TransactionDeleteOne {
+	builder := c.Delete().Where(transaction.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TransactionDeleteOne{builder}
+}
+
+// Query returns a query builder for Transaction.
+func (c *TransactionClient) Query() *TransactionQuery {
+	return &TransactionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTransaction},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Transaction entity by its id.
+func (c *TransactionClient) Get(ctx context.Context, id uuid.UUID) (*Transaction, error) {
+	return c.Query().Where(transaction.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TransactionClient) GetX(ctx context.Context, id uuid.UUID) *Transaction {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCreator queries the creator edge of a Transaction.
+func (c *TransactionClient) QueryCreator(_m *Transaction) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(transaction.Table, transaction.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, transaction.CreatorTable, transaction.CreatorColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Transaction
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUpdater queries the updater edge of a Transaction.
+func (c *TransactionClient) QueryUpdater(_m *Transaction) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(transaction.Table, transaction.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, transaction.UpdaterTable, transaction.UpdaterColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Transaction
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryParish queries the parish edge of a Transaction.
+func (c *TransactionClient) QueryParish(_m *Transaction) *ParishQuery {
+	query := (&ParishClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(transaction.Table, transaction.FieldID, id),
+			sqlgraph.To(parish.Table, parish.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, transaction.ParishTable, transaction.ParishColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Parish
+		step.Edge.Schema = schemaConfig.Transaction
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUnit queries the unit edge of a Transaction.
+func (c *TransactionClient) QueryUnit(_m *Transaction) *UnitQuery {
+	query := (&UnitClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(transaction.Table, transaction.FieldID, id),
+			sqlgraph.To(unit.Table, unit.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, transaction.UnitTable, transaction.UnitColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Unit
+		step.Edge.Schema = schemaConfig.Transaction
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryEntries queries the entries edge of a Transaction.
+func (c *TransactionClient) QueryEntries(_m *Transaction) *EntryQuery {
+	query := (&EntryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(transaction.Table, transaction.FieldID, id),
+			sqlgraph.To(entry.Table, entry.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, transaction.EntriesTable, transaction.EntriesColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Entry
+		step.Edge.Schema = schemaConfig.Entry
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAttachments queries the attachments edge of a Transaction.
+func (c *TransactionClient) QueryAttachments(_m *Transaction) *AttachmentQuery {
+	query := (&AttachmentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(transaction.Table, transaction.FieldID, id),
+			sqlgraph.To(attachment.Table, attachment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, transaction.AttachmentsTable, transaction.AttachmentsColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Attachment
+		step.Edge.Schema = schemaConfig.Attachment
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TransactionClient) Hooks() []Hook {
+	return c.hooks.Transaction
+}
+
+// Interceptors returns the client interceptors.
+func (c *TransactionClient) Interceptors() []Interceptor {
+	return c.inters.Transaction
+}
+
+func (c *TransactionClient) mutate(ctx context.Context, m *TransactionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TransactionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TransactionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TransactionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TransactionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Transaction mutation op: %q", m.Op())
 	}
 }
 
@@ -1534,11 +2735,12 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Diocese, Membership, Parish, Parishioner, Territory, Unit, User []ent.Hook
+		Account, Attachment, Diocese, Entry, Membership, Parish, Parishioner, Posting,
+		Territory, Transaction, Unit, User []ent.Hook
 	}
 	inters struct {
-		Diocese, Membership, Parish, Parishioner, Territory, Unit,
-		User []ent.Interceptor
+		Account, Attachment, Diocese, Entry, Membership, Parish, Parishioner, Posting,
+		Territory, Transaction, Unit, User []ent.Interceptor
 	}
 )
 

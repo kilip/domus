@@ -7,11 +7,16 @@ import "context"
 // SchemaConfig represents alternative schema names for all tables
 // that can be passed at runtime.
 type SchemaConfig struct {
+	Account     string // Account table.
+	Attachment  string // Attachment table.
 	Diocese     string // Diocese table.
+	Entry       string // Entry table.
 	Membership  string // Membership table.
 	Parish      string // Parish table.
 	Parishioner string // Parishioner table.
+	Posting     string // Posting table.
 	Territory   string // Territory table.
+	Transaction string // Transaction table.
 	Unit        string // Unit table.
 	User        string // User table.
 }

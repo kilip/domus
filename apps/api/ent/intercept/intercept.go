@@ -8,12 +8,17 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/paroki/domus/api/ent"
+	"github.com/paroki/domus/api/ent/account"
+	"github.com/paroki/domus/api/ent/attachment"
 	"github.com/paroki/domus/api/ent/diocese"
+	"github.com/paroki/domus/api/ent/entry"
 	"github.com/paroki/domus/api/ent/membership"
 	"github.com/paroki/domus/api/ent/parish"
 	"github.com/paroki/domus/api/ent/parishioner"
+	"github.com/paroki/domus/api/ent/posting"
 	"github.com/paroki/domus/api/ent/predicate"
 	"github.com/paroki/domus/api/ent/territory"
+	"github.com/paroki/domus/api/ent/transaction"
 	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
 )
@@ -74,6 +79,60 @@ func (f TraverseFunc) Traverse(ctx context.Context, q ent.Query) error {
 	return f(ctx, query)
 }
 
+// The AccountFunc type is an adapter to allow the use of ordinary function as a Querier.
+type AccountFunc func(context.Context, *ent.AccountQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f AccountFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.AccountQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.AccountQuery", q)
+}
+
+// The TraverseAccount type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseAccount func(context.Context, *ent.AccountQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseAccount) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseAccount) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.AccountQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.AccountQuery", q)
+}
+
+// The AttachmentFunc type is an adapter to allow the use of ordinary function as a Querier.
+type AttachmentFunc func(context.Context, *ent.AttachmentQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f AttachmentFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.AttachmentQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.AttachmentQuery", q)
+}
+
+// The TraverseAttachment type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseAttachment func(context.Context, *ent.AttachmentQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseAttachment) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseAttachment) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.AttachmentQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.AttachmentQuery", q)
+}
+
 // The DioceseFunc type is an adapter to allow the use of ordinary function as a Querier.
 type DioceseFunc func(context.Context, *ent.DioceseQuery) (ent.Value, error)
 
@@ -99,6 +158,33 @@ func (f TraverseDiocese) Traverse(ctx context.Context, q ent.Query) error {
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *ent.DioceseQuery", q)
+}
+
+// The EntryFunc type is an adapter to allow the use of ordinary function as a Querier.
+type EntryFunc func(context.Context, *ent.EntryQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f EntryFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.EntryQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.EntryQuery", q)
+}
+
+// The TraverseEntry type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseEntry func(context.Context, *ent.EntryQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseEntry) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseEntry) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.EntryQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.EntryQuery", q)
 }
 
 // The MembershipFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -182,6 +268,33 @@ func (f TraverseParishioner) Traverse(ctx context.Context, q ent.Query) error {
 	return fmt.Errorf("unexpected query type %T. expect *ent.ParishionerQuery", q)
 }
 
+// The PostingFunc type is an adapter to allow the use of ordinary function as a Querier.
+type PostingFunc func(context.Context, *ent.PostingQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f PostingFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.PostingQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.PostingQuery", q)
+}
+
+// The TraversePosting type is an adapter to allow the use of ordinary function as Traverser.
+type TraversePosting func(context.Context, *ent.PostingQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraversePosting) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraversePosting) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.PostingQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.PostingQuery", q)
+}
+
 // The TerritoryFunc type is an adapter to allow the use of ordinary function as a Querier.
 type TerritoryFunc func(context.Context, *ent.TerritoryQuery) (ent.Value, error)
 
@@ -207,6 +320,33 @@ func (f TraverseTerritory) Traverse(ctx context.Context, q ent.Query) error {
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *ent.TerritoryQuery", q)
+}
+
+// The TransactionFunc type is an adapter to allow the use of ordinary function as a Querier.
+type TransactionFunc func(context.Context, *ent.TransactionQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f TransactionFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.TransactionQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.TransactionQuery", q)
+}
+
+// The TraverseTransaction type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseTransaction func(context.Context, *ent.TransactionQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseTransaction) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseTransaction) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.TransactionQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.TransactionQuery", q)
 }
 
 // The UnitFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -266,16 +406,26 @@ func (f TraverseUser) Traverse(ctx context.Context, q ent.Query) error {
 // NewQuery returns the generic Query interface for the given typed query.
 func NewQuery(q ent.Query) (Query, error) {
 	switch q := q.(type) {
+	case *ent.AccountQuery:
+		return &query[*ent.AccountQuery, predicate.Account, account.OrderOption]{typ: ent.TypeAccount, tq: q}, nil
+	case *ent.AttachmentQuery:
+		return &query[*ent.AttachmentQuery, predicate.Attachment, attachment.OrderOption]{typ: ent.TypeAttachment, tq: q}, nil
 	case *ent.DioceseQuery:
 		return &query[*ent.DioceseQuery, predicate.Diocese, diocese.OrderOption]{typ: ent.TypeDiocese, tq: q}, nil
+	case *ent.EntryQuery:
+		return &query[*ent.EntryQuery, predicate.Entry, entry.OrderOption]{typ: ent.TypeEntry, tq: q}, nil
 	case *ent.MembershipQuery:
 		return &query[*ent.MembershipQuery, predicate.Membership, membership.OrderOption]{typ: ent.TypeMembership, tq: q}, nil
 	case *ent.ParishQuery:
 		return &query[*ent.ParishQuery, predicate.Parish, parish.OrderOption]{typ: ent.TypeParish, tq: q}, nil
 	case *ent.ParishionerQuery:
 		return &query[*ent.ParishionerQuery, predicate.Parishioner, parishioner.OrderOption]{typ: ent.TypeParishioner, tq: q}, nil
+	case *ent.PostingQuery:
+		return &query[*ent.PostingQuery, predicate.Posting, posting.OrderOption]{typ: ent.TypePosting, tq: q}, nil
 	case *ent.TerritoryQuery:
 		return &query[*ent.TerritoryQuery, predicate.Territory, territory.OrderOption]{typ: ent.TypeTerritory, tq: q}, nil
+	case *ent.TransactionQuery:
+		return &query[*ent.TransactionQuery, predicate.Transaction, transaction.OrderOption]{typ: ent.TypeTransaction, tq: q}, nil
 	case *ent.UnitQuery:
 		return &query[*ent.UnitQuery, predicate.Unit, unit.OrderOption]{typ: ent.TypeUnit, tq: q}, nil
 	case *ent.UserQuery:

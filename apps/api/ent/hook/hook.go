@@ -9,6 +9,30 @@ import (
 	"github.com/paroki/domus/api/ent"
 )
 
+// The AccountFunc type is an adapter to allow the use of ordinary
+// function as Account mutator.
+type AccountFunc func(context.Context, *ent.AccountMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AccountFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AccountMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AccountMutation", m)
+}
+
+// The AttachmentFunc type is an adapter to allow the use of ordinary
+// function as Attachment mutator.
+type AttachmentFunc func(context.Context, *ent.AttachmentMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AttachmentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AttachmentMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AttachmentMutation", m)
+}
+
 // The DioceseFunc type is an adapter to allow the use of ordinary
 // function as Diocese mutator.
 type DioceseFunc func(context.Context, *ent.DioceseMutation) (ent.Value, error)
@@ -19,6 +43,18 @@ func (f DioceseFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DioceseMutation", m)
+}
+
+// The EntryFunc type is an adapter to allow the use of ordinary
+// function as Entry mutator.
+type EntryFunc func(context.Context, *ent.EntryMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f EntryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.EntryMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.EntryMutation", m)
 }
 
 // The MembershipFunc type is an adapter to allow the use of ordinary
@@ -57,6 +93,18 @@ func (f ParishionerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ParishionerMutation", m)
 }
 
+// The PostingFunc type is an adapter to allow the use of ordinary
+// function as Posting mutator.
+type PostingFunc func(context.Context, *ent.PostingMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PostingFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PostingMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PostingMutation", m)
+}
+
 // The TerritoryFunc type is an adapter to allow the use of ordinary
 // function as Territory mutator.
 type TerritoryFunc func(context.Context, *ent.TerritoryMutation) (ent.Value, error)
@@ -67,6 +115,18 @@ func (f TerritoryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, e
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TerritoryMutation", m)
+}
+
+// The TransactionFunc type is an adapter to allow the use of ordinary
+// function as Transaction mutator.
+type TransactionFunc func(context.Context, *ent.TransactionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TransactionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.TransactionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TransactionMutation", m)
 }
 
 // The UnitFunc type is an adapter to allow the use of ordinary

@@ -6,11 +6,16 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/paroki/domus/api/ent/account"
+	"github.com/paroki/domus/api/ent/attachment"
 	"github.com/paroki/domus/api/ent/diocese"
+	"github.com/paroki/domus/api/ent/entry"
 	"github.com/paroki/domus/api/ent/membership"
 	"github.com/paroki/domus/api/ent/parish"
+	"github.com/paroki/domus/api/ent/posting"
 	"github.com/paroki/domus/api/ent/schema"
 	"github.com/paroki/domus/api/ent/territory"
+	"github.com/paroki/domus/api/ent/transaction"
 	"github.com/paroki/domus/api/ent/unit"
 	"github.com/paroki/domus/api/ent/user"
 )
@@ -19,6 +24,84 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	accountMixin := schema.Account{}.Mixin()
+	accountMixinFields0 := accountMixin[0].Fields()
+	_ = accountMixinFields0
+	accountMixinFields1 := accountMixin[1].Fields()
+	_ = accountMixinFields1
+	accountFields := schema.Account{}.Fields()
+	_ = accountFields
+	// accountDescCreatedAt is the schema descriptor for createdAt field.
+	accountDescCreatedAt := accountMixinFields1[1].Descriptor()
+	// account.DefaultCreatedAt holds the default value on creation for the createdAt field.
+	account.DefaultCreatedAt = accountDescCreatedAt.Default.(func() time.Time)
+	// accountDescUpdatedAt is the schema descriptor for updatedAt field.
+	accountDescUpdatedAt := accountMixinFields1[3].Descriptor()
+	// account.DefaultUpdatedAt holds the default value on creation for the updatedAt field.
+	account.DefaultUpdatedAt = accountDescUpdatedAt.Default.(func() time.Time)
+	// account.UpdateDefaultUpdatedAt holds the default value on update for the updatedAt field.
+	account.UpdateDefaultUpdatedAt = accountDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// accountDescCode is the schema descriptor for code field.
+	accountDescCode := accountFields[0].Descriptor()
+	// account.CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	account.CodeValidator = accountDescCode.Validators[0].(func(string) error)
+	// accountDescName is the schema descriptor for name field.
+	accountDescName := accountFields[1].Descriptor()
+	// account.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	account.NameValidator = accountDescName.Validators[0].(func(string) error)
+	// accountDescPostable is the schema descriptor for postable field.
+	accountDescPostable := accountFields[4].Descriptor()
+	// account.DefaultPostable holds the default value on creation for the postable field.
+	account.DefaultPostable = accountDescPostable.Default.(bool)
+	// accountDescID is the schema descriptor for id field.
+	accountDescID := accountMixinFields0[0].Descriptor()
+	// account.DefaultID holds the default value on creation for the id field.
+	account.DefaultID = accountDescID.Default.(func() uuid.UUID)
+	attachmentMixin := schema.Attachment{}.Mixin()
+	attachmentMixinFields0 := attachmentMixin[0].Fields()
+	_ = attachmentMixinFields0
+	attachmentMixinFields1 := attachmentMixin[1].Fields()
+	_ = attachmentMixinFields1
+	attachmentFields := schema.Attachment{}.Fields()
+	_ = attachmentFields
+	// attachmentDescCreatedAt is the schema descriptor for createdAt field.
+	attachmentDescCreatedAt := attachmentMixinFields1[1].Descriptor()
+	// attachment.DefaultCreatedAt holds the default value on creation for the createdAt field.
+	attachment.DefaultCreatedAt = attachmentDescCreatedAt.Default.(func() time.Time)
+	// attachmentDescUpdatedAt is the schema descriptor for updatedAt field.
+	attachmentDescUpdatedAt := attachmentMixinFields1[3].Descriptor()
+	// attachment.DefaultUpdatedAt holds the default value on creation for the updatedAt field.
+	attachment.DefaultUpdatedAt = attachmentDescUpdatedAt.Default.(func() time.Time)
+	// attachment.UpdateDefaultUpdatedAt holds the default value on update for the updatedAt field.
+	attachment.UpdateDefaultUpdatedAt = attachmentDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// attachmentDescBucket is the schema descriptor for bucket field.
+	attachmentDescBucket := attachmentFields[0].Descriptor()
+	// attachment.BucketValidator is a validator for the "bucket" field. It is called by the builders before save.
+	attachment.BucketValidator = attachmentDescBucket.Validators[0].(func(string) error)
+	// attachmentDescObjectKey is the schema descriptor for object_key field.
+	attachmentDescObjectKey := attachmentFields[1].Descriptor()
+	// attachment.ObjectKeyValidator is a validator for the "object_key" field. It is called by the builders before save.
+	attachment.ObjectKeyValidator = attachmentDescObjectKey.Validators[0].(func(string) error)
+	// attachmentDescFilename is the schema descriptor for filename field.
+	attachmentDescFilename := attachmentFields[2].Descriptor()
+	// attachment.FilenameValidator is a validator for the "filename" field. It is called by the builders before save.
+	attachment.FilenameValidator = attachmentDescFilename.Validators[0].(func(string) error)
+	// attachmentDescMimeType is the schema descriptor for mime_type field.
+	attachmentDescMimeType := attachmentFields[3].Descriptor()
+	// attachment.MimeTypeValidator is a validator for the "mime_type" field. It is called by the builders before save.
+	attachment.MimeTypeValidator = attachmentDescMimeType.Validators[0].(func(string) error)
+	// attachmentDescSize is the schema descriptor for size field.
+	attachmentDescSize := attachmentFields[4].Descriptor()
+	// attachment.SizeValidator is a validator for the "size" field. It is called by the builders before save.
+	attachment.SizeValidator = attachmentDescSize.Validators[0].(func(int64) error)
+	// attachmentDescChecksum is the schema descriptor for checksum field.
+	attachmentDescChecksum := attachmentFields[5].Descriptor()
+	// attachment.ChecksumValidator is a validator for the "checksum" field. It is called by the builders before save.
+	attachment.ChecksumValidator = attachmentDescChecksum.Validators[0].(func(string) error)
+	// attachmentDescID is the schema descriptor for id field.
+	attachmentDescID := attachmentMixinFields0[0].Descriptor()
+	// attachment.DefaultID holds the default value on creation for the id field.
+	attachment.DefaultID = attachmentDescID.Default.(func() uuid.UUID)
 	dioceseMixin := schema.Diocese{}.Mixin()
 	dioceseMixinFields0 := dioceseMixin[0].Fields()
 	_ = dioceseMixinFields0
@@ -42,6 +125,27 @@ func init() {
 	dioceseDescActive := dioceseFields[2].Descriptor()
 	// diocese.DefaultActive holds the default value on creation for the active field.
 	diocese.DefaultActive = dioceseDescActive.Default.(bool)
+	entryMixin := schema.Entry{}.Mixin()
+	entryMixinFields0 := entryMixin[0].Fields()
+	_ = entryMixinFields0
+	entryMixinFields1 := entryMixin[1].Fields()
+	_ = entryMixinFields1
+	entryFields := schema.Entry{}.Fields()
+	_ = entryFields
+	// entryDescCreatedAt is the schema descriptor for createdAt field.
+	entryDescCreatedAt := entryMixinFields1[1].Descriptor()
+	// entry.DefaultCreatedAt holds the default value on creation for the createdAt field.
+	entry.DefaultCreatedAt = entryDescCreatedAt.Default.(func() time.Time)
+	// entryDescUpdatedAt is the schema descriptor for updatedAt field.
+	entryDescUpdatedAt := entryMixinFields1[3].Descriptor()
+	// entry.DefaultUpdatedAt holds the default value on creation for the updatedAt field.
+	entry.DefaultUpdatedAt = entryDescUpdatedAt.Default.(func() time.Time)
+	// entry.UpdateDefaultUpdatedAt holds the default value on update for the updatedAt field.
+	entry.UpdateDefaultUpdatedAt = entryDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// entryDescID is the schema descriptor for id field.
+	entryDescID := entryMixinFields0[0].Descriptor()
+	// entry.DefaultID holds the default value on creation for the id field.
+	entry.DefaultID = entryDescID.Default.(func() uuid.UUID)
 	membershipFields := schema.Membership{}.Fields()
 	_ = membershipFields
 	// membershipDescUserID is the schema descriptor for user_id field.
@@ -66,6 +170,31 @@ func init() {
 	parishDescActive := parishFields[6].Descriptor()
 	// parish.DefaultActive holds the default value on creation for the active field.
 	parish.DefaultActive = parishDescActive.Default.(bool)
+	postingMixin := schema.Posting{}.Mixin()
+	postingMixinFields0 := postingMixin[0].Fields()
+	_ = postingMixinFields0
+	postingMixinFields1 := postingMixin[1].Fields()
+	_ = postingMixinFields1
+	postingFields := schema.Posting{}.Fields()
+	_ = postingFields
+	// postingDescCreatedAt is the schema descriptor for createdAt field.
+	postingDescCreatedAt := postingMixinFields1[1].Descriptor()
+	// posting.DefaultCreatedAt holds the default value on creation for the createdAt field.
+	posting.DefaultCreatedAt = postingDescCreatedAt.Default.(func() time.Time)
+	// postingDescUpdatedAt is the schema descriptor for updatedAt field.
+	postingDescUpdatedAt := postingMixinFields1[3].Descriptor()
+	// posting.DefaultUpdatedAt holds the default value on creation for the updatedAt field.
+	posting.DefaultUpdatedAt = postingDescUpdatedAt.Default.(func() time.Time)
+	// posting.UpdateDefaultUpdatedAt holds the default value on update for the updatedAt field.
+	posting.UpdateDefaultUpdatedAt = postingDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// postingDescAmount is the schema descriptor for amount field.
+	postingDescAmount := postingFields[0].Descriptor()
+	// posting.AmountValidator is a validator for the "amount" field. It is called by the builders before save.
+	posting.AmountValidator = postingDescAmount.Validators[0].(func(int64) error)
+	// postingDescID is the schema descriptor for id field.
+	postingDescID := postingMixinFields0[0].Descriptor()
+	// posting.DefaultID holds the default value on creation for the id field.
+	posting.DefaultID = postingDescID.Default.(func() uuid.UUID)
 	territoryMixin := schema.Territory{}.Mixin()
 	territoryMixinFields0 := territoryMixin[0].Fields()
 	_ = territoryMixinFields0
@@ -89,6 +218,31 @@ func init() {
 	territoryDescKind := territoryFields[3].Descriptor()
 	// territory.KindValidator is a validator for the "kind" field. It is called by the builders before save.
 	territory.KindValidator = territoryDescKind.Validators[0].(func(string) error)
+	transactionMixin := schema.Transaction{}.Mixin()
+	transactionMixinFields0 := transactionMixin[0].Fields()
+	_ = transactionMixinFields0
+	transactionMixinFields1 := transactionMixin[1].Fields()
+	_ = transactionMixinFields1
+	transactionFields := schema.Transaction{}.Fields()
+	_ = transactionFields
+	// transactionDescCreatedAt is the schema descriptor for createdAt field.
+	transactionDescCreatedAt := transactionMixinFields1[1].Descriptor()
+	// transaction.DefaultCreatedAt holds the default value on creation for the createdAt field.
+	transaction.DefaultCreatedAt = transactionDescCreatedAt.Default.(func() time.Time)
+	// transactionDescUpdatedAt is the schema descriptor for updatedAt field.
+	transactionDescUpdatedAt := transactionMixinFields1[3].Descriptor()
+	// transaction.DefaultUpdatedAt holds the default value on creation for the updatedAt field.
+	transaction.DefaultUpdatedAt = transactionDescUpdatedAt.Default.(func() time.Time)
+	// transaction.UpdateDefaultUpdatedAt holds the default value on update for the updatedAt field.
+	transaction.UpdateDefaultUpdatedAt = transactionDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// transactionDescNumber is the schema descriptor for number field.
+	transactionDescNumber := transactionFields[0].Descriptor()
+	// transaction.NumberValidator is a validator for the "number" field. It is called by the builders before save.
+	transaction.NumberValidator = transactionDescNumber.Validators[0].(func(string) error)
+	// transactionDescID is the schema descriptor for id field.
+	transactionDescID := transactionMixinFields0[0].Descriptor()
+	// transaction.DefaultID holds the default value on creation for the id field.
+	transaction.DefaultID = transactionDescID.Default.(func() uuid.UUID)
 	unitMixin := schema.Unit{}.Mixin()
 	unitMixinFields0 := unitMixin[0].Fields()
 	_ = unitMixinFields0
