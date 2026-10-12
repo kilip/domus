@@ -70,9 +70,4 @@ export const auth = betterAuth({
   socialProviders,
 });
 
-export {
-  type SeedSuperadminOptions,
-  type SeedSuperadminResult,
-  seedSuperadmin,
-} from "./seedSuperadmin";
 export { authDB, authEnv };

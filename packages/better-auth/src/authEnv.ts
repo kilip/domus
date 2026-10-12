@@ -27,8 +27,6 @@ export const authEnvConfig = () => {
       AUTH_GITHUB_SECRET: z.string().optional(),
       API_INTERNAL_URL: z.url(),
       API_INTERNAL_KEY: z.string().min(32),
-      SUPERADMIN_EMAIL: z.string().email().optional(),
-      SUPERADMIN_NAME: z.string().optional().default("Super Admin"),
     },
     runtimeEnv: process.env,
     isServer: typeof window === "undefined",

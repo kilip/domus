@@ -16,6 +16,9 @@ type Config struct {
 	TrustedOrigins []string `env:"AUTH_TRUSTED_ORIGINS"`
 	InternalKey    string   `env:"API_INTERNAL_KEY, required"`
 
+	SuperadminEmail string `env:"SUPERADMIN_EMAIL"`
+	SuperadminName  string `env:"SUPERADMIN_NAME, default=Super Admin"`
+
 	S3Endpoint       string `env:"S3_ENDPOINT"`
 	S3AccessKey      string `env:"S3_ACCESS_KEY"`
 	S3SecretKey      string `env:"S3_SECRET_KEY"`

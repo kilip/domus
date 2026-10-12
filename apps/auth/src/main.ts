@@ -1,10 +1,7 @@
-import { seedSuperadmin } from "@domus/better-auth/auth";
 import { Elysia } from "elysia";
 import { server } from "./server";
 
 const port = Number(process.env.AUTH_PORT ?? 8001);
-
-await seedSuperadmin();
 
 const app = new Elysia().use(server).listen({ port, hostname: "0.0.0.0" });
 console.log(`[auth] listening on 0.0.0.0:${port}`);
