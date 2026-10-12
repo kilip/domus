@@ -10,6 +10,8 @@ describe("seedSuperadmin", () => {
     process.env.AUTH_URL = "http://localhost:3000";
     process.env.AUTH_PATH = "/api/auth";
     process.env.AUTH_DB_URL = "postgres://user:pass@localhost:5432/db";
+    process.env.API_INTERNAL_URL = "http://localhost:8002";
+    process.env.API_INTERNAL_KEY = "12345678901234567890123456789012";
   });
 
   afterEach(() => {

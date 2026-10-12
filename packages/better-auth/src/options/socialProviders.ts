@@ -24,7 +24,6 @@ function withGitHub(): Providers {
       github: {
         clientId: authEnv.AUTH_GITHUB_ID,
         clientSecret: authEnv.AUTH_GITHUB_SECRET,
-        scope: ["profile", "email", "openid"],
       },
     };
   }
