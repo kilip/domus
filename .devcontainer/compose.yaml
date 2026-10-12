@@ -15,6 +15,9 @@ services:
       # Dev-only default. Override with a Codespaces secret or a local env var.
       AUTH_SECRET: 6171ce314c622f9a4cdb542c810d40b91edde2f659bcd5224c6aeee7d7ea4925
       AUTH_TRUSTED_ORIGINS: http://localhost:3001,http://localhost:8002
+      AUTH_JWKS_URL: http://localhost:8001/jwks
+      API_INTERNAL_URL: http://localhost:8002
+      API_INTERNAL_KEY: dev-internal-key-at-least-32-chars-long
       REDIS_URL: redis://redis:6379
       S3_ENDPOINT: http://rustfs:9000
       S3_ACCESS_KEY: rustfsadmin

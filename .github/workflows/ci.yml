@@ -43,6 +43,8 @@ jobs:
       AUTH_PATH: ""
       AUTH_DB_URL: postgres://domus:domus@localhost:5432/domus
       AUTH_SECRET: 6171ce314c622f9a4cdb542c810d40b91edde2f659bcd5224c6aeee7d7ea4925
+      API_INTERNAL_URL: http://localhost:8002
+      API_INTERNAL_KEY: dev-internal-key-at-least-32-chars-long
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
@@ -129,6 +131,9 @@ jobs:
       AUTH_DB_URL: postgres://domus:domus@localhost:5432/domus
       AUTH_SECRET: 6171ce314c622f9a4cdb542c810d40b91edde2f659bcd5224c6aeee7d7ea4925
       AUTH_TRUSTED_ORIGINS: http://localhost:3001,http://localhost:8002
+      AUTH_JWKS_URL: http://localhost:8001/jwks
+      API_INTERNAL_URL: http://localhost:8002
+      API_INTERNAL_KEY: dev-internal-key-at-least-32-chars-long
       API_DB_URL: postgres://domus:domus@localhost:5432/domus?sslmode=disable
       SUPERADMIN_EMAIL: admin@domus.local
       SUPERADMIN_NAME: "Super Admin"

@@ -1,6 +1,6 @@
 # Domus
 
-Digital parish administration. One platform serving many dioceses, organized as **diocese → parish → unit (lingkungan)**.
+Digital parish administration. One platform serving many dioceses, organized as **diocese → parish → workspace (lingkungan)**.
 
 The monorepo is managed with [Bun workspaces](https://bun.sh/docs/install/workspaces) and [Turborepo](https://turbo.build/repo).
 
@@ -42,8 +42,11 @@ domus/
                        └──► Postgres (Ent)
 ```
 
-- `apps/auth` issues JWTs. `apps/api` verifies them with the JWKS, matches `iss`/`aud` against `AUTH_URL`, and creates a local user *snapshot* on the first request.
-- Authorization in `apps/api` is **membership based** per scope (`system`, `diocese`, `parish`, `unit`), with per-module roles (e.g. `finance-writer`) and a global `superadmin`.
+- `apps/api` is the single source of truth (SSOT) for users. Users are invited via `POST /users` (`status = invited`).
+- `apps/auth` issues JWTs upon social login (Google/GitHub). A `user.create.before` hook verifies the email with the API internal endpoint (`POST /internal/users/resolve`). Unregistered emails are rejected.
+- `apps/api` verifies JWTs with the JWKS from `apps/auth`, matches `iss`/`aud` against `AUTH_URL`. On the first authenticated request, `UserValidate` binds the auth user ID and activates the user (`status = active`).
+- Authorization in `apps/api` is **membership based** per scope (`system`, `diocese`, `parish`, `workspace`), with per-module roles (e.g. `finance-writer`) and a global `superadmin`.
+- Internal routes under `/internal/*` are secured with `API_INTERNAL_KEY`. The reverse proxy must **never** expose `/internal` publicly.
 - The dashboard uses a module registry (`sys`, `web`, `sacra`, `fin`, `par`, `act`). Adding a module means adding one entry to `apps/dash/app/shared/modules/registry.ts`.
 
 ## Tech Stack
@@ -101,7 +104,9 @@ In the devcontainer all values below are set through `.devcontainer/compose.yaml
 | `AUTH_TRUSTED_ORIGINS` | auth, api | Comma-separated CORS origins |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | auth | Optional, Google login |
 | `AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET` | auth | Optional, GitHub login |
-| `AUTH_JWKS_URL` | api | JWKS endpoint of the auth service. **Not set in compose/CI yet**, set it manually |
+| `AUTH_JWKS_URL` | api | JWKS endpoint of the auth service |
+| `API_INTERNAL_URL` | auth, e2e | API internal URL for user resolution hook |
+| `API_INTERNAL_KEY` | auth, api, e2e | Shared secret (>= 32 chars) for `/internal/*` routes |
 | `API_DB_URL` | api | Postgres connection for the API (`...?sslmode=disable` locally) |
 | `API_PORT` | api | Defaults to `8002` |
 | `SUPERADMIN_EMAIL` / `SUPERADMIN_NAME` | api | Optional, seeded superadmin user and system:0 membership |

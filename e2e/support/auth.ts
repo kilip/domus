@@ -18,10 +18,33 @@ async function testHelpers() {
 export async function createSession(overrides: Record<string, unknown> = {}) {
   const t = await testHelpers();
   const id = (overrides.id as string) ?? randomUUID();
+  const email = (
+    (overrides.email as string) ?? `e2e-${randomUUID()}@example.com`
+  ).toLowerCase();
+  const name = (overrides.name as string) ?? "E2E User";
+  const role = (overrides.role as string) ?? "user";
+
+  // Pre-register user in API database (public.users)
+  await authDB.execute(
+    sql`INSERT INTO public.users (id, email, name, status, auth_user_id)
+        VALUES (${id}, ${email}, ${name}, 'active', ${id})
+        ON CONFLICT (email) WHERE deleted_at IS NULL DO UPDATE SET auth_user_id = ${id}, status = 'active'`,
+  );
+
+  // If role is admin or superadmin, insert system:0 superadmin membership
+  if (role === "admin" || role === "superadmin") {
+    await authDB.execute(
+      sql`INSERT INTO public.memberships (user_id, scope_type, scope_id, role, created_at)
+          VALUES (${id}, 'system', 0, 'superadmin', NOW())
+          ON CONFLICT DO NOTHING`,
+    );
+  }
+
   const user = t.createUser({
     id,
-    email: `e2e-${randomUUID()}@example.com`,
-    name: "E2E User",
+    email,
+    name,
+    emailVerified: true,
     ...overrides,
   });
   const saved = await t.saveUser(user);
@@ -34,7 +57,21 @@ export async function createSession(overrides: Record<string, unknown> = {}) {
 
 export async function removeUser(id: string) {
   const t = await testHelpers();
-  await t.deleteUser(id);
+  try {
+    await t.deleteUser(id);
+  } catch (err) {
+    console.error("[e2e] Failed to delete auth user:", err);
+  }
+  try {
+    await authDB.execute(
+      sql`DELETE FROM public.memberships WHERE user_id = ${id}`,
+    );
+    await authDB.execute(
+      sql`DELETE FROM public.users WHERE id = ${id} OR auth_user_id = ${id}`,
+    );
+  } catch (err) {
+    console.error("[e2e] Failed to clean test user from public tables:", err);
+  }
 }
 
 export async function cleanTestDioceses() {
