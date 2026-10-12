@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent/internal"
 	"github.com/paroki/domus/api/ent/predicate"
 	"github.com/paroki/domus/api/ent/user"
@@ -46,6 +47,26 @@ func (_u *UserUpdate) SetNillableDeletedAt(v *time.Time) *UserUpdate {
 // ClearDeletedAt clears the value of the "deletedAt" field.
 func (_u *UserUpdate) ClearDeletedAt() *UserUpdate {
 	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
+// SetAuthUserID sets the "auth_user_id" field.
+func (_u *UserUpdate) SetAuthUserID(v uuid.UUID) *UserUpdate {
+	_u.mutation.SetAuthUserID(v)
+	return _u
+}
+
+// SetNillableAuthUserID sets the "auth_user_id" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableAuthUserID(v *uuid.UUID) *UserUpdate {
+	if v != nil {
+		_u.SetAuthUserID(*v)
+	}
+	return _u
+}
+
+// ClearAuthUserID clears the value of the "auth_user_id" field.
+func (_u *UserUpdate) ClearAuthUserID() *UserUpdate {
+	_u.mutation.ClearAuthUserID()
 	return _u
 }
 
@@ -181,6 +202,12 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(user.FieldDeletedAt, field.TypeTime)
 	}
+	if value, ok := _u.mutation.AuthUserID(); ok {
+		_spec.SetField(user.FieldAuthUserID, field.TypeUUID, value)
+	}
+	if _u.mutation.AuthUserIDCleared() {
+		_spec.ClearField(user.FieldAuthUserID, field.TypeUUID)
+	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(user.FieldName, field.TypeString, value)
 	}
@@ -235,6 +262,26 @@ func (_u *UserUpdateOne) SetNillableDeletedAt(v *time.Time) *UserUpdateOne {
 // ClearDeletedAt clears the value of the "deletedAt" field.
 func (_u *UserUpdateOne) ClearDeletedAt() *UserUpdateOne {
 	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
+// SetAuthUserID sets the "auth_user_id" field.
+func (_u *UserUpdateOne) SetAuthUserID(v uuid.UUID) *UserUpdateOne {
+	_u.mutation.SetAuthUserID(v)
+	return _u
+}
+
+// SetNillableAuthUserID sets the "auth_user_id" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableAuthUserID(v *uuid.UUID) *UserUpdateOne {
+	if v != nil {
+		_u.SetAuthUserID(*v)
+	}
+	return _u
+}
+
+// ClearAuthUserID clears the value of the "auth_user_id" field.
+func (_u *UserUpdateOne) ClearAuthUserID() *UserUpdateOne {
+	_u.mutation.ClearAuthUserID()
 	return _u
 }
 
@@ -399,6 +446,12 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(user.FieldDeletedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.AuthUserID(); ok {
+		_spec.SetField(user.FieldAuthUserID, field.TypeUUID, value)
+	}
+	if _u.mutation.AuthUserIDCleared() {
+		_spec.ClearField(user.FieldAuthUserID, field.TypeUUID)
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(user.FieldName, field.TypeString, value)

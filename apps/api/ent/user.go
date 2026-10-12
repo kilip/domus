@@ -20,6 +20,8 @@ type User struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// DeletedAt holds the value of the "deletedAt" field.
 	DeletedAt *time.Time `json:"deletedAt,omitempty"`
+	// AuthUserID holds the value of the "auth_user_id" field.
+	AuthUserID *uuid.UUID `json:"auth_user_id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Email holds the value of the "email" field.
@@ -36,6 +38,8 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case user.FieldAuthUserID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case user.FieldName, user.FieldEmail, user.FieldAvatar, user.FieldStatus:
 			values[i] = new(sql.NullString)
 		case user.FieldDeletedAt:
@@ -69,6 +73,13 @@ func (_m *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
+			}
+		case user.FieldAuthUserID:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field auth_user_id", values[i])
+			} else if value.Valid {
+				_m.AuthUserID = new(uuid.UUID)
+				*_m.AuthUserID = *value.S.(*uuid.UUID)
 			}
 		case user.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -133,6 +144,11 @@ func (_m *User) String() string {
 	if v := _m.DeletedAt; v != nil {
 		builder.WriteString("deletedAt=")
 		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.AuthUserID; v != nil {
+		builder.WriteString("auth_user_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("name=")

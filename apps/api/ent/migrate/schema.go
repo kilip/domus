@@ -466,6 +466,7 @@ var (
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "auth_user_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "email", Type: field.TypeString},
 		{Name: "avatar", Type: field.TypeString, Nullable: true},
@@ -480,7 +481,15 @@ var (
 			{
 				Name:    "user_email",
 				Unique:  true,
-				Columns: []*schema.Column{UsersColumns[3]},
+				Columns: []*schema.Column{UsersColumns[4]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "deleted_at IS NULL",
+				},
+			},
+			{
+				Name:    "user_auth_user_id",
+				Unique:  true,
+				Columns: []*schema.Column{UsersColumns[2]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "deleted_at IS NULL",
 				},

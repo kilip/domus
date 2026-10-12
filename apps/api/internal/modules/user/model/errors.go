@@ -13,7 +13,7 @@ var (
 	// ErrScopeNotFound indicates that the requested scope target was not found in the database.
 	ErrScopeNotFound = errors.New("SCOPE_NOT_FOUND")
 	// ErrUserNotRegistered indicates that an email or user has not been invited or registered.
-	ErrUserNotRegistered = errors.New("USER_NOT_REGISTERED")
+	ErrUserNotRegistered = core.ErrUserNotRegistered
 )
 
 func init() {

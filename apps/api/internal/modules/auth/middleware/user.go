@@ -8,6 +8,7 @@ import (
 	jwtware "github.com/gofiber/contrib/v3/jwt"
 	"github.com/gofiber/fiber/v3"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/paroki/domus/api/internal/core"
 )
 
@@ -44,6 +45,27 @@ func UserInjector(issuer string, restAudience string) fiber.Handler {
 		if err := json.Unmarshal(b, &user); err != nil {
 			return fiber.ErrInternalServerError
 		}
+
+		if sub, err := claims.GetSubject(); err == nil && sub != "" {
+			if parsedSub, err := uuid.Parse(sub); err == nil {
+				user.AuthID = &parsedSub
+				if user.ID == uuid.Nil {
+					user.ID = parsedSub
+				}
+			}
+		}
+
+		if user.AuthID == nil && user.ID != uuid.Nil {
+			authID := user.ID
+			user.AuthID = &authID
+		}
+
+		if ev, ok := claims["email_verified"].(bool); ok {
+			user.EmailVerified = ev
+		} else if ev, ok := claims["emailVerified"].(bool); ok {
+			user.EmailVerified = ev
+		}
+
 		c.Locals(core.AUTH_USER_CONTEXT_KEY, user)
 
 		return c.Next()

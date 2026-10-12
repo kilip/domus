@@ -38,6 +38,20 @@ func (_c *UserCreate) SetNillableDeletedAt(v *time.Time) *UserCreate {
 	return _c
 }
 
+// SetAuthUserID sets the "auth_user_id" field.
+func (_c *UserCreate) SetAuthUserID(v uuid.UUID) *UserCreate {
+	_c.mutation.SetAuthUserID(v)
+	return _c
+}
+
+// SetNillableAuthUserID sets the "auth_user_id" field if the given value is not nil.
+func (_c *UserCreate) SetNillableAuthUserID(v *uuid.UUID) *UserCreate {
+	if v != nil {
+		_c.SetAuthUserID(*v)
+	}
+	return _c
+}
+
 // SetName sets the "name" field.
 func (_c *UserCreate) SetName(v string) *UserCreate {
 	_c.mutation.SetName(v)
@@ -204,6 +218,10 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
+	if value, ok := _c.mutation.AuthUserID(); ok {
+		_spec.SetField(user.FieldAuthUserID, field.TypeUUID, value)
+		_node.AuthUserID = &value
+	}
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(user.FieldName, field.TypeString, value)
 		_node.Name = value
@@ -287,6 +305,24 @@ func (u *UserUpsert) UpdateDeletedAt() *UserUpsert {
 // ClearDeletedAt clears the value of the "deletedAt" field.
 func (u *UserUpsert) ClearDeletedAt() *UserUpsert {
 	u.SetNull(user.FieldDeletedAt)
+	return u
+}
+
+// SetAuthUserID sets the "auth_user_id" field.
+func (u *UserUpsert) SetAuthUserID(v uuid.UUID) *UserUpsert {
+	u.Set(user.FieldAuthUserID, v)
+	return u
+}
+
+// UpdateAuthUserID sets the "auth_user_id" field to the value that was provided on create.
+func (u *UserUpsert) UpdateAuthUserID() *UserUpsert {
+	u.SetExcluded(user.FieldAuthUserID)
+	return u
+}
+
+// ClearAuthUserID clears the value of the "auth_user_id" field.
+func (u *UserUpsert) ClearAuthUserID() *UserUpsert {
+	u.SetNull(user.FieldAuthUserID)
 	return u
 }
 
@@ -410,6 +446,27 @@ func (u *UserUpsertOne) UpdateDeletedAt() *UserUpsertOne {
 func (u *UserUpsertOne) ClearDeletedAt() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.ClearDeletedAt()
+	})
+}
+
+// SetAuthUserID sets the "auth_user_id" field.
+func (u *UserUpsertOne) SetAuthUserID(v uuid.UUID) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetAuthUserID(v)
+	})
+}
+
+// UpdateAuthUserID sets the "auth_user_id" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateAuthUserID() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateAuthUserID()
+	})
+}
+
+// ClearAuthUserID clears the value of the "auth_user_id" field.
+func (u *UserUpsertOne) ClearAuthUserID() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearAuthUserID()
 	})
 }
 
@@ -709,6 +766,27 @@ func (u *UserUpsertBulk) UpdateDeletedAt() *UserUpsertBulk {
 func (u *UserUpsertBulk) ClearDeletedAt() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.ClearDeletedAt()
+	})
+}
+
+// SetAuthUserID sets the "auth_user_id" field.
+func (u *UserUpsertBulk) SetAuthUserID(v uuid.UUID) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetAuthUserID(v)
+	})
+}
+
+// UpdateAuthUserID sets the "auth_user_id" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateAuthUserID() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateAuthUserID()
+	})
+}
+
+// ClearAuthUserID clears the value of the "auth_user_id" field.
+func (u *UserUpsertBulk) ClearAuthUserID() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearAuthUserID()
 	})
 }
 

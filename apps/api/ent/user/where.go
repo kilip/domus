@@ -60,6 +60,11 @@ func DeletedAt(v time.Time) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldDeletedAt, v))
 }
 
+// AuthUserID applies equality check predicate on the "auth_user_id" field. It's identical to AuthUserIDEQ.
+func AuthUserID(v uuid.UUID) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldAuthUserID, v))
+}
+
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
 func Name(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldName, v))
@@ -123,6 +128,56 @@ func DeletedAtIsNil() predicate.User {
 // DeletedAtNotNil applies the NotNil predicate on the "deletedAt" field.
 func DeletedAtNotNil() predicate.User {
 	return predicate.User(sql.FieldNotNull(FieldDeletedAt))
+}
+
+// AuthUserIDEQ applies the EQ predicate on the "auth_user_id" field.
+func AuthUserIDEQ(v uuid.UUID) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldAuthUserID, v))
+}
+
+// AuthUserIDNEQ applies the NEQ predicate on the "auth_user_id" field.
+func AuthUserIDNEQ(v uuid.UUID) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldAuthUserID, v))
+}
+
+// AuthUserIDIn applies the In predicate on the "auth_user_id" field.
+func AuthUserIDIn(vs ...uuid.UUID) predicate.User {
+	return predicate.User(sql.FieldIn(FieldAuthUserID, vs...))
+}
+
+// AuthUserIDNotIn applies the NotIn predicate on the "auth_user_id" field.
+func AuthUserIDNotIn(vs ...uuid.UUID) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldAuthUserID, vs...))
+}
+
+// AuthUserIDGT applies the GT predicate on the "auth_user_id" field.
+func AuthUserIDGT(v uuid.UUID) predicate.User {
+	return predicate.User(sql.FieldGT(FieldAuthUserID, v))
+}
+
+// AuthUserIDGTE applies the GTE predicate on the "auth_user_id" field.
+func AuthUserIDGTE(v uuid.UUID) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldAuthUserID, v))
+}
+
+// AuthUserIDLT applies the LT predicate on the "auth_user_id" field.
+func AuthUserIDLT(v uuid.UUID) predicate.User {
+	return predicate.User(sql.FieldLT(FieldAuthUserID, v))
+}
+
+// AuthUserIDLTE applies the LTE predicate on the "auth_user_id" field.
+func AuthUserIDLTE(v uuid.UUID) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldAuthUserID, v))
+}
+
+// AuthUserIDIsNil applies the IsNil predicate on the "auth_user_id" field.
+func AuthUserIDIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldAuthUserID))
+}
+
+// AuthUserIDNotNil applies the NotNil predicate on the "auth_user_id" field.
+func AuthUserIDNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldAuthUserID))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.

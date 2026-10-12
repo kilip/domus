@@ -283,6 +283,7 @@ func (s *AttachmentSuite) TestAuthz_ReaderVsWriter() {
 		Roles: []core.UserRole{core.UserRoleAdmin},
 	}
 	s.User = &readerUser
+	EnsureUser(&s.ApiTestSuite)
 	s.grantUnitRole(unit.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelReader))
 
 	// Reader can list

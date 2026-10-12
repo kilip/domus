@@ -7,10 +7,10 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"github.com/paroki/domus/api/ent"
 	"github.com/paroki/domus/api/ent/parish"
+	"github.com/paroki/domus/api/ent/user"
 	entworkspace "github.com/paroki/domus/api/ent/workspace"
 	"github.com/paroki/domus/api/internal/core"
 	"github.com/paroki/domus/api/internal/platform/authz"
@@ -42,12 +42,22 @@ func SetFinanceCookie[T any](s *testutil.ApiTestSuite[T], parishID int, workspac
 	})
 }
 
-// EnsureUser performs an authenticated GET /ping to ensure
-// that the current test user  is stored in the database.
+// EnsureUser ensures that the current test user is stored in the database.
 func EnsureUser[T any](s *testutil.ApiTestSuite[T]) {
 	s.T().Helper()
-	s.Request("/ping", fiber.MethodGet, nil)
-	s.OK()
+	st := testutil.GetState()
+	exists, err := st.Ent.User.Query().Where(user.IDEQ(s.User.ID)).Exist(context.Background())
+	require.NoError(s.T(), err)
+	if !exists {
+		_, err = st.Ent.User.Create().
+			SetID(s.User.ID).
+			SetName(s.User.Name).
+			SetEmail(s.User.Email).
+			SetAuthUserID(s.User.ID).
+			SetStatus(user.StatusActive).
+			Save(context.Background())
+		require.NoError(s.T(), err)
+	}
 }
 
 // CreateTestParish creates a fresh parish with a unique name directly via Ent client.

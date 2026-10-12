@@ -6,10 +6,11 @@ import (
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/paroki/domus/api/internal/core"
+	"github.com/paroki/domus/api/internal/modules/auth/model"
 )
 
 type UserService interface {
-	Validate(c context.Context, user core.AuthenticatedUser) error
+	Validate(c context.Context, user core.AuthenticatedUser) (*model.UserResponse, error)
 }
 
 func UserValidate(svc UserService) fiber.Handler {
@@ -19,9 +20,18 @@ func UserValidate(svc UserService) fiber.Handler {
 		}
 		user := core.UserFromContext(c)
 
-		if err := svc.Validate(c, user); err != nil {
+		dbUser, err := svc.Validate(c, user)
+		if err != nil {
 			return err
 		}
+
+		user.ID = dbUser.ID
+		user.Name = dbUser.Name
+		user.Email = dbUser.Email
+		if dbUser.Avatar != "" {
+			user.Avatar = dbUser.Avatar
+		}
+		c.Locals(core.AUTH_USER_CONTEXT_KEY, user)
 
 		return c.Next()
 	}

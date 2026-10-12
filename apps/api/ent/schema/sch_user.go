@@ -5,6 +5,7 @@ import (
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/google/uuid"
 )
 
 // User holds the schema definition for the User entity.
@@ -22,6 +23,9 @@ func (User) Mixin() []ent.Mixin {
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
+		field.UUID("auth_user_id", uuid.UUID{}).
+			Optional().
+			Nillable(),
 		field.String("name").NotEmpty(),
 		field.String("email").NotEmpty(),
 		field.String("avatar").Optional(),
@@ -40,6 +44,11 @@ func (User) Edges() []ent.Edge {
 func (User) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("email").
+			Unique().
+			Annotations(
+				entsql.IndexWhere("deleted_at IS NULL"),
+			),
+		index.Fields("auth_user_id").
 			Unique().
 			Annotations(
 				entsql.IndexWhere("deleted_at IS NULL"),

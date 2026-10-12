@@ -27,12 +27,14 @@ type User struct {
 }
 
 type AuthenticatedUser struct {
-	ID     uuid.UUID  `json:"id"`
-	Name   string     `json:"name"`
-	Email  string     `json:"email"`
-	Avatar string     `json:"avatar,omitempty"`
-	Roles  []UserRole `json:"roles"`
-	Scope  string     `json:"scope,omitempty"`
+	ID            uuid.UUID  `json:"id"`
+	AuthID        *uuid.UUID `json:"authId,omitempty"`
+	EmailVerified bool       `json:"emailVerified,omitempty"`
+	Name          string     `json:"name"`
+	Email         string     `json:"email"`
+	Avatar        string     `json:"avatar,omitempty"`
+	Roles         []UserRole `json:"roles"`
+	Scope         string     `json:"scope,omitempty"`
 }
 
 func (u AuthenticatedUser) HasScope(requiredScope string) bool {

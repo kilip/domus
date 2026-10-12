@@ -16,6 +16,8 @@ const (
 	FieldID = "id"
 	// FieldDeletedAt holds the string denoting the deletedat field in the database.
 	FieldDeletedAt = "deleted_at"
+	// FieldAuthUserID holds the string denoting the auth_user_id field in the database.
+	FieldAuthUserID = "auth_user_id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// FieldEmail holds the string denoting the email field in the database.
@@ -32,6 +34,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldDeletedAt,
+	FieldAuthUserID,
 	FieldName,
 	FieldEmail,
 	FieldAvatar,
@@ -94,6 +97,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByDeletedAt orders the results by the deletedAt field.
 func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
+// ByAuthUserID orders the results by the auth_user_id field.
+func ByAuthUserID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAuthUserID, opts...).ToFunc()
 }
 
 // ByName orders the results by the name field.

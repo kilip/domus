@@ -56,11 +56,17 @@ const docTemplate = `{
             },
             "core.AuthenticatedUser": {
                 "properties": {
+                    "authId": {
+                        "type": "string"
+                    },
                     "avatar": {
                         "type": "string"
                     },
                     "email": {
                         "type": "string"
+                    },
+                    "emailVerified": {
+                        "type": "boolean"
                     },
                     "id": {
                         "type": "string"

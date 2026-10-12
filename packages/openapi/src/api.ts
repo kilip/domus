@@ -3005,8 +3005,10 @@ export interface components {
       workspaceId?: number;
     };
     "core.AuthenticatedUser": {
+      authId?: string;
       avatar?: string;
       email?: string;
+      emailVerified?: boolean;
       id?: string;
       name?: string;
       roles?: components["schemas"]["core.UserRole"][];

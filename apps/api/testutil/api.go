@@ -12,6 +12,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/paroki/domus/api/ent/membership"
+	"github.com/paroki/domus/api/ent/user"
 	"github.com/paroki/domus/api/internal/core"
 	"github.com/paroki/domus/api/internal/platform/authz"
 	"github.com/paroki/domus/api/internal/platform/httpx"
@@ -30,11 +31,22 @@ func (s *ApiTestSuite[T]) SetupTest() {
 	s.Cookies = nil
 	uid := core.GenerateID()
 	s.User = &core.AuthenticatedUser{
-		Name:  "Test User",
-		Email: "test-" + uid.String() + "@example.com",
-		ID:    uid,
-		Roles: []core.UserRole{core.UserRoleAdmin},
+		Name:          "Test User",
+		Email:         "test-" + uid.String() + "@example.com",
+		ID:            uid,
+		AuthID:        &uid,
+		EmailVerified: true,
+		Roles:         []core.UserRole{core.UserRoleAdmin},
 	}
+
+	_, err := entClient.User.Create().
+		SetID(uid).
+		SetName(s.User.Name).
+		SetEmail(s.User.Email).
+		SetAuthUserID(uid).
+		SetStatus(user.StatusActive).
+		Save(context.Background())
+	require.NoError(s.T(), err)
 }
 
 func (s *ApiTestSuite[T]) SetCookie(cookie *http.Cookie) {
@@ -104,10 +116,12 @@ func (s *ApiTestSuite[T]) RequestWithClaims(path string, method string, requestB
 	s.T().Helper()
 
 	claims := jwt.MapClaims{
-		"id":    s.User.ID,
-		"name":  s.User.Name,
-		"email": s.User.Email,
-		"roles": s.User.Roles,
+		"id":             s.User.ID,
+		"sub":            s.User.ID.String(),
+		"name":           s.User.Name,
+		"email":          s.User.Email,
+		"email_verified": true,
+		"roles":          s.User.Roles,
 	}
 	for k, v := range extraClaims {
 		claims[k] = v
@@ -143,10 +157,12 @@ func (s *ApiTestSuite[T]) RequestMultipartWithClaims(path string, method string,
 	req.Header.Set("Content-Type", w.FormDataContentType())
 
 	claims := jwt.MapClaims{
-		"id":    s.User.ID,
-		"name":  s.User.Name,
-		"email": s.User.Email,
-		"roles": s.User.Roles,
+		"id":             s.User.ID,
+		"sub":            s.User.ID.String(),
+		"name":           s.User.Name,
+		"email":          s.User.Email,
+		"email_verified": true,
+		"roles":          s.User.Roles,
 	}
 	for k, v := range extraClaims {
 		claims[k] = v
