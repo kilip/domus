@@ -8,6 +8,7 @@ import (
 	"github.com/paroki/domus/api/internal/modules/auth"
 	"github.com/paroki/domus/api/internal/modules/finance"
 	"github.com/paroki/domus/api/internal/modules/system"
+	"github.com/paroki/domus/api/internal/modules/user"
 	"github.com/paroki/domus/api/internal/platform/authz"
 	"github.com/paroki/domus/api/internal/platform/storage"
 )
@@ -53,8 +54,19 @@ func initFinance(state State) {
 	finModule.InitEntCli(state.Ent)
 }
 
+func initUser(state State) {
+	userModule := user.New(user.Config{
+		EntCli: state.Ent,
+		Authz:  state.Authz,
+		Log:    state.Log,
+	})
+	userModule.InitRoutes(state.FiberApp)
+}
+
 func Bootstrap(state State) {
 	initAuth(state)
 	initSystem(state)
 	initFinance(state)
+	initUser(state)
 }
+

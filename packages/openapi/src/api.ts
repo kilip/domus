@@ -2521,6 +2521,95 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/users": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Invite user or add memberships
+     * @description Invite a new user with initial memberships, or add memberships to an existing user
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      /** @description Invite user request */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["model.InviteUserRequest"];
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.WebResponse-model_UserInviteResponse"];
+          };
+        };
+        /** @description Created */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.WebResponse-model_UserInviteResponse"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+        /** @description Unprocessable Entity */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["httpx.ErrorResponse"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/workspaces": {
     parameters: {
       query?: never;
@@ -3031,6 +3120,10 @@ export interface components {
       data?: components["schemas"]["model.TrialBalanceResponse"];
       meta?: components["schemas"]["httpx.Meta"];
     };
+    "httpx.WebResponse-model_UserInviteResponse": {
+      data?: components["schemas"]["model.UserInviteResponse"];
+      meta?: components["schemas"]["httpx.Meta"];
+    };
     "httpx.WebResponse-model_WorkspaceResponse": {
       data?: components["schemas"]["model.WorkspaceResponse"];
       meta?: components["schemas"]["httpx.Meta"];
@@ -3140,6 +3233,14 @@ export interface components {
       name?: string;
       parishId?: number;
     };
+    "model.InviteUserRequest": {
+      /** @description Email is the unique email address of the user. */
+      email: string;
+      /** @description Memberships contains one or more initial scope memberships. */
+      memberships: components["schemas"]["model.MembershipInput"][];
+      /** @description Name is the display name of the user. */
+      name: string;
+    };
     "model.LedgerAccount": {
       code?: string;
       id?: string;
@@ -3163,6 +3264,29 @@ export interface components {
       postingId?: string;
       transactionId?: string;
       transactionNumber?: string;
+    };
+    "model.MembershipInput": {
+      /** @description Role is the role name to assign within the scope. */
+      role: string;
+      /** @description ScopeID is the numeric identifier of the scope (0 for system). */
+      scopeId?: number;
+      /**
+       * @description ScopeType defines the scope hierarchy level: system, diocese, parish, or workspace.
+       * @enum {string}
+       */
+      scopeType: "system" | "diocese" | "parish" | "workspace";
+    };
+    "model.MembershipResponse": {
+      /** @description CreatedAt is the timestamp when the membership was created. */
+      createdAt?: string;
+      /** @description ID is the database record identifier for the membership. */
+      id?: number;
+      /** @description Role is the assigned role name. */
+      role?: string;
+      /** @description ScopeID is the numeric identifier of the scope. */
+      scopeId?: number;
+      /** @description ScopeType is the scope level: system, diocese, parish, or workspace. */
+      scopeType?: string;
     };
     "model.ParishResponse": {
       active?: boolean;
@@ -3309,6 +3433,18 @@ export interface components {
       parishId: number;
       /** @enum {string} */
       status?: "active" | "inactive";
+    };
+    "model.UserInviteResponse": {
+      /** @description Email is the lowercase email of the user. */
+      email?: string;
+      /** @description ID is the unique identifier (UUID v7) of the user. */
+      id?: string;
+      /** @description Memberships is the list of memberships associated with the user. */
+      memberships?: components["schemas"]["model.MembershipResponse"][];
+      /** @description Name is the display name of the user. */
+      name?: string;
+      /** @description Status is the user activation status (e.g., invited, active). */
+      status?: string;
     };
     "model.VoidTransactionRequest": {
       date?: string;

@@ -64,6 +64,20 @@ func (_c *UserCreate) SetNillableAvatar(v *string) *UserCreate {
 	return _c
 }
 
+// SetStatus sets the "status" field.
+func (_c *UserCreate) SetStatus(v user.Status) *UserCreate {
+	_c.mutation.SetStatus(v)
+	return _c
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_c *UserCreate) SetNillableStatus(v *user.Status) *UserCreate {
+	if v != nil {
+		_c.SetStatus(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *UserCreate) SetID(v uuid.UUID) *UserCreate {
 	_c.mutation.SetID(v)
@@ -113,6 +127,10 @@ func (_c *UserCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *UserCreate) defaults() {
+	if _, ok := _c.mutation.Status(); !ok {
+		v := user.DefaultStatus
+		_c.mutation.SetStatus(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := user.DefaultID()
 		_c.mutation.SetID(v)
@@ -135,6 +153,14 @@ func (_c *UserCreate) check() error {
 	if v, ok := _c.mutation.Email(); ok {
 		if err := user.EmailValidator(v); err != nil {
 			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Status(); !ok {
+		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "User.status"`)}
+	}
+	if v, ok := _c.mutation.Status(); ok {
+		if err := user.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "User.status": %w`, err)}
 		}
 	}
 	return nil
@@ -189,6 +215,10 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Avatar(); ok {
 		_spec.SetField(user.FieldAvatar, field.TypeString, value)
 		_node.Avatar = value
+	}
+	if value, ok := _c.mutation.Status(); ok {
+		_spec.SetField(user.FieldStatus, field.TypeEnum, value)
+		_node.Status = value
 	}
 	return _node, _spec
 }
@@ -299,6 +329,18 @@ func (u *UserUpsert) UpdateAvatar() *UserUpsert {
 // ClearAvatar clears the value of the "avatar" field.
 func (u *UserUpsert) ClearAvatar() *UserUpsert {
 	u.SetNull(user.FieldAvatar)
+	return u
+}
+
+// SetStatus sets the "status" field.
+func (u *UserUpsert) SetStatus(v user.Status) *UserUpsert {
+	u.Set(user.FieldStatus, v)
+	return u
+}
+
+// UpdateStatus sets the "status" field to the value that was provided on create.
+func (u *UserUpsert) UpdateStatus() *UserUpsert {
+	u.SetExcluded(user.FieldStatus)
 	return u
 }
 
@@ -417,6 +459,20 @@ func (u *UserUpsertOne) UpdateAvatar() *UserUpsertOne {
 func (u *UserUpsertOne) ClearAvatar() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.ClearAvatar()
+	})
+}
+
+// SetStatus sets the "status" field.
+func (u *UserUpsertOne) SetStatus(v user.Status) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetStatus(v)
+	})
+}
+
+// UpdateStatus sets the "status" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateStatus() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateStatus()
 	})
 }
 
@@ -702,6 +758,20 @@ func (u *UserUpsertBulk) UpdateAvatar() *UserUpsertBulk {
 func (u *UserUpsertBulk) ClearAvatar() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.ClearAvatar()
+	})
+}
+
+// SetStatus sets the "status" field.
+func (u *UserUpsertBulk) SetStatus(v user.Status) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetStatus(v)
+	})
+}
+
+// UpdateStatus sets the "status" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateStatus() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateStatus()
 	})
 }
 

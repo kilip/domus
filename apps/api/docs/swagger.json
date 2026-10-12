@@ -412,6 +412,17 @@
         },
         "type": "object"
       },
+      "httpx.WebResponse-model_UserInviteResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/model.UserInviteResponse"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/httpx.Meta"
+          }
+        },
+        "type": "object"
+      },
       "httpx.WebResponse-model_WorkspaceResponse": {
         "properties": {
           "data": {
@@ -739,6 +750,29 @@
         },
         "type": "object"
       },
+      "model.InviteUserRequest": {
+        "properties": {
+          "email": {
+            "description": "Email is the unique email address of the user.",
+            "type": "string"
+          },
+          "memberships": {
+            "description": "Memberships contains one or more initial scope memberships.",
+            "items": {
+              "$ref": "#/components/schemas/model.MembershipInput"
+            },
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": false
+          },
+          "name": {
+            "description": "Name is the display name of the user.",
+            "type": "string"
+          }
+        },
+        "required": ["email", "memberships", "name"],
+        "type": "object"
+      },
       "model.LedgerAccount": {
         "properties": {
           "code": {
@@ -807,6 +841,51 @@
             "type": "string"
           },
           "transactionNumber": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "model.MembershipInput": {
+        "properties": {
+          "role": {
+            "description": "Role is the role name to assign within the scope.",
+            "type": "string"
+          },
+          "scopeId": {
+            "description": "ScopeID is the numeric identifier of the scope (0 for system).",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "scopeType": {
+            "description": "ScopeType defines the scope hierarchy level: system, diocese, parish, or workspace.",
+            "enum": ["system", "diocese", "parish", "workspace"],
+            "type": "string"
+          }
+        },
+        "required": ["role", "scopeType"],
+        "type": "object"
+      },
+      "model.MembershipResponse": {
+        "properties": {
+          "createdAt": {
+            "description": "CreatedAt is the timestamp when the membership was created.",
+            "type": "string"
+          },
+          "id": {
+            "description": "ID is the database record identifier for the membership.",
+            "type": "integer"
+          },
+          "role": {
+            "description": "Role is the assigned role name.",
+            "type": "string"
+          },
+          "scopeId": {
+            "description": "ScopeID is the numeric identifier of the scope.",
+            "type": "integer"
+          },
+          "scopeType": {
+            "description": "ScopeType is the scope level: system, diocese, parish, or workspace.",
             "type": "string"
           }
         },
@@ -1242,6 +1321,35 @@
           }
         },
         "required": ["name", "parishId"],
+        "type": "object"
+      },
+      "model.UserInviteResponse": {
+        "properties": {
+          "email": {
+            "description": "Email is the lowercase email of the user.",
+            "type": "string"
+          },
+          "id": {
+            "description": "ID is the unique identifier (UUID v7) of the user.",
+            "type": "string"
+          },
+          "memberships": {
+            "description": "Memberships is the list of memberships associated with the user.",
+            "items": {
+              "$ref": "#/components/schemas/model.MembershipResponse"
+            },
+            "type": "array",
+            "uniqueItems": false
+          },
+          "name": {
+            "description": "Name is the display name of the user.",
+            "type": "string"
+          },
+          "status": {
+            "description": "Status is the user activation status (e.g., invited, active).",
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "model.VoidTransactionRequest": {
@@ -3984,6 +4092,93 @@
         ],
         "summary": "Update territory",
         "tags": ["Territory"]
+      }
+    },
+    "/users": {
+      "post": {
+        "description": "Invite a new user with initial memberships, or add memberships to an existing user",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/model.InviteUserRequest",
+                "summary": "request",
+                "description": "Invite user request"
+              }
+            }
+          },
+          "description": "Invite user request",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.WebResponse-model_UserInviteResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.WebResponse-model_UserInviteResponse"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/httpx.ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Invite user or add memberships",
+        "tags": ["User"]
       }
     },
     "/workspaces": {

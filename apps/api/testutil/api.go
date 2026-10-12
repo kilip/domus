@@ -28,10 +28,11 @@ type ApiTestSuite[T any] struct {
 
 func (s *ApiTestSuite[T]) SetupTest() {
 	s.Cookies = nil
+	uid := core.GenerateID()
 	s.User = &core.AuthenticatedUser{
 		Name:  "Test User",
-		Email: "test@example.com",
-		ID:    core.GenerateID(),
+		Email: "test-" + uid.String() + "@example.com",
+		ID:    uid,
 		Roles: []core.UserRole{core.UserRoleAdmin},
 	}
 }

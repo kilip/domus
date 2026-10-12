@@ -10,6 +10,8 @@ const (
 	ResourceWorkspace Resource = "workspaces"
 	ResourceFinance   Resource = "finance"
 	ResourceSacrament Resource = "sacrament"
+	// ResourceUser represents the user management resource.
+	ResourceUser Resource = "users"
 )
 
 const (

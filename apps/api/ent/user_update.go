@@ -97,6 +97,20 @@ func (_u *UserUpdate) ClearAvatar() *UserUpdate {
 	return _u
 }
 
+// SetStatus sets the "status" field.
+func (_u *UserUpdate) SetStatus(v user.Status) *UserUpdate {
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableStatus(v *user.Status) *UserUpdate {
+	if v != nil {
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdate) Mutation() *UserMutation {
 	return _u.mutation
@@ -141,6 +155,11 @@ func (_u *UserUpdate) check() error {
 			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Status(); ok {
+		if err := user.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "User.status": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -173,6 +192,9 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.AvatarCleared() {
 		_spec.ClearField(user.FieldAvatar, field.TypeString)
+	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(user.FieldStatus, field.TypeEnum, value)
 	}
 	_spec.Node.Schema = _u.schemaConfig.User
 	ctx = internal.NewSchemaConfigContext(ctx, _u.schemaConfig)
@@ -264,6 +286,20 @@ func (_u *UserUpdateOne) ClearAvatar() *UserUpdateOne {
 	return _u
 }
 
+// SetStatus sets the "status" field.
+func (_u *UserUpdateOne) SetStatus(v user.Status) *UserUpdateOne {
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableStatus(v *user.Status) *UserUpdateOne {
+	if v != nil {
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdateOne) Mutation() *UserMutation {
 	return _u.mutation
@@ -321,6 +357,11 @@ func (_u *UserUpdateOne) check() error {
 			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Status(); ok {
+		if err := user.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "User.status": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -370,6 +411,9 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if _u.mutation.AvatarCleared() {
 		_spec.ClearField(user.FieldAvatar, field.TypeString)
+	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(user.FieldStatus, field.TypeEnum, value)
 	}
 	_spec.Node.Schema = _u.schemaConfig.User
 	ctx = internal.NewSchemaConfigContext(ctx, _u.schemaConfig)
