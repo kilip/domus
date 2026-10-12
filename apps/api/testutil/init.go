@@ -37,6 +37,10 @@ func loadEnvForTest() {
 func init() {
 	loadEnvForTest()
 
+	if os.Getenv("API_INTERNAL_KEY") == "" {
+		_ = os.Setenv("API_INTERNAL_KEY", "test-internal-key-for-domus-api-at-least-32-chars")
+	}
+
 	cfg = config.GetConfig()
 
 	mock := NewJWKSMock()

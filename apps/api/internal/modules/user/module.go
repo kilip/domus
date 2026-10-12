@@ -39,5 +39,5 @@ func New(cfg Config) Module {
 // InitRoutes registers all user module endpoints on the Fiber router.
 func (m Module) InitRoutes(r fiber.Router) {
 	r.Post("/users", m.controller.Invite)
+	r.Post("/internal/users/resolve", m.controller.Resolve)
 }
-

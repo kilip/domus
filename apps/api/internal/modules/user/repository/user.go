@@ -11,6 +11,7 @@ import (
 	"github.com/paroki/domus/api/ent/workspace"
 	"github.com/paroki/domus/api/internal/core"
 	"github.com/paroki/domus/api/internal/modules/user/model"
+	"github.com/paroki/domus/api/internal/platform/authz"
 	"github.com/paroki/domus/api/internal/platform/database"
 )
 
@@ -168,3 +169,40 @@ func (r UserRepository) UpsertInvite(
 	return &resp, isNew, newMemberships, nil
 }
 
+// FindResolveUserByEmail looks up a non-deleted user by lowercase email
+// and returns their id, status, and role (superadmin if has system:0 superadmin membership, else user).
+// Returns core.ErrItemNotFound if user does not exist or is soft-deleted.
+func (r UserRepository) FindResolveUserByEmail(ctx context.Context, email string) (*model.ResolveUserResponse, error) {
+	u, err := r.entcli.User.Query().
+		Where(user.EmailEqualFold(email)).
+		Only(ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, core.ErrItemNotFound
+		}
+		return nil, err
+	}
+
+	isSuperadmin, err := r.entcli.Membership.Query().
+		Where(
+			membership.UserIDEQ(u.ID.String()),
+			membership.ScopeTypeEQ(membership.ScopeTypeSystem),
+			membership.ScopeIDEQ(0),
+			membership.RoleEQ(authz.RoleSuperadmin),
+		).
+		Exist(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	role := "user"
+	if isSuperadmin {
+		role = "superadmin"
+	}
+
+	return &model.ResolveUserResponse{
+		ID:     u.ID,
+		Status: string(u.Status),
+		Role:   role,
+	}, nil
+}

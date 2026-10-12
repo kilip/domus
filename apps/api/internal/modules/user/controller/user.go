@@ -13,6 +13,7 @@ import (
 // UserService defines the business logic methods exposed to UserController.
 type UserService interface {
 	Invite(ctx context.Context, caller core.AuthenticatedUser, req model.InviteUserRequest) (*model.UserInviteResponse, bool, error)
+	Resolve(ctx context.Context, email string) (*model.ResolveUserResponse, error)
 }
 
 // UserController handles HTTP requests for user endpoints.
@@ -68,3 +69,20 @@ func (uc UserController) Invite(c fiber.Ctx) error {
 	return httpx.OK(c, resp)
 }
 
+func (uc UserController) Resolve(c fiber.Ctx) error {
+	var req model.ResolveUserRequest
+	if err := c.Bind().Body(&req); err != nil {
+		return err
+	}
+
+	if err := uc.validate.Struct(req); err != nil {
+		return err
+	}
+
+	resp, err := uc.svc.Resolve(c, req.Email)
+	if err != nil {
+		return err
+	}
+
+	return c.Status(fiber.StatusOK).JSON(resp)
+}

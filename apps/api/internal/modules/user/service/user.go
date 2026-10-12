@@ -15,6 +15,7 @@ type UserRepository interface {
 	FindParishDioceseID(ctx context.Context, parishID int) (int, error)
 	FindWorkspaceParishID(ctx context.Context, workspaceID int) (int, error)
 	UpsertInvite(ctx context.Context, email, name string, memberships []model.MembershipInput) (*model.UserInviteResponse, bool, []model.MembershipInput, error)
+	FindResolveUserByEmail(ctx context.Context, email string) (*model.ResolveUserResponse, error)
 }
 
 // UserService coordinates user invitation and membership management with authorization enforcement.
@@ -148,3 +149,8 @@ func (s UserService) canManageMembership(ctx context.Context, callerID string, m
 	}
 }
 
+// Resolve finds an invited or active non-deleted user by email and returns their resolve details.
+func (s UserService) Resolve(ctx context.Context, email string) (*model.ResolveUserResponse, error) {
+	cleanEmail := strings.ToLower(strings.TrimSpace(email))
+	return s.repo.FindResolveUserByEmail(ctx, cleanEmail)
+}

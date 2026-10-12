@@ -54,3 +54,14 @@ type UserInviteResponse struct {
 	Memberships []MembershipResponse `json:"memberships"`
 }
 
+// ResolveUserRequest represents the payload for resolving a user via POST /internal/users/resolve.
+type ResolveUserRequest struct {
+	Email string `json:"email" validate:"required,email"`
+}
+
+// ResolveUserResponse represents the minimal user details returned to auth service.
+type ResolveUserResponse struct {
+	ID     uuid.UUID `json:"id"`
+	Status string    `json:"status"`
+	Role   string    `json:"role"`
+}

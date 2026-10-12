@@ -49,7 +49,7 @@ Tooling: Bun `1.4.2` (workspaces), Node `>=22`, Turborepo, Biome 2, Husky + Comm
 The devcontainer (`.devcontainer/compose.yaml`) sets everything for local dev; CI sets its own copy in `.github/workflows/ci.yml`. No `.env.example` exists in the repo. `.env*` files are git-ignored. `globalEnv` in `turbo.json` covers `AUTH_*`, `KAFKA_*`, `API_*`, `SUPERADMIN_*`.
 
 - auth / better-auth: `AUTH_URL`, `AUTH_HOST?`, `AUTH_PORT?`, `AUTH_PATH`, `AUTH_DB_URL`, `AUTH_SECRET`, `AUTH_TRUSTED_ORIGINS` (comma separated), optional `AUTH_GOOGLE_*` / `AUTH_GITHUB_*`, optional `SUPERADMIN_EMAIL`, `SUPERADMIN_NAME`
-- api: `API_DB_URL`, `API_PORT` (default 8002), `AUTH_URL`, `AUTH_JWKS_URL`, `AUTH_TRUSTED_ORIGINS`, `S3_*` (`S3_ENDPOINT`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_REGION`, `S3_FORCE_PATH_STYLE`, `S3_BUCKET` default `domus-finance`)
+- api: `API_DB_URL`, `API_PORT` (default 8002), `API_INTERNAL_KEY`, `AUTH_URL`, `AUTH_JWKS_URL`, `AUTH_TRUSTED_ORIGINS`, `S3_*` (`S3_ENDPOINT`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_REGION`, `S3_FORCE_PATH_STYLE`, `S3_BUCKET` default `domus-finance`)
 - dash: `VITE_AUTH_URL`, `VITE_PUBLIC_URL`, `VITE_API_URL` (default `http://localhost:8002`)
 - provisioned but not used by app code yet: `REDIS_URL`, `KAFKA_BROKERS`
 
@@ -78,6 +78,7 @@ Regenerate and commit them in the same change as their source. After changing Sw
 - Layering is controller → service → repository (Ent). New module: add the folders, a `module.go` with `New(Config)` and `InitRoutes`, then wire it in `internal/config/bootstrap.go`.
 - Responses and errors go through `internal/platform/httpx` (`{data, meta}` / `{error, meta}`); never leak internal error text to clients.
 - Protect routes with `httpx.RequirePermission(enforcer, scope, resource, action)`; add new resources in `internal/platform/authz/resource.go`.
+- Internal routes under `POST /internal/*` are authenticated via `X-Internal-Key` with `API_INTERNAL_KEY`. Reverse proxy must not expose `/internal` publicly.
 - Tests use testify suites; `testutil` boots the app with an in-memory SQLite Ent client (needs CGO) and an ephemeral mock JWKS server.
 
 ### apps/dash (React Router SPA)

@@ -2,11 +2,13 @@ package config
 
 import (
 	"context"
+	"crypto/subtle"
 	"fmt"
 	"log"
 	"log/slog"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -36,9 +38,21 @@ func initMiddlewares(cfg Config, app *fiber.App, logger *slog.Logger) error {
 	// cors config
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     cfg.TrustedOrigins,
-		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "X-Internal-Key"},
 		AllowCredentials: true,
 	}))
+
+	// Dedicated middleware to protect /internal prefix with API_INTERNAL_KEY
+	app.Use(func(c fiber.Ctx) error {
+		if !strings.HasPrefix(c.Path(), "/internal") {
+			return c.Next()
+		}
+		key := c.Get("X-Internal-Key")
+		if key == "" || subtle.ConstantTimeCompare([]byte(key), []byte(cfg.InternalKey)) != 1 {
+			return core.ErrUnauthorized
+		}
+		return c.Next()
+	})
 
 	// jwks config
 	jwks, err := keyfunc.NewDefaultCtx(context.Background(), []string{cfg.JWKSUrl})
@@ -47,7 +61,7 @@ func initMiddlewares(cfg Config, app *fiber.App, logger *slog.Logger) error {
 	}
 	app.Use(jwtware.New(jwtware.Config{
 		Next: func(c fiber.Ctx) bool {
-			return c.Method() == fiber.MethodOptions
+			return c.Method() == fiber.MethodOptions || strings.HasPrefix(c.Path(), "/internal")
 		},
 		KeyFunc:   jwks.KeyfuncCtx(context.Background()),
 		Extractor: extractors.FromAuthHeader("Bearer"),

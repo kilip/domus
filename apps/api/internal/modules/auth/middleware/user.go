@@ -3,6 +3,7 @@ package middleware
 import (
 	"encoding/json"
 	"slices"
+	"strings"
 
 	jwtware "github.com/gofiber/contrib/v3/jwt"
 	"github.com/gofiber/fiber/v3"
@@ -12,7 +13,7 @@ import (
 
 func UserInjector(issuer string, restAudience string) fiber.Handler {
 	return func(c fiber.Ctx) error {
-		if c.Method() == fiber.MethodOptions {
+		if c.Method() == fiber.MethodOptions || strings.HasPrefix(c.Path(), "/internal") {
 			return c.Next()
 		}
 		token := jwtware.FromContext(c)
