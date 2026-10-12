@@ -29,7 +29,7 @@ type TransactionSuite struct {
 
 func (s *TransactionSuite) SetupTest() {
 	s.ApiTestSuite.SetupTest()
-	EnsureUserSnapshot(&s.ApiTestSuite)
+	EnsureUser(&s.ApiTestSuite)
 }
 
 func (s *TransactionSuite) grantRole(parishID int, role string) {

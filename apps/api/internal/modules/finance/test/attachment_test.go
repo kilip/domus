@@ -26,7 +26,7 @@ type AttachmentSuite struct {
 
 func (s *AttachmentSuite) SetupTest() {
 	s.ApiTestSuite.SetupTest()
-	EnsureUserSnapshot(&s.ApiTestSuite)
+	EnsureUser(&s.ApiTestSuite)
 }
 
 func (s *AttachmentSuite) grantRole(parishID int, role string) {
@@ -319,7 +319,7 @@ func (s *AttachmentSuite) TestAuthz_OtherUnitRoleIsForbidden() {
 
 	other := core.AuthenticatedUser{ID: core.GenerateID(), Email: "other-unit@example.com", Name: "Other Unit", Roles: []core.UserRole{core.UserRoleAdmin}}
 	s.User = &other
-	EnsureUserSnapshot(&s.ApiTestSuite)
+	EnsureUser(&s.ApiTestSuite)
 	otherUnit := CreateTestUnit(s.T(), parish.ID, other.ID)
 	s.grantUnitRole(otherUnit.ID, authz.ModuleRole(authz.ResourceFinance, authz.LevelWriter))
 	s.activate(parish.ID, unit.ID)

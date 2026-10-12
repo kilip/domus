@@ -21,7 +21,7 @@ type FinanceWorkspaceTestSuite struct {
 
 func (s *FinanceWorkspaceTestSuite) SetupTest() {
 	s.ApiTestSuite.SetupTest()
-	EnsureUserSnapshot(&s.ApiTestSuite)
+	EnsureUser(&s.ApiTestSuite)
 }
 
 func (s *FinanceWorkspaceTestSuite) TestGetAccessibleWorkspaces_EmptyWhenNoRoles() {

@@ -19,18 +19,18 @@ type Config struct {
 }
 type Module struct {
 	config  Config
-	userSvc service.UserSnapshotService
+	userSvc service.UserService
 }
 
 func New(config Config) Module {
-	userRepo := repository.NewUserSnapshotRepository(config.EntCli, config.Log)
-	userSvc := service.NewUserSnapshotService(userRepo, config.Log)
+	userRepo := repository.NewUserRepository(config.EntCli, config.Log)
+	userSvc := service.NewUserService(userRepo, config.Log)
 	return Module{config, userSvc}
 }
 
 func (m Module) InitMiddleware(app *fiber.App) {
 	app.Use(middleware.UserInjector(m.config.RestIssuer, m.config.RestAudience))
-	app.Use(middleware.Snapshot(m.userSvc))
+	app.Use(middleware.UserValidate(m.userSvc))
 }
 
 func (m Module) InitRoutes(r fiber.Router) {

@@ -22,7 +22,7 @@ type AccountSuite struct {
 
 func (s *AccountSuite) SetupTest() {
 	s.ApiTestSuite.SetupTest()
-	EnsureUserSnapshot(&s.ApiTestSuite)
+	EnsureUser(&s.ApiTestSuite)
 }
 
 func (s *AccountSuite) grantRole(parishID int, role string) {

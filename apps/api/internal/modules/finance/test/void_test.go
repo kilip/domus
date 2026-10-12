@@ -31,7 +31,7 @@ type VoidSuite struct {
 
 func (s *VoidSuite) SetupTest() {
 	s.ApiTestSuite.SetupTest()
-	EnsureUserSnapshot(&s.ApiTestSuite)
+	EnsureUser(&s.ApiTestSuite)
 }
 
 func (s *VoidSuite) grantRole(parishID int, role string) {

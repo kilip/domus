@@ -7,11 +7,11 @@ import (
 	"github.com/paroki/domus/api/internal/core"
 )
 
-type UserSnapshotService interface {
+type UserService interface {
 	Validate(c context.Context, user core.AuthenticatedUser) error
 }
 
-func Snapshot(svc UserSnapshotService) fiber.Handler {
+func UserValidate(svc UserService) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		user := core.UserFromContext(c)
 

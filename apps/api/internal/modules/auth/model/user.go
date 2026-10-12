@@ -15,14 +15,14 @@ type UserResponse struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-type CreateUserSnapshotRequest struct {
+type CreateUserRequest struct {
 	ID     uuid.UUID `json:"id"`
 	Name   string    `json:"name"`
 	Email  string    `json:"email"`
 	Avatar string    `json:"avatar,omitempty"`
 }
 
-type UpdateUserSnapshotRequest struct {
+type UpdateUserRequest struct {
 	Name   string `json:"name"`
 	Email  string `json:"email"`
 	Avatar string `json:"avatar,omitempty"`

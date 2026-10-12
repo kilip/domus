@@ -11,16 +11,16 @@ import (
 	"github.com/paroki/domus/api/internal/platform/database"
 )
 
-type UserSnapshotRepository struct {
+type UserRepository struct {
 	entcli *ent.Client
 	log    *slog.Logger
 }
 
-func NewUserSnapshotRepository(entcli *ent.Client, log *slog.Logger) UserSnapshotRepository {
-	return UserSnapshotRepository{entcli, log}
+func NewUserRepository(entcli *ent.Client, log *slog.Logger) UserRepository {
+	return UserRepository{entcli, log}
 }
 
-func (r UserSnapshotRepository) GetByID(c context.Context, id uuid.UUID) (*model.UserResponse, error) {
+func (r UserRepository) GetByID(c context.Context, id uuid.UUID) (*model.UserResponse, error) {
 	var response model.UserResponse
 
 	user, err := r.entcli.User.Get(c, id)
@@ -36,7 +36,7 @@ func (r UserSnapshotRepository) GetByID(c context.Context, id uuid.UUID) (*model
 	return &response, nil
 }
 
-func (r UserSnapshotRepository) Create(c context.Context, req model.CreateUserSnapshotRequest) (*model.UserResponse, error) {
+func (r UserRepository) Create(c context.Context, req model.CreateUserRequest) (*model.UserResponse, error) {
 	var res model.UserResponse
 	var user *ent.User
 	err := database.WithTx(c, r.entcli, func(tx *ent.Tx) error {
@@ -60,7 +60,7 @@ func (r UserSnapshotRepository) Create(c context.Context, req model.CreateUserSn
 	return &res, nil
 }
 
-func (r UserSnapshotRepository) Update(c context.Context, id uuid.UUID, req model.UpdateUserSnapshotRequest) (*model.UserResponse, error) {
+func (r UserRepository) Update(c context.Context, id uuid.UUID, req model.UpdateUserRequest) (*model.UserResponse, error) {
 	var res model.UserResponse
 	var user *ent.User
 	err := database.WithTx(c, r.entcli, func(tx *ent.Tx) error {
@@ -91,7 +91,7 @@ func nilIfEmpty(s string) *string {
 	return &s
 }
 
-func (r UserSnapshotRepository) Delete(c context.Context, id uuid.UUID) error {
+func (r UserRepository) Delete(c context.Context, id uuid.UUID) error {
 	return database.WithTx(c, r.entcli, func(tx *ent.Tx) error {
 		return tx.User.DeleteOneID(id).Exec(c)
 	})

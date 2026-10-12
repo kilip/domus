@@ -19,7 +19,7 @@ type ActivateSuite struct {
 
 func (s *ActivateSuite) SetupTest() {
 	s.ApiTestSuite.SetupTest()
-	EnsureUserSnapshot(&s.ApiTestSuite)
+	EnsureUser(&s.ApiTestSuite)
 }
 
 func (s *ActivateSuite) TestActivate_SuccessAndCookie() {

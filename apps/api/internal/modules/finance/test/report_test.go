@@ -24,7 +24,7 @@ type ReportSuite struct {
 
 func (s *ReportSuite) SetupTest() {
 	s.ApiTestSuite.SetupTest()
-	EnsureUserSnapshot(&s.ApiTestSuite)
+	EnsureUser(&s.ApiTestSuite)
 }
 
 func (s *ReportSuite) grantRole(parishID int, role string) {

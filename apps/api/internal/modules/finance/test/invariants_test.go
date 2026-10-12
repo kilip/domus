@@ -29,7 +29,7 @@ type InvariantsSuite struct {
 
 func (s *InvariantsSuite) SetupTest() {
 	s.ApiTestSuite.SetupTest()
-	EnsureUserSnapshot(&s.ApiTestSuite)
+	EnsureUser(&s.ApiTestSuite)
 }
 
 func (s *InvariantsSuite) grantRole(parishID int, role string) {

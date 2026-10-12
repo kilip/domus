@@ -42,9 +42,9 @@ func SetFinanceCookie[T any](s *testutil.ApiTestSuite[T], parishID int, workspac
 	})
 }
 
-// EnsureUserSnapshot performs an authenticated GET /ping to ensure
-// that the current test user snapshot is stored in the database.
-func EnsureUserSnapshot[T any](s *testutil.ApiTestSuite[T]) {
+// EnsureUser performs an authenticated GET /ping to ensure
+// that the current test user  is stored in the database.
+func EnsureUser[T any](s *testutil.ApiTestSuite[T]) {
 	s.T().Helper()
 	s.Request("/ping", fiber.MethodGet, nil)
 	s.OK()
@@ -90,8 +90,8 @@ func (s *FinanceSmokeSuite) SetupTest() {
 }
 
 func (s *FinanceSmokeSuite) TestHelpersAndRoleGrant_Smoke() {
-	// 1. Ensure user snapshot exists in DB
-	EnsureUserSnapshot(&s.ApiTestSuite)
+	// 1. Ensure user  exists in DB
+	EnsureUser(&s.ApiTestSuite)
 
 	// Verify user exists in ent DB
 	st := testutil.GetState()
